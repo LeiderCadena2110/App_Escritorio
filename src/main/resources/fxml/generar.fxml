@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Asistente de 4 pasos. Enter = Siguiente, Esc = Cancelar, Alt+← / Cmd+[ = Atrás -->
+<VBox fx:id="raiz" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="co.edu.ucc.reportes.ui.GenerarController" styleClass="seccion" spacing="14">
+    <Label text="%generar.titulo" styleClass="titulo"/>
+    <HBox fx:id="indicador" spacing="10" alignment="CENTER_LEFT" styleClass="indicador"/>
+
+    <StackPane VBox.vgrow="ALWAYS" styleClass="tarjeta">
+        <!-- Paso 1: datos -->
+        <VBox fx:id="paso1" spacing="10">
+            <Label text="%generar.paso1.pregunta" styleClass="titulo-tarjeta"/>
+            <Label fx:id="datosArchivo" styleClass="subtitulo-tarjeta"/>
+            <Label fx:id="datosDetalle" styleClass="nota" wrapText="true"/>
+            <HBox fx:id="cajaHoja" spacing="8" alignment="CENTER_LEFT">
+                <Label text="%datos.hoja"/>
+                <ComboBox fx:id="hoja" prefWidth="220"/>
+            </HBox>
+            <Label fx:id="datosResumen" styleClass="resumen"/>
+            <Label fx:id="datosErrores" wrapText="true"/>
+            <HBox spacing="8">
+                <Button text="%generar.paso1.elegir" onAction="#elegirArchivo"/>
+                <Button text="%generar.paso1.ver" onAction="#verDatos"/>
+            </HBox>
+        </VBox>
+
+        <!-- Paso 2: plantilla -->
+        <VBox fx:id="paso2" spacing="10">
+            <Label text="%generar.paso2.pregunta" styleClass="titulo-tarjeta"/>
+            <ListView fx:id="plantillas" VBox.vgrow="ALWAYS"/>
+            <Label fx:id="plantillaDescripcion" styleClass="nota" wrapText="true"/>
+            <Button text="%generar.paso2.gestionar" onAction="#irAPlantillas" styleClass="boton-enlace"/>
+        </VBox>
+
+        <!-- Paso 3: mapeo -->
+        <VBox fx:id="paso3" spacing="10">
+            <Label text="%generar.paso3.pregunta" styleClass="titulo-tarjeta"/>
+            <Label text="%generar.paso3.ayuda" styleClass="nota" wrapText="true"/>
+            <Label fx:id="mapeoVacio" text="%generar.paso3.vacio" wrapText="true" styleClass="texto-ok"/>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-mapeo">
+                <GridPane fx:id="gridMapeo" hgap="16" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="220" prefWidth="300"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+                </GridPane>
+            </ScrollPane>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label fx:id="mapeoEstado"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="%generar.paso3.sugerir" onAction="#sugerirMapeo"/>
+                <Button text="%generar.paso3.limpiar" onAction="#limpiarMapeo"/>
+            </HBox>
+        </VBox>
+
+        <!-- Paso 4: salida y formato -->
+        <VBox fx:id="paso4" spacing="12">
+            <Label text="%generar.paso4.pregunta" styleClass="titulo-tarjeta"/>
+            <fx:define>
+                <ToggleGroup fx:id="grupoModo"/>
+            </fx:define>
+            <RadioButton fx:id="modoPorFila" text="%modo.POR_FILA" toggleGroup="$grupoModo" selected="true"/>
+            <RadioButton fx:id="modoTabla" text="%modo.TABLA" toggleGroup="$grupoModo"/>
+            <Label fx:id="modoAviso" styleClass="nota" wrapText="true"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="%generar.paso4.formato" minWidth="200"/>
+                <Label fx:id="formatoSalida" styleClass="subtitulo-tarjeta"/>
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="%generar.paso4.carpeta" minWidth="200"/>
+                <TextField fx:id="carpeta" HBox.hgrow="ALWAYS"/>
+                <Button text="%comun.cambiar" onAction="#elegirCarpeta"/>
+            </HBox>
+            <HBox fx:id="cajaNombre" spacing="8" alignment="CENTER_LEFT">
+                <Label text="%generar.paso4.nombreArchivo" minWidth="200"/>
+                <ComboBox fx:id="columnaNombre" prefWidth="260" promptText="%generar.paso4.nombreAuto"/>
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <CheckBox fx:id="guardarPerfil" text="%generar.paso4.guardarPerfil" minWidth="200"/>
+                <TextField fx:id="nombrePerfil" HBox.hgrow="ALWAYS" promptText="%generar.paso4.nombrePerfil"/>
+            </HBox>
+        </VBox>
+
+        <!-- Generando -->
+        <VBox fx:id="generando" spacing="14" alignment="CENTER">
+            <Label text="%generar.generando" styleClass="titulo-tarjeta"/>
+            <ProgressBar fx:id="barra" prefWidth="460"/>
+            <Label fx:id="progresoTexto"/>
+            <Button fx:id="cancelarGeneracion" text="%comun.cancelar" onAction="#cancelarGeneracion"/>
+        </VBox>
+
+        <!-- Resultado -->
+        <VBox fx:id="resultado" spacing="12">
+            <Label fx:id="resultadoTitulo" styleClass="titulo"/>
+            <Label fx:id="resultadoTexto" wrapText="true"/>
+            <ListView fx:id="resultadoErrores" VBox.vgrow="ALWAYS"/>
+            <HBox spacing="8">
+                <Button text="%comun.abrirCarpeta" onAction="#abrirCarpetaResultado" styleClass="boton-principal"/>
+                <Button text="%generar.otro" onAction="#otroReporte"/>
+                <Button text="%generar.verHistorial" onAction="#irAlHistorial"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <HBox fx:id="botonera" spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="cancelar" text="%comun.cancelar" onAction="#cancelar" cancelButton="true"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="atras" text="%generar.boton.atras" onAction="#atras"/>
+        <Button fx:id="siguiente" text="%generar.boton.siguiente" onAction="#siguiente" defaultButton="true" styleClass="boton-principal"/>
+    </HBox>
+</VBox>

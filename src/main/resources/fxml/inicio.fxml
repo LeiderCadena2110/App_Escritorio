@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="co.edu.ucc.reportes.ui.InicioController" styleClass="seccion" spacing="18">
+    <Label text="%inicio.titulo" styleClass="titulo"/>
+    <Label text="%inicio.subtitulo" styleClass="subtitulo" wrapText="true"/>
+    <HBox spacing="12">
+        <Button text="%inicio.nuevo" onAction="#nuevoReporte" styleClass="boton-principal"/>
+        <Button text="%inicio.importar" onAction="#importarDatos"/>
+    </HBox>
+
+    <HBox spacing="18" VBox.vgrow="ALWAYS">
+        <VBox spacing="8" HBox.hgrow="ALWAYS" prefWidth="300" styleClass="tarjeta">
+            <Label text="%inicio.recientes" styleClass="titulo-tarjeta"/>
+            <ListView fx:id="recientes" VBox.vgrow="ALWAYS"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Button fx:id="abrirCarpeta" text="%comun.abrirCarpeta" onAction="#abrirCarpeta"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="%inicio.verHistorial" onAction="#verHistorial" styleClass="boton-enlace"/>
+            </HBox>
+        </VBox>
+        <VBox spacing="8" HBox.hgrow="ALWAYS" prefWidth="300" styleClass="tarjeta">
+            <Label text="%inicio.perfiles" styleClass="titulo-tarjeta"/>
+            <ListView fx:id="perfiles" VBox.vgrow="ALWAYS"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Button fx:id="usarPerfil" text="%inicio.usarPerfil" onAction="#usarPerfil" styleClass="boton-principal"/>
+                <Button fx:id="eliminarPerfil" text="%comun.eliminar" onAction="#eliminarPerfil"/>
+            </HBox>
+            <Label text="%inicio.perfilesAyuda" styleClass="nota" wrapText="true" minHeight="-Infinity"/>
+        </VBox>
+    </HBox>
+</VBox>

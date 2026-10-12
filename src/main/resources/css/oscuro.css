@@ -1,0 +1,32 @@
+/* Tema oscuro: solo cambia los colores; la estructura está en base.css */
+.root {
+    -color-fondo: #16191d;
+    -color-panel: #20252b;
+    -color-lateral: #0f1b2b;
+    -color-lateral-texto: #b9c6d4;
+    -color-lateral-activo: #2a5b8f;
+    -color-texto: #e4e7eb;
+    -color-texto-suave: #9aa5b1;
+    -color-borde: #323a43;
+    -color-acento: #4a9be0;
+    -color-acento-texto: #0b1622;
+    -color-ok: #5fd08f;
+    -color-aviso: #f0b45a;
+    -color-error: #ff7b7f;
+    -color-error-fondo: #3a2023;
+    -color-aviso-fondo: #3a3020;
+
+    -fx-base: #2b3138;
+    -fx-background: -color-fondo;
+    -fx-control-inner-background: #20252b;
+    -fx-control-inner-background-alt: #252b32;
+    -fx-text-base-color: -color-texto;
+    -fx-text-background-color: -color-texto;
+    -fx-text-inner-color: -color-texto;
+    -fx-prompt-text-fill: #7b8794;
+}
+.menu-bar {
+    -fx-background-color: #1b2026;
+}
+.etiqueta-word { -fx-background-color: #3b6fc4; }
+.etiqueta-pdf { -fx-background-color: #d0352a; }

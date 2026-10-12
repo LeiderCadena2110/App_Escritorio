@@ -1,0 +1,192 @@
+/* Tema claro (base). El tema oscuro solo redefine los colores de .root en oscuro.css */
+.root {
+    -color-fondo: #f4f6f8;
+    -color-panel: #ffffff;
+    -color-lateral: #1d3557;
+    -color-lateral-texto: #dbe4ee;
+    -color-lateral-activo: #2f5d8a;
+    -color-texto: #1f2933;
+    -color-texto-suave: #616e7c;
+    -color-borde: #d9e2ec;
+    -color-acento: #1d6fb8;
+    -color-acento-texto: #ffffff;
+    -color-ok: #1e7b46;
+    -color-aviso: #a35c00;
+    -color-error: #c0262d;
+    -color-error-fondo: #fdecec;
+    -color-aviso-fondo: #fff6e5;
+
+    -fx-font-size: 13px;
+    -fx-base: #eef1f4;
+    -fx-background: -color-fondo;
+    -fx-control-inner-background: -color-panel;
+    -fx-accent: -color-acento;
+    -fx-focus-color: -color-acento;
+    -fx-faint-focus-color: transparent;
+    -fx-text-base-color: -color-texto;
+    -fx-text-background-color: -color-texto;
+}
+
+.ventana, .contenido {
+    -fx-background-color: -color-fondo;
+}
+
+/* Barra lateral fija */
+.barra-lateral {
+    -fx-background-color: -color-lateral;
+    -fx-padding: 18 10 18 10;
+}
+.marca {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 8 18 8;
+}
+.boton-seccion {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-lateral-texto;
+    -fx-alignment: center-left;
+    -fx-padding: 10 12 10 12;
+    -fx-background-radius: 6;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+.boton-seccion:hover {
+    -fx-background-color: derive(-color-lateral, 15%);
+}
+.boton-seccion:selected {
+    -fx-background-color: -color-lateral-activo;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Secciones */
+.seccion {
+    -fx-padding: 24 28 22 28;
+}
+.titulo {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-texto;
+}
+.subtitulo {
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-texto-suave;
+}
+.tarjeta {
+    -fx-background-color: -color-panel;
+    -fx-background-radius: 8;
+    -fx-border-color: -color-borde;
+    -fx-border-radius: 8;
+    -fx-padding: 16;
+}
+.titulo-tarjeta {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-texto;
+}
+.subtitulo-tarjeta {
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-texto;
+}
+.nota, .lista-sub {
+    -fx-text-fill: -color-texto-suave;
+}
+.lista-titulo {
+    -fx-font-weight: bold;
+}
+.resumen {
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-acento;
+}
+
+/* Botones */
+.button {
+    -fx-background-radius: 6;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+}
+.boton-principal {
+    -fx-background-color: -color-acento;
+    -fx-text-fill: -color-acento-texto;
+    -fx-font-weight: bold;
+}
+.boton-principal:hover {
+    -fx-background-color: derive(-color-acento, -12%);
+}
+.boton-principal:disabled {
+    -fx-opacity: 0.45;
+}
+.boton-peligro {
+    -fx-text-fill: -color-error;
+}
+.boton-enlace {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-acento;
+    -fx-underline: true;
+    -fx-padding: 6 4 6 4;
+}
+
+/* Etiquetas de tipo */
+.etiqueta {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 1 6 1 6;
+    -fx-background-radius: 4;
+    -fx-text-fill: white;
+}
+.etiqueta-word { -fx-background-color: #2b579a; }
+.etiqueta-pdf { -fx-background-color: #b30b00; }
+
+/* Revisión de datos */
+.problema-error { -fx-background-color: -color-error-fondo; -fx-text-fill: -color-error; }
+.problema-aviso { -fx-background-color: -color-aviso-fondo; -fx-text-fill: -color-aviso; }
+.problema-error .problema-marca { -fx-text-fill: -color-error; }
+.problema-aviso .problema-marca { -fx-text-fill: -color-aviso; }
+.problema-error:selected, .problema-aviso:selected { -fx-background-color: -color-acento; -fx-text-fill: white; }
+.texto-error { -fx-text-fill: -color-error; -fx-font-weight: bold; }
+.texto-aviso { -fx-text-fill: -color-aviso; }
+.texto-ok { -fx-text-fill: -color-ok; -fx-font-weight: bold; }
+.columna-numero { -fx-alignment: center-right; }
+
+/* Asistente */
+.indicador {
+    -fx-padding: 0 0 2 0;
+}
+.paso {
+    -fx-text-fill: -color-texto-suave;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 14;
+}
+.paso-actual {
+    -fx-background-color: -color-acento;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+.paso-hecho {
+    -fx-text-fill: -color-ok;
+}
+.paso-separador {
+    -fx-text-fill: -color-texto-suave;
+}
+.encabezado-grid {
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-texto-suave;
+}
+.marcador {
+    -fx-font-family: "Consolas", "Menlo", "DejaVu Sans Mono", monospace;
+}
+.marcador-falta {
+    -fx-text-fill: -color-error;
+    -fx-font-weight: bold;
+}
+.combo-falta {
+    -fx-border-color: -color-error;
+    -fx-border-radius: 3;
+}
+.scroll-mapeo, .scroll-mapeo > .viewport {
+    -fx-background-color: transparent;
+}
+.progress-bar > .bar {
+    -fx-background-color: -color-acento;
+}

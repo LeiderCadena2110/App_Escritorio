@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${titulo}">Certificado</title>
+    <style>
+        @page { size: A4 landscape; margin: 1.5cm; }
+        body { font-family: sans-serif; color: #1f2933; }
+        .hoja { border: 3px double #1d4e89; padding: 1.6cm 2cm; height: 14.2cm; text-align: center; }
+        .salto { page-break-after: always; }
+        .entidad { font-size: 12pt; letter-spacing: 3px; color: #1d4e89; text-transform: uppercase; }
+        h1 { font-size: 34pt; margin: 0.6cm 0 0.4cm 0; color: #1d4e89; }
+        .texto { font-size: 14pt; margin: 0.3cm 0; }
+        .nombre { font-size: 26pt; font-weight: bold; margin: 0.5cm 0 0.2cm 0; }
+        .documento { font-size: 12pt; color: #52606d; }
+        .motivo { font-size: 15pt; margin: 0.6cm 1.5cm; }
+        .pie { margin-top: 1.4cm; font-size: 11pt; color: #52606d; }
+        .firma { margin: 1.2cm auto 0 auto; width: 7cm; border-top: 1px solid #1f2933; padding-top: 4px; font-size: 11pt; }
+    </style>
+</head>
+<body>
+<!-- Campos: fila['nombre'], fila['documento'], fila['motivo'], fila['fecha'] -->
+<div th:each="fila, iter : ${filas}" class="hoja" th:classappend="${!iter.last} ? 'salto'">
+    <div class="entidad">Certificado</div>
+    <h1>Certificado de reconocimiento</h1>
+    <p class="texto">Se otorga a</p>
+    <p class="nombre" th:text="${fila['nombre']}">Nombre completo</p>
+    <p class="documento">Documento <span th:text="${fila['documento']}">0000000</span></p>
+    <p class="motivo" th:text="${fila['motivo']}">Por su participación</p>
+    <p class="pie">Expedido el <span th:text="${fila['fecha']}">01/01/2026</span></p>
+    <div class="firma">Firma autorizada</div>
+</div>
+</body>
+</html>

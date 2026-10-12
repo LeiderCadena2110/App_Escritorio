@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Ventana principal: menú arriba, barra lateral fija a la izquierda y el centro que cambia -->
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.ucc.reportes.ui.PrincipalController"
+            styleClass="ventana" prefWidth="1180" prefHeight="760">
+    <top>
+        <MenuBar fx:id="menu"/>
+    </top>
+    <left>
+        <VBox fx:id="barraLateral" styleClass="barra-lateral" spacing="4" prefWidth="220"/>
+    </left>
+    <center>
+        <StackPane fx:id="contenido" styleClass="contenido"/>
+    </center>
+</BorderPane>

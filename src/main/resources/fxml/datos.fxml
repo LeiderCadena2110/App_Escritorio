@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="raiz" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="co.edu.ucc.reportes.ui.DatosController" styleClass="seccion" spacing="12">
+    <Label text="%datos.titulo" styleClass="titulo"/>
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Button text="%datos.importar" onAction="#importar" styleClass="boton-principal"/>
+        <HBox fx:id="cajaHoja" spacing="8" alignment="CENTER_LEFT">
+            <Label text="%datos.hoja"/>
+            <ComboBox fx:id="hoja" prefWidth="200"/>
+        </HBox>
+        <ProgressIndicator fx:id="cargando" prefWidth="24" prefHeight="24"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="usarDatos" text="%datos.usar" onAction="#usarDatos"/>
+    </HBox>
+    <VBox spacing="2">
+        <Label fx:id="archivo" styleClass="titulo-tarjeta"/>
+        <Label fx:id="detalle" styleClass="nota" wrapText="true"/>
+        <Label fx:id="resumen" styleClass="resumen"/>
+    </VBox>
+    <SplitPane orientation="VERTICAL" dividerPositions="0.68" VBox.vgrow="ALWAYS">
+        <TableView fx:id="vista"/>
+        <VBox spacing="6" styleClass="panel-problemas">
+            <Label fx:id="tituloProblemas" text="%datos.problemas" styleClass="titulo-tarjeta"/>
+            <ListView fx:id="problemas" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </SplitPane>
+</VBox>

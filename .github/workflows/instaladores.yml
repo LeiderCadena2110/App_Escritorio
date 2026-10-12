@@ -1,0 +1,55 @@
+# Crea los instaladores en cada sistema (jpackage no compila de forma cruzada).
+# Se ejecuta a mano (Actions > Instaladores > Run workflow) o al publicar una etiqueta v1.0.0.
+name: Instaladores
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  construir:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - so: windows-2022        # trae WiX 3.14, necesario para el .exe con JDK 21
+            script: empaquetado\empaquetar-windows.bat exe
+          - so: macos-14            # Apple Silicon
+            script: empaquetado/empaquetar-macos.sh
+          - so: macos-15-intel      # Intel
+            script: empaquetado/empaquetar-macos.sh
+          - so: ubuntu-24.04
+            script: empaquetado/empaquetar-linux.sh
+    runs-on: ${{ matrix.so }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Compilar y probar
+        run: mvn -B package
+      - name: Herramientas de Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update && sudo apt-get install -y fakeroot libfuse2
+          curl -sSL -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool && sudo mv appimagetool /usr/local/bin/
+      - name: Empaquetar (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: ${{ matrix.script }}
+      - name: Empaquetar (macOS y Linux)
+        if: runner.os != 'Windows'
+        run: ${{ matrix.script }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: instalador-${{ matrix.so }}
+          path: target/instaladores/*
+      - name: Publicar en el release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/instaladores/*
