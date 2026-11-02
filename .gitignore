@@ -1,7 +1,20 @@
+# Build output
 target/
+out/
+
+# IDEs
 .idea/
 *.iml
 .vscode/
-out/
+.classpath
+.project
+.settings/
+
+# Operating systems
 .DS_Store
 Thumbs.db
+
+# Local database and logs (they live in ~/.stockflow, but just in case)
+*.mv.db
+*.trace.db
+*.log
