@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Dashboard: today's and this month's sales, stock alerts and best sellers -->
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.ucc.stockflow.ui.controller.DashboardController"
+            fitToWidth="true">
+    <VBox styleClass="section" spacing="16">
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <VBox spacing="2">
+                <Label fx:id="greetingLabel" styleClass="title" text="Inicio"/>
+                <Label fx:id="dateLabel" styleClass="subtitle"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Actualizar" onAction="#refresh"/>
+            <Button text="Nueva venta" styleClass="primary-button" onAction="#newSale"/>
+        </HBox>
+
+        <HBox spacing="14">
+            <VBox styleClass="card" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <Label styleClass="kpi-label" text="Ventas de hoy"/>
+                <Label fx:id="todaySalesLabel" styleClass="kpi-value, kpi-value-accent" text="\$ 0"/>
+                <Label fx:id="todayInvoicesLabel" styleClass="kpi-hint"/>
+            </VBox>
+            <VBox styleClass="card" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <Label styleClass="kpi-label" text="Ventas del mes"/>
+                <Label fx:id="monthSalesLabel" styleClass="kpi-value" text="\$ 0"/>
+                <Label fx:id="monthInvoicesLabel" styleClass="kpi-hint"/>
+            </VBox>
+            <VBox styleClass="card" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <Label styleClass="kpi-label" text="Ganancia del mes"/>
+                <Label fx:id="monthProfitLabel" styleClass="kpi-value" text="\$ 0"/>
+                <Label fx:id="averageTicketLabel" styleClass="kpi-hint"/>
+            </VBox>
+            <VBox styleClass="card" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <Label styleClass="kpi-label" text="Valor del inventario"/>
+                <Label fx:id="stockValueLabel" styleClass="kpi-value" text="\$ 0"/>
+                <Label fx:id="productsLabel" styleClass="kpi-hint"/>
+            </VBox>
+            <VBox styleClass="card" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <Label styleClass="kpi-label" text="Stock bajo"/>
+                <Label fx:id="lowStockLabel" styleClass="kpi-value" text="0"/>
+                <Label styleClass="kpi-hint" text="productos por reponer"/>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="14">
+            <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS" prefWidth="520">
+                <Label styleClass="card-title" text="Ventas de los últimos 7 días"/>
+                <BarChart fx:id="salesChart" legendVisible="false" animated="false" prefHeight="250">
+                    <xAxis>
+                        <CategoryAxis/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="salesAxis" tickLabelsVisible="true"/>
+                    </yAxis>
+                </BarChart>
+            </VBox>
+            <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS" prefWidth="420">
+                <Label styleClass="card-title" text="Más vendidos del mes"/>
+                <TableView fx:id="topTable" prefHeight="250"/>
+            </VBox>
+        </HBox>
+
+        <VBox styleClass="card" spacing="8">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label styleClass="card-title" text="Productos con poco stock"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Ver productos" styleClass="link-button" onAction="#openProducts"/>
+            </HBox>
+            <TableView fx:id="lowStockTable" prefHeight="230"/>
+        </VBox>
+        <padding>
+            <Insets bottom="10"/>
+        </padding>
+    </VBox>
+</ScrollPane>
