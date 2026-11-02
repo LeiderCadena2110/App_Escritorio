@@ -1,0 +1,35 @@
+/* Dark theme: only changes colors; the structure lives in main.css */
+.root {
+    -color-background: #16191d;
+    -color-panel: #20252b;
+    -color-sidebar: #0e1a28;
+    -color-sidebar-text: #b9c6d4;
+    -color-sidebar-active: #2a5b8f;
+    -color-text: #e4e7eb;
+    -color-muted: #9aa5b1;
+    -color-border: #323a43;
+    -color-accent: #4a9be0;
+    -color-accent-text: #0b1622;
+    -color-success: #5fd08f;
+    -color-success-bg: #1d3328;
+    -color-warning: #f0b45a;
+    -color-warning-bg: #3a3020;
+    -color-danger: #ff7b7f;
+    -color-danger-bg: #3a2023;
+
+    -fx-base: #2b3138;
+    -fx-background: -color-background;
+    -fx-control-inner-background: #20252b;
+    -fx-control-inner-background-alt: #252b32;
+    -fx-text-base-color: -color-text;
+    -fx-text-background-color: -color-text;
+    -fx-text-inner-color: -color-text;
+    -fx-prompt-text-fill: #7b8794;
+}
+.menu-bar {
+    -fx-background-color: #1b2026;
+}
+.chart-title, .axis-label, .axis {
+    -fx-text-fill: -color-text;
+    -fx-tick-label-fill: -color-muted;
+}
