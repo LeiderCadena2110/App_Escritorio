@@ -141,6 +141,27 @@ public final class Tables {
         }
     }
 
+    /**
+     * Columns keep their preferred width and the column at {@code growIndex} takes the free space,
+     * so long names (product, customer) get the room.
+     */
+    public static <T> void fill(TableView<T> table, int growIndex) {
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        TableColumn<T, ?> grow = table.getColumns().get(growIndex);
+        double minimum = Math.min(grow.getPrefWidth(), 140);
+        Runnable resize = () -> {
+            double others = 0;
+            for (TableColumn<T, ?> c : table.getColumns()) {
+                if (c != grow && c.isVisible()) others += c.getWidth();
+            }
+            grow.setPrefWidth(Math.max(minimum, table.getWidth() - others - 20));
+        };
+        table.widthProperty().addListener((o, a, b) -> resize.run());
+        for (TableColumn<T, ?> c : table.getColumns()) {
+            if (c != grow) c.widthProperty().addListener((o, a, b) -> resize.run());
+        }
+    }
+
     public static <T> void placeholder(TableView<T> table, String text) {
         Label l = new Label(text);
         l.getStyleClass().add("muted");
