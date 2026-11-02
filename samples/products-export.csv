@@ -1,0 +1,14 @@
+﻿Código;Nombre;Categoría;Proveedor;Unidad;Costo;Precio de venta;Margen %;Stock;Stock mínimo;Valor en inventario;Activo
+CAS-003;Botín casual cuero negro;Casuales;Calzado Andino S.A.S.;PAR;110000,00;199900,00;45,0;0;3;0,00;Sí
+DEP-002;Guayos fútbol Pro FG;Deportivos;Distribuidora Deportiva del Sur;PAR;120000,00;189900,00;36,8;5;4;600000,00;Sí
+ACC-002;Kit limpieza de calzado;Accesorios;Insumos y Cuidado Ltda.;UND;15000,00;29900,00;49,8;11;5;165000,00;Sí
+ACC-001;Medias deportivas x3;Accesorios;Insumos y Cuidado Ltda.;UND;9000,00;18900,00;52,4;57;15;513000,00;Sí
+CAS-002;Mocasín casual café;Casuales;Calzado Andino S.A.S.;PAR;70000,00;129900,00;46,1;12;4;840000,00;Sí
+ACC-003;Plantillas de gel;Accesorios;Insumos y Cuidado Ltda.;UND;12000,00;24900,00;51,8;0;5;0,00;Sí
+SAN-002;Sandalia cuero dama;Sandalias;Calzado Andino S.A.S.;PAR;45000,00;84900,00;47,0;4;5;180000,00;Sí
+SAN-001;Sandalia playera unisex;Sandalias;Calzado Andino S.A.S.;PAR;18000,00;34900,00;48,4;38;10;684000,00;Sí
+DEP-001;Tenis running Ultra 3;Deportivos;Distribuidora Deportiva del Sur;PAR;145000,00;229900,00;36,9;15;5;2175000,00;Sí
+DEP-003;Tenis training Flex;Deportivos;Distribuidora Deportiva del Sur;PAR;98000,00;159900,00;38,7;1;4;98000,00;Sí
+CAS-001;Tenis urbanos lona blanca;Casuales;Calzado Andino S.A.S.;PAR;55000,00;99900,00;44,9;22;8;1210000,00;Sí
+FOR-001;Zapato Oxford negro;Formales;Calzado Andino S.A.S.;PAR;95000,00;174900,00;45,7;8;3;760000,00;Sí
+FOR-002;Zapato de tacón 7 cm;Formales;Calzado Andino S.A.S.;PAR;85000,00;159900,00;46,8;2;3;170000,00;Sí
