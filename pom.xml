@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Spring Boot organiza servicios y base local; NO levanta servidor web -->
+    <!-- Spring Boot wires services and the local database; it does NOT start a web server -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -13,24 +13,22 @@
     </parent>
 
     <groupId>co.edu.ucc</groupId>
-    <artifactId>automatizador-reportes</artifactId>
+    <artifactId>stockflow</artifactId>
     <version>1.0.0</version>
-    <name>Automatizador de Reportes</name>
-    <description>Genera informes Word y PDF desde Excel o CSV, sin internet</description>
+    <name>StockFlow</name>
+    <description>Inventory and billing desktop app for small businesses (offline)</description>
 
     <properties>
         <java.version>21</java.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javafx.version>21.0.6</javafx.version>
-        <poi-tl.version>1.12.2</poi-tl.version>
-        <commons-csv.version>1.11.0</commons-csv.version>
-        <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
-        <clase.principal>co.edu.ucc.reportes.Lanzador</clase.principal>
+        <pdfbox.version>2.0.32</pdfbox.version>
+        <main.class>co.edu.ucc.stockflow.Launcher</main.class>
     </properties>
 
     <dependencies>
-        <!-- Interfaz: JavaFX (Maven baja la versión del sistema donde se compila) -->
+        <!-- User interface: JavaFX -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -42,14 +40,10 @@
             <version>${javafx.version}</version>
         </dependency>
 
-        <!-- Servicios y datos locales -->
+        <!-- Services and local data: Spring JDBC + H2 + Flyway -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -61,30 +55,14 @@
             <artifactId>flyway-core</artifactId>
         </dependency>
 
-        <!-- Excel, CSV y Word -->
+        <!-- Invoice PDF -->
         <dependency>
-            <groupId>com.deepoove</groupId>
-            <artifactId>poi-tl</artifactId>
-            <version>${poi-tl.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
-            <version>${commons-csv.version}</version>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>${pdfbox.version}</version>
         </dependency>
 
-        <!-- PDF desde plantillas HTML: Java puro, sin navegador ni internet -->
-        <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.openhtmltopdf</groupId>
-            <artifactId>openhtmltopdf-pdfbox</artifactId>
-            <version>${openhtmltopdf.version}</version>
-        </dependency>
-
-        <!-- Pruebas: JUnit 5 -->
+        <!-- Tests: JUnit 5 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -93,17 +71,17 @@
     </dependencies>
 
     <build>
-        <finalName>automatizador-reportes</finalName>
+        <finalName>stockflow</finalName>
         <plugins>
-            <!-- mvn spring-boot:run  arranca la app desde la terminal -->
+            <!-- "mvn spring-boot:run" starts the app from the terminal -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>${clase.principal}</mainClass>
+                    <mainClass>${main.class}</mainClass>
                 </configuration>
                 <executions>
-                    <!-- Sin "fat jar": jpackage usa el .jar normal + la carpeta lib/ -->
+                    <!-- No fat jar: jpackage uses the plain .jar + the lib/ folder -->
                     <execution>
                         <id>repackage</id>
                         <phase>none</phase>
@@ -111,7 +89,7 @@
                 </executions>
             </plugin>
 
-            <!-- El .jar lleva en su manifiesto la clase principal y las librerías de lib/ -->
+            <!-- The .jar manifest points to the main class and the libraries in lib/ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -119,7 +97,7 @@
                     <outputDirectory>${project.build.directory}/app</outputDirectory>
                     <archive>
                         <manifest>
-                            <mainClass>${clase.principal}</mainClass>
+                            <mainClass>${main.class}</mainClass>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                         </manifest>
@@ -127,13 +105,13 @@
                 </configuration>
             </plugin>
 
-            <!-- Copia las librerías junto al .jar: target/app es la entrada de jpackage -->
+            <!-- Copies the libraries next to the .jar: target/app is the jpackage input -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copiar-librerias</id>
+                        <id>copy-libraries</id>
                         <phase>package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
