@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Reports: sales of a period, profit and best-selling products -->
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.ucc.stockflow.ui.controller.ReportsController"
+            fitToWidth="true">
+    <VBox styleClass="section" spacing="16">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <VBox spacing="2">
+                <Label styleClass="title" text="Reportes"/>
+                <Label styleClass="subtitle" text="Ventas, ganancia y productos más vendidos"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Exportar más vendidos (CSV)" onAction="#exportTopProducts"/>
+        </HBox>
+
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="Desde" styleClass="form-label"/>
+            <DatePicker fx:id="fromDate" prefWidth="140"/>
+            <Label text="Hasta" styleClass="form-label"/>
+            <DatePicker fx:id="toDate" prefWidth="140"/>
+            <Button text="Hoy" onAction="#today"/>
+            <Button text="Últimos 7 días" onAction="#lastWeek"/>
+            <Button text="Este mes" onAction="#thisMonth"/>
+            <Button text="Mes anterior" onAction="#lastMonth"/>
+        </HBox>
+
+        <HBox spacing="14">
+            <VBox styleClass="card" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <Label styleClass="kpi-label" text="Total vendido"/>
+                <Label fx:id="totalLabel" styleClass="kpi-value, kpi-value-accent"/>
+                <Label fx:id="invoicesLabel" styleClass="kpi-hint"/>
+            </VBox>
+            <VBox styleClass="card" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <Label styleClass="kpi-label" text="Ganancia bruta"/>
+                <Label fx:id="profitLabel" styleClass="kpi-value"/>
+                <Label fx:id="marginLabel" styleClass="kpi-hint"/>
+            </VBox>
+            <VBox styleClass="card" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <Label styleClass="kpi-label" text="Ticket promedio"/>
+                <Label fx:id="ticketLabel" styleClass="kpi-value"/>
+                <Label fx:id="unitsLabel" styleClass="kpi-hint"/>
+            </VBox>
+            <VBox styleClass="card" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                <Label styleClass="kpi-label" text="IVA cobrado"/>
+                <Label fx:id="taxLabel" styleClass="kpi-value"/>
+                <Label fx:id="discountLabel" styleClass="kpi-hint"/>
+            </VBox>
+        </HBox>
+
+        <VBox styleClass="card" spacing="8">
+            <Label styleClass="card-title" text="Ventas por día"/>
+            <BarChart fx:id="chart" legendVisible="false" animated="false" prefHeight="260">
+                <xAxis>
+                    <CategoryAxis/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="yAxis"/>
+                </yAxis>
+            </BarChart>
+        </VBox>
+
+        <VBox styleClass="card" spacing="8">
+            <Label styleClass="card-title" text="Productos más vendidos"/>
+            <TableView fx:id="topTable" prefHeight="300"/>
+        </VBox>
+    </VBox>
+</ScrollPane>
