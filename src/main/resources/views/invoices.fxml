@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Invoices: search issued invoices, view the detail, export to PDF or cancel -->
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="co.edu.ucc.stockflow.ui.controller.InvoicesController"
+      styleClass="section" spacing="14">
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <VBox spacing="2">
+            <Label styleClass="title" text="Facturas"/>
+            <Label styleClass="subtitle" text="Ventas registradas"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Exportar CSV" onAction="#exportCsv"/>
+        <Button text="Nueva venta" styleClass="primary-button" onAction="#newSale"/>
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label text="Desde" styleClass="form-label"/>
+        <DatePicker fx:id="fromDate" prefWidth="140"/>
+        <Label text="Hasta" styleClass="form-label"/>
+        <DatePicker fx:id="toDate" prefWidth="140"/>
+        <TextField fx:id="searchField" promptText="Número, cliente o documento" prefWidth="240"/>
+        <ComboBox fx:id="statusBox" prefWidth="150"/>
+        <Button text="Hoy" onAction="#today"/>
+        <Button text="Este mes" onAction="#thisMonth"/>
+    </HBox>
+
+    <TableView fx:id="table" VBox.vgrow="ALWAYS"/>
+
+    <HBox alignment="CENTER_LEFT" spacing="8">
+        <Button fx:id="detailButton" text="Ver detalle" onAction="#openSelected"/>
+        <Button fx:id="pdfButton" text="Exportar PDF" onAction="#exportPdf"/>
+        <Button fx:id="cancelButton" text="Anular" styleClass="danger-button" onAction="#cancelSelected"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="summaryLabel" styleClass="muted"/>
+    </HBox>
+</VBox>
