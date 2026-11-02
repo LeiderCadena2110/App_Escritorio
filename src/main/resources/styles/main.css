@@ -186,7 +186,9 @@
 }
 .table-row-cell.row-entry .quantity-cell { -fx-text-fill: -color-success; -fx-font-weight: bold; }
 .table-row-cell.row-exit .quantity-cell { -fx-text-fill: -color-danger; -fx-font-weight: bold; }
-.table-row-cell:selected .table-cell {
+.table-row-cell.row-low-stock:selected .table-cell,
+.table-row-cell.row-entry:selected .quantity-cell,
+.table-row-cell.row-exit:selected .quantity-cell {
     -fx-text-fill: white;
 }
 
