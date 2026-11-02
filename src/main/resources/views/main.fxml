@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Main window: menu on top, fixed sidebar on the left and the changing center -->
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.ucc.stockflow.ui.MainController"
+            styleClass="window" prefWidth="1240" prefHeight="780">
+    <top>
+        <MenuBar fx:id="menuBar"/>
+    </top>
+    <left>
+        <VBox fx:id="sidebar" styleClass="sidebar" spacing="3" prefWidth="210"/>
+    </left>
+    <center>
+        <StackPane fx:id="content" styleClass="content"/>
+    </center>
+</BorderPane>
