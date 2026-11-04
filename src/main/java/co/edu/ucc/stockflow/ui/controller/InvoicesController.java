@@ -9,6 +9,7 @@ import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.Section;
 import co.edu.ucc.stockflow.ui.SectionController;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.ViewLoader;
 import co.edu.ucc.stockflow.ui.component.Combos;
 import co.edu.ucc.stockflow.ui.component.DatePickers;
@@ -17,8 +18,6 @@ import co.edu.ucc.stockflow.ui.component.Tables;
 import co.edu.ucc.stockflow.ui.dialog.InvoiceDetailDialog;
 import co.edu.ucc.stockflow.util.DateRange;
 import co.edu.ucc.stockflow.util.Money;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -57,10 +56,12 @@ public class InvoicesController implements SectionController {
     private final Navigator navigator;
     private final ViewLoader views;
     private final PauseTransition searchDelay = new PauseTransition(Duration.millis(250));
+    private final TaskRunner tasks;
 
     public InvoicesController(InvoiceService invoices, InvoicePdfService pdf, CsvExportService csv,
                               InvoiceDetailDialog detailDialog, Dialogs dialogs, Navigator navigator,
-                              ViewLoader views) {
+                              ViewLoader views,
+                              TaskRunner tasks) {
         this.invoices = invoices;
         this.pdf = pdf;
         this.csv = csv;
@@ -68,6 +69,7 @@ public class InvoicesController implements SectionController {
         this.dialogs = dialogs;
         this.navigator = navigator;
         this.views = views;
+        this.tasks = tasks;
     }
 
     @FXML
@@ -113,7 +115,13 @@ public class InvoicesController implements SectionController {
     private void reload() {
         LocalDate from = fromDate.getValue() == null ? LocalDate.of(2000, 1, 1) : fromDate.getValue();
         LocalDate to = toDate.getValue() == null ? LocalDate.now().plusYears(1) : toDate.getValue();
-        List<Invoice> list = invoices.search(DateRange.ofDays(from, to), searchField.getText(), statusBox.getValue());
+        String text = searchField.getText();
+        InvoiceStatus status = statusBox.getValue();
+        tasks.run("No se pudieron cargar las facturas",
+                () -> invoices.search(DateRange.ofDays(from, to), text, status), this::render);
+    }
+
+    private void render(List<Invoice> list) {
         table.getItems().setAll(list);
         BigDecimal total = list.stream().filter(i -> !i.isCancelled()).map(Invoice::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -165,14 +173,7 @@ public class InvoicesController implements SectionController {
     private void exportPdf(Invoice invoice) {
         Path file = FileChoosers.savePdf(navigator.window(), invoice.getNumber());
         if (file == null) return;
-        dialogs.run(navigator.window(), "No se pudo guardar el PDF", () -> {
-            try {
-                pdf.export(invoice, file);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-            views.openFile(file);
-        });
+        tasks.run("No se pudo guardar el PDF", () -> pdf.export(invoice, file), () -> views.openFile(file));
     }
 
     @FXML
@@ -188,23 +189,14 @@ public class InvoicesController implements SectionController {
         }
         dialogs.askText(navigator.window(), "Anular factura " + invoice.getNumber(),
                 "Motivo de la anulación (los productos vuelven al inventario):", "").ifPresent(reason ->
-                dialogs.run(navigator.window(), "No se pudo anular", () -> {
-                    invoices.cancel(invoice.getId(), reason);
-                    reload();
-                }));
+                tasks.run("No se pudo anular", () -> invoices.cancel(invoice.getId(), reason), this::reload));
     }
 
     @FXML
     private void exportCsv() {
         Path file = FileChoosers.saveCsv(navigator.window(), "facturas");
         if (file == null) return;
-        dialogs.run(navigator.window(), "No se pudo exportar", () -> {
-            try {
-                csv.exportInvoices(table.getItems(), file);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-            views.openFile(file);
-        });
+        List<Invoice> rows = List.copyOf(table.getItems());
+        tasks.run("No se pudo exportar", () -> csv.exportInvoices(rows, file), () -> views.openFile(file));
     }
 }
