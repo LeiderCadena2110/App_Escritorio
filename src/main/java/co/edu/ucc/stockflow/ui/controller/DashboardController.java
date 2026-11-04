@@ -6,10 +6,10 @@ import co.edu.ucc.stockflow.dto.TopProduct;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.service.ReportService;
 import co.edu.ucc.stockflow.service.SettingsService;
-import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.Section;
 import co.edu.ucc.stockflow.ui.SectionController;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.component.Tables;
 import co.edu.ucc.stockflow.util.Money;
 import java.time.LocalDate;
@@ -53,13 +53,14 @@ public class DashboardController implements SectionController {
     private final ReportService reports;
     private final SettingsService settings;
     private final Navigator navigator;
-    private final Dialogs dialogs;
+    private final TaskRunner tasks;
 
-    public DashboardController(ReportService reports, SettingsService settings, Navigator navigator, Dialogs dialogs) {
+    public DashboardController(ReportService reports, SettingsService settings, Navigator navigator,
+                               TaskRunner tasks) {
         this.reports = reports;
         this.settings = settings;
         this.navigator = navigator;
-        this.dialogs = dialogs;
+        this.tasks = tasks;
     }
 
     @FXML
@@ -105,16 +106,19 @@ public class DashboardController implements SectionController {
 
     @FXML
     private void refresh() {
-        DashboardSummary s;
-        try {
-            s = reports.dashboard();
-        } catch (RuntimeException e) {
-            dialogs.error(navigator.window(), "No se pudo cargar el inicio", e);
-            return;
-        }
+        tasks.run("No se pudo cargar el inicio",
+                () -> new Loaded(reports.dashboard(), settings.businessInfo().name()),
+                loaded -> render(loaded.summary(), loaded.businessName()));
+    }
+
+    /** What the dashboard loads in the background. */
+    private record Loaded(DashboardSummary summary, String businessName) {
+    }
+
+    private void render(DashboardSummary s, String businessName) {
         int hour = LocalTime.now().getHour();
         String greeting = hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
-        greetingLabel.setText(greeting + ", " + settings.businessInfo().name());
+        greetingLabel.setText(greeting + ", " + businessName);
         String date = LONG_DATE.format(LocalDate.now());
         dateLabel.setText(Character.toUpperCase(date.charAt(0)) + date.substring(1));
 
