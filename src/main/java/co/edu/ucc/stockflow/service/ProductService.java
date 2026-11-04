@@ -37,6 +37,13 @@ public class ProductService {
         return repository.findBySku(sku);
     }
 
+    /** Product with that exact code: SKU first, then barcode (what a scanner types). */
+    public Optional<Product> findByCode(String code) {
+        if (code == null || code.isBlank()) return Optional.empty();
+        Optional<Product> bySku = repository.findBySku(code);
+        return bySku.isPresent() ? bySku : repository.findByBarcode(code);
+    }
+
     /**
      * Creates a product. If it has units, they are registered as the initial inventory so the stock
      * history starts with them.
@@ -88,11 +95,15 @@ public class ProductService {
 
     private void validate(Product p) {
         p.setSku(Formats.clean(p.getSku()));
+        p.setBarcode(Formats.clean(p.getBarcode()));
         p.setName(Formats.clean(p.getName()));
         p.setDescription(Formats.clean(p.getDescription()));
         if (p.getSku() == null) throw new BusinessException("Escriba el código (SKU) del producto.");
         if (p.getSku().length() > 50) throw new BusinessException("El código (SKU) puede tener máximo 50 caracteres.");
         if (p.getName() == null) throw new BusinessException("Escriba el nombre del producto.");
+        if (p.getBarcode() != null && !p.getBarcode().matches("[0-9A-Za-z\\-]{4,50}")) {
+            throw new BusinessException("El código de barras solo puede tener letras, números y guiones (4 a 50).");
+        }
         if (p.getCostPrice().signum() < 0) throw new BusinessException("El precio de costo no puede ser negativo.");
         if (p.getSalePrice().signum() <= 0) throw new BusinessException("El precio de venta debe ser mayor que 0.");
         if (p.getMinStock() < 0) throw new BusinessException("El stock mínimo no puede ser negativo.");
@@ -103,5 +114,13 @@ public class ProductService {
                     throw new BusinessException("Ya existe un producto con el código " + p.getSku()
                             + " (" + other.getName() + ").");
                 });
+        if (p.getBarcode() != null) {
+            repository.findByBarcode(p.getBarcode())
+                    .filter(other -> !other.getId().equals(p.getId()))
+                    .ifPresent(other -> {
+                        throw new BusinessException("El código de barras " + p.getBarcode()
+                                + " ya lo tiene " + other.getSku() + " · " + other.getName() + ".");
+                    });
+        }
     }
 }
