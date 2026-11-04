@@ -136,4 +136,27 @@ class InvoiceFlowIntegrationTest {
         stock.register(shoe.getId(), MovementType.PURCHASE, 4, new BigDecimal("1000"), "FC-1", null);
         assertEquals(6, products.findById(shoe.getId()).orElseThrow().getStock());
     }
+
+    @Test
+    void invoiceSeriesUsesTheConfiguredPrefixAndNumber() {
+        sequences.configureInvoices("POS-", 500);
+        Product shoe = newProduct("IT-008", "10000", 3);
+        Invoice draft = new Invoice();
+        draft.getItems().add(InvoiceItem.of(shoe, 1));
+        assertEquals("POS-000500", invoices.issue(draft).getNumber());
+        assertEquals("POS-000501", sequences.peekInvoiceNumber());
+    }
+
+    @Test
+    void productsCanBeFoundByBarcodeAndBarcodesAreUnique() {
+        Product shoe = newProduct("IT-009", "10000", 1);
+        shoe.setBarcode("7709000000017");
+        products.update(shoe);
+        assertEquals(shoe.getId(), products.findByCode("7709000000017").orElseThrow().getId());
+        assertEquals(shoe.getId(), products.findByCode("it-009").orElseThrow().getId());
+
+        Product other = newProduct("IT-010", "10000", 1);
+        other.setBarcode("7709000000017");
+        assertThrows(BusinessException.class, () -> products.update(other));
+    }
 }
