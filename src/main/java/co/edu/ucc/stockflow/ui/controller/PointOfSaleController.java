@@ -1,5 +1,6 @@
 package co.edu.ucc.stockflow.ui.controller;
 
+import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
@@ -10,6 +11,7 @@ import co.edu.ucc.stockflow.service.InvoicePdfService;
 import co.edu.ucc.stockflow.service.InvoiceService;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.SequenceService;
+import co.edu.ucc.stockflow.service.SettingsService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.SectionController;
@@ -17,13 +19,17 @@ import co.edu.ucc.stockflow.ui.ViewLoader;
 import co.edu.ucc.stockflow.ui.component.FileChoosers;
 import co.edu.ucc.stockflow.ui.component.Tables;
 import co.edu.ucc.stockflow.ui.dialog.CustomerDialog;
+import co.edu.ucc.stockflow.ui.viewmodel.SaleViewModel;
 import co.edu.ucc.stockflow.util.Money;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Consumer;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -41,7 +47,10 @@ import javafx.scene.input.KeyEvent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-/** Point of sale: builds the cart and issues the invoice. */
+/**
+ * Point of sale screen. The cart rules and totals live in {@link SaleViewModel}; this class only
+ * connects the controls to it, searches products and customers, and issues the invoice.
+ */
 @Component
 @Scope("prototype")
 public class PointOfSaleController implements SectionController {
@@ -77,27 +86,29 @@ public class PointOfSaleController implements SectionController {
     private final InvoiceService invoices;
     private final InvoicePdfService pdf;
     private final SequenceService sequences;
+    private final SettingsService settings;
     private final CustomerDialog customerDialog;
     private final Dialogs dialogs;
     private final Navigator navigator;
     private final ViewLoader views;
 
+    private final SaleViewModel sale = new SaleViewModel();
     private final ObservableList<Product> catalog = FXCollections.observableArrayList();
     private final FilteredList<Product> results = new FilteredList<>(catalog);
     private final ObservableList<Customer> allCustomers = FXCollections.observableArrayList();
     private final FilteredList<Customer> customerOptions = new FilteredList<>(allCustomers);
-    private final ObservableList<InvoiceItem> cart = FXCollections.observableArrayList();
-    private Invoice preview = new Invoice();
     private boolean shortcutsInstalled;
 
     public PointOfSaleController(ProductService products, CustomerService customers, InvoiceService invoices,
-                                 InvoicePdfService pdf, SequenceService sequences, CustomerDialog customerDialog,
-                                 Dialogs dialogs, Navigator navigator, ViewLoader views) {
+                                 InvoicePdfService pdf, SequenceService sequences, SettingsService settings,
+                                 CustomerDialog customerDialog, Dialogs dialogs, Navigator navigator,
+                                 ViewLoader views) {
         this.products = products;
         this.customers = customers;
         this.invoices = invoices;
         this.pdf = pdf;
         this.sequences = sequences;
+        this.settings = settings;
         this.customerDialog = customerDialog;
         this.dialogs = dialogs;
         this.navigator = navigator;
@@ -106,6 +117,32 @@ public class PointOfSaleController implements SectionController {
 
     @FXML
     private void initialize() {
+        buildResultsTable();
+        buildCartTable();
+        bindInputs();
+        bindTotals();
+
+        searchField.textProperty().addListener((o, a, text) -> filterProducts(text));
+        searchField.setOnAction(e -> addFromSearch());
+        searchField.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.DOWN) {
+                resultsTable.requestFocus();
+                resultsTable.getSelectionModel().selectFirst();
+            }
+        });
+        customerBox.setItems(customerOptions);
+        customerSearch.textProperty().addListener((o, a, text) -> filterCustomers(text));
+
+        // F2: search, F12: charge. The filter is added once; it only acts while this view is on screen.
+        searchField.sceneProperty().addListener((o, old, scene) -> {
+            if (scene != null && !shortcutsInstalled) {
+                scene.addEventFilter(KeyEvent.KEY_PRESSED, this::shortcuts);
+                shortcutsInstalled = true;
+            }
+        });
+    }
+
+    private void buildResultsTable() {
         resultsTable.setItems(results);
         resultsTable.getColumns().setAll(List.of(
                 Tables.text("Código", Product::getSku, 100),
@@ -117,8 +154,10 @@ public class PointOfSaleController implements SectionController {
         Tables.placeholder(resultsTable, "No hay productos que coincidan con la búsqueda.");
         Tables.styledRows(resultsTable, p -> p.getStock() == 0 ? "row-inactive" : p.isLowStock() ? "row-low-stock" : null,
                 this::addProduct);
+    }
 
-        cartTable.setItems(cart);
+    private void buildCartTable() {
+        cartTable.setItems(sale.getItems());
         cartTable.getColumns().setAll(List.of(
                 Tables.text("Código", InvoiceItem::getProductSku, 100),
                 Tables.text("Producto", InvoiceItem::getProductName, 260),
@@ -137,33 +176,47 @@ public class PointOfSaleController implements SectionController {
         minusButton.disableProperty().bind(noItem);
         quantityButton.disableProperty().bind(noItem);
         removeButton.disableProperty().bind(noItem);
+    }
 
-        searchField.textProperty().addListener((o, a, text) -> filterProducts(text));
-        searchField.setOnAction(e -> addFromSearch());
-        searchField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.DOWN) {
-                resultsTable.requestFocus();
-                resultsTable.getSelectionModel().selectFirst();
-            }
-        });
-
-        customerBox.setItems(customerOptions);
-        customerSearch.textProperty().addListener((o, a, text) -> filterCustomers(text));
-
+    /** Controls → view model. */
+    private void bindInputs() {
         paymentBox.getItems().setAll(PaymentMethod.values());
-        paymentBox.setValue(PaymentMethod.CASH);
-        paymentBox.valueProperty().addListener((o, a, b) -> updateTotals());
-        discountField.textProperty().addListener((o, a, b) -> updateTotals());
-        receivedField.textProperty().addListener((o, a, b) -> updateTotals());
-        cart.addListener((javafx.collections.ListChangeListener<InvoiceItem>) c -> updateTotals());
+        paymentBox.valueProperty().bindBidirectional(sale.paymentMethodProperty());
+        customerBox.valueProperty().bindBidirectional(sale.customerProperty());
+        notesField.textProperty().bindBidirectional(sale.notesProperty());
+        moneyField(discountField, sale.discountProperty()::set);
+        moneyField(receivedField, sale.receivedProperty()::set);
+    }
 
-        // F2: search, F12: charge. The filter is added once; it only acts while this view is on screen.
-        searchField.sceneProperty().addListener((o, old, scene) -> {
-            if (scene != null && !shortcutsInstalled) {
-                scene.addEventFilter(KeyEvent.KEY_PRESSED, this::shortcuts);
-                shortcutsInstalled = true;
-            }
-        });
+    private static void moneyField(TextField field, Consumer<BigDecimal> target) {
+        field.textProperty().addListener((o, a, text) -> target.accept(Money.parseOr(text, BigDecimal.ZERO)));
+    }
+
+    /** View model → labels and buttons. */
+    private void bindTotals() {
+        subtotalLabel.textProperty().bind(money(sale.subtotalProperty()));
+        discountLabel.textProperty().bind(Bindings.createStringBinding(() -> sale.getAppliedDiscount().signum() > 0
+                ? "- " + Money.format(sale.getAppliedDiscount()) : Money.format(BigDecimal.ZERO),
+                sale.appliedDiscountProperty()));
+        taxNameLabel.textProperty().bind(Bindings.createStringBinding(() -> "IVA ("
+                + sale.taxRateProperty().get().stripTrailingZeros().toPlainString() + " %)", sale.taxRateProperty()));
+        taxLabel.textProperty().bind(money(sale.taxProperty()));
+        totalLabel.textProperty().bind(money(sale.totalProperty()));
+        changeLabel.textProperty().bind(money(sale.changeProperty()));
+        warningLabel.textProperty().bind(sale.warningProperty());
+        itemsLabel.textProperty().bind(Bindings.createStringBinding(() -> sale.getItems().size() + " productos · "
+                + sale.getUnits() + " unidades", sale.getItems(), sale.unitsProperty()));
+
+        var notCash = sale.cashProperty().not();
+        receivedLabel.disableProperty().bind(notCash);
+        receivedField.disableProperty().bind(notCash);
+        changeNameLabel.visibleProperty().bind(sale.cashProperty());
+        changeLabel.visibleProperty().bind(sale.cashProperty());
+        chargeButton.disableProperty().bind(sale.emptyProperty());
+    }
+
+    private static StringBinding money(ObservableValue<BigDecimal> value) {
+        return Bindings.createStringBinding(() -> Money.format(value.getValue()), value);
     }
 
     private void shortcuts(KeyEvent e) {
@@ -179,24 +232,24 @@ public class PointOfSaleController implements SectionController {
 
     @Override
     public void onShow() {
+        sale.taxRateProperty().set(settings.taxRate());
         reloadCatalog();
         reloadCustomers(null);
-        updateTotals();
         Platform.runLater(searchField::requestFocus);
     }
 
     private void reloadCatalog() {
         catalog.setAll(products.findActive());
+        sale.updateCatalog(catalog);
         filterProducts(searchField.getText());
         nextNumberLabel.setText("Próxima factura: " + sequences.peekInvoiceNumber());
     }
 
     private void reloadCustomers(Customer select) {
         Customer current = select != null ? select : customerBox.getValue();
-        Customer finalConsumer = customers.finalConsumer();
+        Customer target = current != null ? current : customers.finalConsumer();
         allCustomers.setAll(customers.search(null));
         filterCustomers(customerSearch.getText());
-        Customer target = current != null ? current : finalConsumer;
         allCustomers.stream().filter(c -> c.getId().equals(target.getId())).findFirst().ifPresent(customerBox::setValue);
     }
 
@@ -204,6 +257,7 @@ public class PointOfSaleController implements SectionController {
         String t = text == null ? "" : text.trim().toLowerCase();
         results.setPredicate(p -> t.isEmpty() || p.getSku().toLowerCase().contains(t)
                 || p.getName().toLowerCase().contains(t)
+                || (p.getBarcode() != null && p.getBarcode().equals(t))
                 || (p.getCategoryName() != null && p.getCategoryName().toLowerCase().contains(t)));
     }
 
@@ -216,55 +270,56 @@ public class PointOfSaleController implements SectionController {
         else if (!customerOptions.isEmpty() && !t.isEmpty()) customerBox.setValue(customerOptions.get(0));
     }
 
-    /** Enter in the search box: exact code first, otherwise the only (or first) result. */
+    /** Enter in the search box (or a barcode scanner): exact SKU or barcode first, otherwise the first result. */
     private void addFromSearch() {
         String text = searchField.getText().trim();
         if (text.isEmpty()) return;
-        Optional<Product> exact = catalog.stream().filter(p -> p.getSku().equalsIgnoreCase(text)).findFirst();
-        Product chosen = exact.orElse(results.isEmpty() ? null : results.get(0));
+        Product chosen = catalog.stream()
+                .filter(p -> p.getSku().equalsIgnoreCase(text) || text.equals(p.getBarcode()))
+                .findFirst()
+                .orElse(results.isEmpty() ? null : results.get(0));
         if (chosen == null) {
-            warningLabel.setText("No se encontró \"" + text + "\".");
+            sale.showNotice("No se encontró \"" + text + "\".");
+            searchField.selectAll();
             return;
         }
         addProduct(chosen);
         searchField.clear();
     }
 
-    /** Adds one unit of the product (or one more if it is already in the cart). */
+    /** Adds one unit of the product (or one more if it is already in the sale). */
     public void addProduct(Product product) {
-        Product p = catalog.stream().filter(x -> x.getId().equals(product.getId())).findFirst().orElse(product);
-        Optional<InvoiceItem> existing = cart.stream().filter(i -> i.getProductId().equals(p.getId())).findFirst();
-        int wanted = existing.map(i -> i.getQuantity() + 1).orElse(1);
-        if (wanted > p.getStock()) {
-            warningLabel.setText(p.getStock() == 0 ? p.getName() + " está agotado."
-                    : "Solo hay " + p.getStock() + " " + p.getUnit() + " de " + p.getName() + ".");
-            return;
+        try {
+            cartTable.getSelectionModel().select(sale.add(product));
+        } catch (BusinessException e) {
+            sale.showNotice(e.getMessage());
         }
-        if (existing.isPresent()) {
-            existing.get().setQuantity(wanted);
-            cartTable.refresh();
-            cartTable.getSelectionModel().select(existing.get());
-        } else {
-            InvoiceItem item = InvoiceItem.of(p, 1);
-            cart.add(item);
-            cartTable.getSelectionModel().select(item);
+    }
+
+    private void onSelected(Consumer<InvoiceItem> action) {
+        InvoiceItem item = cartTable.getSelectionModel().getSelectedItem();
+        if (item == null) return;
+        try {
+            action.accept(item);
+            if (sale.getItems().contains(item)) cartTable.getSelectionModel().select(item);
+        } catch (BusinessException e) {
+            sale.showNotice(e.getMessage());
         }
-        updateTotals();
     }
 
     @FXML
     private void increase() {
-        InvoiceItem item = cartTable.getSelectionModel().getSelectedItem();
-        if (item == null) return;
-        setQuantity(item, item.getQuantity() + 1);
+        onSelected(sale::increase);
     }
 
     @FXML
     private void decrease() {
-        InvoiceItem item = cartTable.getSelectionModel().getSelectedItem();
-        if (item == null) return;
-        if (item.getQuantity() <= 1) removeItem();
-        else setQuantity(item, item.getQuantity() - 1);
+        onSelected(sale::decrease);
+    }
+
+    @FXML
+    private void removeItem() {
+        onSelected(sale::remove);
     }
 
     @FXML
@@ -274,36 +329,17 @@ public class PointOfSaleController implements SectionController {
         dialogs.askText(navigator.window(), "Cantidad de " + item.getProductName(), "Cantidad:",
                 Integer.toString(item.getQuantity())).ifPresent(text -> {
             try {
-                int q = Integer.parseInt(text.trim());
-                if (q <= 0) removeItem();
-                else setQuantity(item, q);
+                int quantity = Integer.parseInt(text.trim());
+                onSelected(i -> sale.setQuantity(i, quantity));
             } catch (NumberFormatException e) {
-                warningLabel.setText("\"" + text + "\" no es una cantidad válida.");
+                sale.showNotice("\"" + text + "\" no es una cantidad válida.");
             }
         });
     }
 
-    private void setQuantity(InvoiceItem item, int quantity) {
-        int stock = catalog.stream().filter(p -> p.getId().equals(item.getProductId()))
-                .mapToInt(Product::getStock).findFirst().orElse(Integer.MAX_VALUE);
-        if (quantity > stock) {
-            warningLabel.setText("Solo hay " + stock + " unidades de " + item.getProductName() + ".");
-            return;
-        }
-        item.setQuantity(quantity);
-        cartTable.refresh();
-        updateTotals();
-    }
-
-    @FXML
-    private void removeItem() {
-        InvoiceItem item = cartTable.getSelectionModel().getSelectedItem();
-        if (item != null) cart.remove(item);
-    }
-
     @FXML
     private void clearSale() {
-        if (!cart.isEmpty() && !dialogs.confirm(navigator.window(), "Vaciar venta",
+        if (!sale.isEmpty() && !dialogs.confirm(navigator.window(), "Vaciar venta",
                 "¿Quitar todos los productos de la venta actual?", "Vaciar")) {
             return;
         }
@@ -311,15 +347,11 @@ public class PointOfSaleController implements SectionController {
     }
 
     private void reset() {
-        cart.clear();
         discountField.clear();
         receivedField.clear();
-        notesField.clear();
         customerSearch.clear();
-        paymentBox.setValue(PaymentMethod.CASH);
+        sale.clear(customers.finalConsumer());
         reloadCustomers(customers.finalConsumer());
-        warningLabel.setText("");
-        updateTotals();
     }
 
     @FXML
@@ -330,68 +362,12 @@ public class PointOfSaleController implements SectionController {
         });
     }
 
-    /** Recalculates the totals shown on the right panel. */
-    private void updateTotals() {
-        preview = buildInvoice();
-        invoices.calculateTotals(preview);
-        String rate = preview.getTaxRate().stripTrailingZeros().toPlainString();
-        subtotalLabel.setText(Money.format(preview.getSubtotal()));
-        discountLabel.setText(preview.getDiscount().signum() > 0 ? "- " + Money.format(preview.getDiscount()) : Money.format(BigDecimal.ZERO));
-        taxNameLabel.setText("IVA (" + rate + " %)");
-        taxLabel.setText(Money.format(preview.getTax()));
-        totalLabel.setText(Money.format(preview.getTotal()));
-
-        boolean cash = paymentBox.getValue() == PaymentMethod.CASH;
-        receivedLabel.setDisable(!cash);
-        receivedField.setDisable(!cash);
-        changeNameLabel.setVisible(cash);
-        changeLabel.setVisible(cash);
-        BigDecimal received = Money.parseOr(receivedField.getText(), BigDecimal.ZERO);
-        String warning = "";
-        if (cash && received.signum() > 0) {
-            BigDecimal change = received.subtract(preview.getTotal());
-            changeLabel.setText(Money.format(change.signum() < 0 ? BigDecimal.ZERO : change));
-            if (change.signum() < 0) warning = "Faltan " + Money.format(change.negate()) + " para completar el pago.";
-        } else {
-            changeLabel.setText(Money.format(BigDecimal.ZERO));
-        }
-        BigDecimal discount = Money.parseOr(discountField.getText(), BigDecimal.ZERO);
-        if (discount.compareTo(preview.getSubtotal()) > 0 && !cart.isEmpty()) {
-            warning = "El descuento es mayor que el subtotal.";
-        }
-        warningLabel.setText(warning);
-        int units = cart.stream().mapToInt(InvoiceItem::getQuantity).sum();
-        itemsLabel.setText(cart.size() + " productos · " + units + " unidades");
-        chargeButton.setDisable(cart.isEmpty());
-    }
-
-    private Invoice buildInvoice() {
-        Invoice inv = new Invoice();
-        for (InvoiceItem item : cart) {
-            InvoiceItem copy = new InvoiceItem();
-            copy.setProductId(item.getProductId());
-            copy.setProductSku(item.getProductSku());
-            copy.setProductName(item.getProductName());
-            copy.setUnitCost(item.getUnitCost());
-            copy.setUnitPrice(item.getUnitPrice());
-            copy.setQuantity(item.getQuantity());
-            inv.getItems().add(copy);
-        }
-        inv.setCustomerId(customerBox.getValue() == null ? null : customerBox.getValue().getId());
-        inv.setPaymentMethod(paymentBox.getValue());
-        inv.setDiscount(Money.parseOr(discountField.getText(), BigDecimal.ZERO));
-        inv.setAmountPaid(Money.parseOr(receivedField.getText(), BigDecimal.ZERO));
-        inv.setNotes(notesField.getText());
-        return inv;
-    }
-
     @FXML
     private void charge() {
-        if (cart.isEmpty()) return;
-        Invoice draft = buildInvoice();
+        if (sale.isEmpty()) return;
         Invoice saved;
         try {
-            saved = invoices.issue(draft);
+            saved = invoices.issue(sale.toInvoice());
         } catch (RuntimeException e) {
             dialogs.error(navigator.window(), "No se pudo facturar", e);
             reloadCatalog();
