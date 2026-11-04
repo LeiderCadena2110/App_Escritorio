@@ -20,6 +20,7 @@ Puede editar o eliminar esos datos cuando quiera.
 | Campo | Ejemplo | Nota |
 |---|---|---|
 | Código (SKU) | `DEP-004` | Único; se puede buscar por él en la venta |
+| Código de barras | `7709000000012` | Opcional y único; permite vender con lector |
 | Precio de costo | `98.000` | Lo que le cuesta a usted |
 | Precio de venta | `159.900` | Sin IVA. El margen se calcula solo |
 | Stock inicial | `12` | Queda como movimiento "Inventario inicial" |
@@ -44,8 +45,9 @@ se abre el historial de un solo producto.
 
 **Vender** (Ctrl + 2, o Ctrl + N):
 
-1. Escriba el código o el nombre y pulse **Enter** (o doble clic en la lista). Si el producto ya
-   está en la venta, suma una unidad.
+1. Escriba el código o el nombre y pulse **Enter** (o doble clic en la lista). Con un **lector de
+   código de barras** USB basta con escanear: el lector escribe el código y pulsa Enter solo. Si el
+   producto ya está en la venta, suma una unidad.
 2. Ajuste cantidades con **+1 / −1**, *Cambiar cantidad…* o las teclas `+`, `−` y `Supr`.
 3. Elija el cliente (por defecto, *Consumidor final*) o cree uno con **+ Nuevo**.
 4. Elija la forma de pago. En efectivo, escriba el dinero recibido para ver el cambio.
