@@ -40,6 +40,11 @@ public class TaskRunner {
      * @param errorTitle title of the dialog shown if the work fails
      */
     public <T> void run(String errorTitle, Callable<T> work, Consumer<T> onSuccess) {
+        run(errorTitle, work, onSuccess, () -> { });
+    }
+
+    /** Like {@link #run(String, Callable, Consumer)}, and also runs {@code onFailure} after showing the error. */
+    public <T> void run(String errorTitle, Callable<T> work, Consumer<T> onSuccess, Runnable onFailure) {
         Task<T> task = new Task<>() {
             @Override
             protected T call() throws Exception {
@@ -54,6 +59,7 @@ public class TaskRunner {
         task.setOnFailed(e -> {
             running.set(running.get() - 1);
             dialogs.error(navigator.window(), errorTitle, task.getException());
+            onFailure.run();
         });
         worker.execute(task);
     }
