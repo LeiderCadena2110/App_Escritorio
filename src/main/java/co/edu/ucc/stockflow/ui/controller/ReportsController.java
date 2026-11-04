@@ -61,8 +61,7 @@ public class ReportsController implements SectionController {
     private boolean updating;
 
     public ReportsController(ReportService reports, CsvExportService csv, Navigator navigator,
-                             ViewLoader views,
-                TaskRunner tasks) {
+                             ViewLoader views, TaskRunner tasks) {
         this.reports = reports;
         this.csv = csv;
         this.navigator = navigator;
