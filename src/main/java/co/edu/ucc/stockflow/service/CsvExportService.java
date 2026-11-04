@@ -32,6 +32,7 @@ public class CsvExportService {
     public void exportProducts(List<Product> products, Path file) throws IOException {
         write(file, products, List.of(
                 new Column<Product>("Código", Product::getSku),
+                new Column<Product>("Código de barras", Product::getBarcode),
                 new Column<Product>("Nombre", Product::getName),
                 new Column<Product>("Categoría", Product::getCategoryName),
                 new Column<Product>("Proveedor", Product::getSupplierName),

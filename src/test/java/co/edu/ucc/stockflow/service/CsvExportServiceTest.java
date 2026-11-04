@@ -43,8 +43,8 @@ class CsvExportServiceTest {
         new CsvExportService().exportProducts(List.of(p), file);
 
         List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
-        assertTrue(lines.get(0).startsWith("﻿Código;Nombre;"));
-        assertTrue(lines.get(1).startsWith("DEP-001;\"Tenis; edición especial\";"));
+        assertTrue(lines.get(0).startsWith("﻿Código;Código de barras;Nombre;"));
+        assertTrue(lines.get(1).startsWith("DEP-001;;\"Tenis; edición especial\";"));
         assertTrue(lines.get(1).contains(";200;") || lines.get(1).contains(";200,"), lines.get(1));
     }
 }
