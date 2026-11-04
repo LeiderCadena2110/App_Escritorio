@@ -49,6 +49,7 @@ public class ProductDialog {
         FormGrid form = fd.form();
 
         TextField sku = form.add("Código (SKU) *", FormGrid.text(p.getSku(), "Ej: DEP-001"));
+        TextField barcode = form.add("Código de barras", FormGrid.text(p.getBarcode(), "Opcional: escanéelo aquí"));
         TextField name = form.add("Nombre *", FormGrid.text(p.getName(), "Ej: Tenis running talla 40"));
 
         ComboBox<Category> category = form.add("Categoría", new ComboBox<>());
@@ -98,6 +99,7 @@ public class ProductDialog {
         TextField initialStock = stock;
         return fd.show(() -> {
             p.setSku(sku.getText());
+            p.setBarcode(barcode.getText());
             p.setName(name.getText());
             p.setCategoryId(category.getValue() == null ? null : category.getValue().getId());
             p.setSupplierId(supplier.getValue() == null ? null : supplier.getValue().getId());
