@@ -170,7 +170,7 @@ public class MainController {
         }
 
         MenuItem about = item("Acerca de StockFlow", null, () -> dialogs.info(stage, "Acerca de StockFlow",
-                "StockFlow 1.0\nInventario y facturación para pequeños negocios.\n\n"
+                "StockFlow 1.1\nInventario y facturación para pequeños negocios.\n\n"
                         + "Los datos se guardan en este equipo, en la carpeta .stockflow de su usuario.\n"
                         + "Universidad Cooperativa de Colombia, sede Pasto."));
         Menu help = new Menu("Ayuda", null, about);

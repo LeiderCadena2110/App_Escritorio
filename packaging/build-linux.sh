@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 [ -f target/app/stockflow.jar ] || { echo "target/app is missing. Run first: mvn package"; exit 1; }
 JPACKAGE="${JAVA_HOME:+$JAVA_HOME/bin/}jpackage"
 NAME="StockFlow"
-COMMON=(--app-version 1.0.0 --vendor "UCC Pasto" --description "Inventario y facturación para pequeños negocios"
+COMMON=(--app-version 1.1.0 --vendor "UCC Pasto" --description "Inventario y facturación para pequeños negocios"
   --input target/app --main-jar stockflow.jar --main-class co.edu.ucc.stockflow.Launcher
   --icon packaging/icons/app-icon.png)
 rm -rf target/installers && mkdir -p target/installers
@@ -37,7 +37,7 @@ exec "$HERE/bin/StockFlow" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
 if command -v appimagetool >/dev/null; then
-  ARCH=x86_64 appimagetool "$APPDIR" "target/installers/StockFlow-1.0.0-x86_64.AppImage"
+  ARCH=x86_64 appimagetool "$APPDIR" "target/installers/StockFlow-1.1.0-x86_64.AppImage"
 else
   echo "Warning: appimagetool not found; only the .deb was created"
 fi
