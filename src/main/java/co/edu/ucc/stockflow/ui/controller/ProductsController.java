@@ -9,6 +9,7 @@ import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.SectionController;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.ViewLoader;
 import co.edu.ucc.stockflow.ui.component.Combos;
 import co.edu.ucc.stockflow.ui.component.FileChoosers;
@@ -59,11 +60,13 @@ public class ProductsController implements SectionController {
     private final Navigator navigator;
     private final ViewLoader views;
     private final PauseTransition searchDelay = new PauseTransition(Duration.millis(250));
+    private final TaskRunner tasks;
 
     public ProductsController(ProductService products, CategoryService categories, CsvExportService csv,
                               ProductDialog productDialog, StockMovementDialog movementDialog,
                               CategoryManagerDialog categoryDialog, Dialogs dialogs, Navigator navigator,
-                              ViewLoader views) {
+                              ViewLoader views,
+                              TaskRunner tasks) {
         this.products = products;
         this.categories = categories;
         this.csv = csv;
@@ -73,6 +76,7 @@ public class ProductsController implements SectionController {
         this.dialogs = dialogs;
         this.navigator = navigator;
         this.views = views;
+        this.tasks = tasks;
     }
 
     @FXML
@@ -122,10 +126,17 @@ public class ProductsController implements SectionController {
     }
 
     private void reload() {
-        Product selected = table.getSelectionModel().getSelectedItem();
         Category c = categoryFilter.getValue();
-        List<Product> list = products.search(searchField.getText(), c == null ? null : c.getId(),
-                lowStockOnly.isSelected(), showInactive.isSelected());
+        String text = searchField.getText();
+        Long categoryId = c == null ? null : c.getId();
+        boolean lowOnly = lowStockOnly.isSelected();
+        boolean inactive = showInactive.isSelected();
+        tasks.run("No se pudieron cargar los productos",
+                () -> products.search(text, categoryId, lowOnly, inactive), this::render);
+    }
+
+    private void render(List<Product> list) {
+        Product selected = table.getSelectionModel().getSelectedItem();
         table.getItems().setAll(list);
         if (selected != null) table.getSelectionModel().select(selected);
         BigDecimal value = list.stream().filter(Product::isActive).map(Product::getStockValue)
@@ -225,14 +236,8 @@ public class ProductsController implements SectionController {
     private void exportCsv() {
         Path file = FileChoosers.saveCsv(navigator.window(), "productos");
         if (file == null) return;
-        dialogs.run(navigator.window(), "No se pudo exportar", () -> {
-            try {
-                csv.exportProducts(table.getItems(), file);
-            } catch (java.io.IOException e) {
-                throw new java.io.UncheckedIOException(e);
-            }
-            views.openFile(file);
-        });
+        List<Product> rows = List.copyOf(table.getItems());
+        tasks.run("No se pudo exportar", () -> csv.exportProducts(rows, file), () -> views.openFile(file));
     }
 
     private static String statusText(Product p) {
