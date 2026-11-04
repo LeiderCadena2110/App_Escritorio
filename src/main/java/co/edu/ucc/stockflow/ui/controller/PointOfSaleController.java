@@ -15,13 +15,13 @@ import co.edu.ucc.stockflow.service.SettingsService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.SectionController;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.ViewLoader;
 import co.edu.ucc.stockflow.ui.component.FileChoosers;
 import co.edu.ucc.stockflow.ui.component.Tables;
 import co.edu.ucc.stockflow.ui.dialog.CustomerDialog;
 import co.edu.ucc.stockflow.ui.viewmodel.SaleViewModel;
 import co.edu.ucc.stockflow.util.Money;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
@@ -29,6 +29,8 @@ import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -91,18 +93,21 @@ public class PointOfSaleController implements SectionController {
     private final Dialogs dialogs;
     private final Navigator navigator;
     private final ViewLoader views;
+    private final TaskRunner tasks;
 
     private final SaleViewModel sale = new SaleViewModel();
     private final ObservableList<Product> catalog = FXCollections.observableArrayList();
     private final FilteredList<Product> results = new FilteredList<>(catalog);
     private final ObservableList<Customer> allCustomers = FXCollections.observableArrayList();
     private final FilteredList<Customer> customerOptions = new FilteredList<>(allCustomers);
+    private final BooleanProperty charging = new SimpleBooleanProperty(false);
     private boolean shortcutsInstalled;
+    private Customer finalConsumer;
 
     public PointOfSaleController(ProductService products, CustomerService customers, InvoiceService invoices,
                                  InvoicePdfService pdf, SequenceService sequences, SettingsService settings,
                                  CustomerDialog customerDialog, Dialogs dialogs, Navigator navigator,
-                                 ViewLoader views) {
+                                 ViewLoader views, TaskRunner tasks) {
         this.products = products;
         this.customers = customers;
         this.invoices = invoices;
@@ -113,6 +118,7 @@ public class PointOfSaleController implements SectionController {
         this.dialogs = dialogs;
         this.navigator = navigator;
         this.views = views;
+        this.tasks = tasks;
     }
 
     @FXML
@@ -212,7 +218,7 @@ public class PointOfSaleController implements SectionController {
         receivedField.disableProperty().bind(notCash);
         changeNameLabel.visibleProperty().bind(sale.cashProperty());
         changeLabel.visibleProperty().bind(sale.cashProperty());
-        chargeButton.disableProperty().bind(sale.emptyProperty());
+        chargeButton.disableProperty().bind(sale.emptyProperty().or(charging));
     }
 
     private static StringBinding money(ObservableValue<BigDecimal> value) {
@@ -232,25 +238,36 @@ public class PointOfSaleController implements SectionController {
 
     @Override
     public void onShow() {
-        sale.taxRateProperty().set(settings.taxRate());
-        reloadCatalog();
-        reloadCustomers(null);
+        reloadData(null);
         Platform.runLater(searchField::requestFocus);
     }
 
-    private void reloadCatalog() {
-        catalog.setAll(products.findActive());
-        sale.updateCatalog(catalog);
-        filterProducts(searchField.getText());
-        nextNumberLabel.setText("Próxima factura: " + sequences.peekInvoiceNumber());
+    /** Everything the screen needs from the database, loaded in the background. */
+    private record Loaded(List<Product> catalog, List<Customer> customers, Customer finalConsumer,
+                          String nextNumber, BigDecimal taxRate) {
     }
 
-    private void reloadCustomers(Customer select) {
+    /** Reloads products (stock), customers, VAT and the next invoice number; selects {@code customer} if given. */
+    private void reloadData(Customer customer) {
+        tasks.run("No se pudieron cargar los productos",
+                () -> new Loaded(products.findActive(), customers.search(null), customers.finalConsumer(),
+                        sequences.peekInvoiceNumber(), settings.taxRate()),
+                loaded -> render(loaded, customer));
+    }
+
+    private void render(Loaded loaded, Customer select) {
+        catalog.setAll(loaded.catalog());
+        sale.updateCatalog(loaded.catalog());
+        sale.taxRateProperty().set(loaded.taxRate());
+        filterProducts(searchField.getText());
+        nextNumberLabel.setText("Próxima factura: " + loaded.nextNumber());
+
         Customer current = select != null ? select : customerBox.getValue();
-        Customer target = current != null ? current : customers.finalConsumer();
-        allCustomers.setAll(customers.search(null));
+        Customer target = current != null ? current : loaded.finalConsumer();
+        allCustomers.setAll(loaded.customers());
         filterCustomers(customerSearch.getText());
         allCustomers.stream().filter(c -> c.getId().equals(target.getId())).findFirst().ifPresent(customerBox::setValue);
+        finalConsumer = loaded.finalConsumer();
     }
 
     private void filterProducts(String text) {
@@ -350,33 +367,32 @@ public class PointOfSaleController implements SectionController {
         discountField.clear();
         receivedField.clear();
         customerSearch.clear();
-        sale.clear(customers.finalConsumer());
-        reloadCustomers(customers.finalConsumer());
+        sale.clear(finalConsumer);
     }
 
     @FXML
     private void newCustomer() {
         customerDialog.show(navigator.window(), null).ifPresent(c -> {
             customerSearch.clear();
-            reloadCustomers(c);
+            reloadData(c);
         });
     }
 
     @FXML
     private void charge() {
-        if (sale.isEmpty()) return;
-        Invoice saved;
-        try {
-            saved = invoices.issue(sale.toInvoice());
-        } catch (RuntimeException e) {
-            dialogs.error(navigator.window(), "No se pudo facturar", e);
-            reloadCatalog();
-            return;
-        }
-        afterSale(saved);
-        reset();
-        reloadCatalog();
-        searchField.requestFocus();
+        if (sale.isEmpty() || charging.get()) return;
+        charging.set(true);
+        Invoice draft = sale.toInvoice();
+        tasks.run("No se pudo facturar", () -> invoices.issue(draft), saved -> {
+            charging.set(false);
+            reset();
+            reloadData(null);
+            afterSale(saved);
+            searchField.requestFocus();
+        }, () -> {
+            charging.set(false);
+            reloadData(null); // the stock may have changed
+        });
     }
 
     private void afterSale(Invoice saved) {
@@ -394,12 +410,9 @@ public class PointOfSaleController implements SectionController {
         if (a.showAndWait().filter(b -> b == savePdf).isPresent()) {
             Path file = FileChoosers.savePdf(navigator.window(), saved.getNumber());
             if (file != null) {
-                try {
-                    pdf.export(invoices.findById(saved.getId()).orElse(saved), file);
-                    views.openFile(file);
-                } catch (IOException | RuntimeException e) {
-                    dialogs.error(navigator.window(), "No se pudo guardar el PDF", e);
-                }
+                tasks.run("No se pudo guardar el PDF",
+                        () -> pdf.export(invoices.findById(saved.getId()).orElse(saved), file),
+                        () -> views.openFile(file));
             }
         }
     }
