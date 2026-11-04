@@ -49,7 +49,7 @@ public class ProductRepository {
     }
 
     /**
-     * Products that match the text (SKU or name), the category and the stock filter.
+     * Products that match the text (SKU, name or exact barcode), the category and the stock filter.
      * Any argument may be null/false to skip that filter.
      */
     public List<Product> search(String text, Long categoryId, boolean lowStockOnly, boolean includeInactive) {
