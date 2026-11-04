@@ -5,17 +5,15 @@ import co.edu.ucc.stockflow.dto.SalesSummary;
 import co.edu.ucc.stockflow.dto.TopProduct;
 import co.edu.ucc.stockflow.service.CsvExportService;
 import co.edu.ucc.stockflow.service.ReportService;
-import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.SectionController;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.ViewLoader;
 import co.edu.ucc.stockflow.ui.component.DatePickers;
 import co.edu.ucc.stockflow.ui.component.FileChoosers;
 import co.edu.ucc.stockflow.ui.component.Tables;
 import co.edu.ucc.stockflow.util.DateRange;
 import co.edu.ucc.stockflow.util.Money;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
@@ -57,18 +55,19 @@ public class ReportsController implements SectionController {
 
     private final ReportService reports;
     private final CsvExportService csv;
-    private final Dialogs dialogs;
     private final Navigator navigator;
     private final ViewLoader views;
+    private final TaskRunner tasks;
     private boolean updating;
 
-    public ReportsController(ReportService reports, CsvExportService csv, Dialogs dialogs, Navigator navigator,
-                             ViewLoader views) {
+    public ReportsController(ReportService reports, CsvExportService csv, Navigator navigator,
+                             ViewLoader views,
+                TaskRunner tasks) {
         this.reports = reports;
         this.csv = csv;
-        this.dialogs = dialogs;
         this.navigator = navigator;
         this.views = views;
+        this.tasks = tasks;
     }
 
     @FXML
@@ -117,7 +116,17 @@ public class ReportsController implements SectionController {
     private void reload() {
         if (updating || fromDate.getValue() == null || toDate.getValue() == null) return;
         DateRange range = DateRange.ofDays(fromDate.getValue(), toDate.getValue());
-        SalesSummary s = reports.salesSummary(range);
+        tasks.run("No se pudo cargar el reporte",
+                () -> new Loaded(reports.salesSummary(range), reports.dailySales(range), reports.topProducts(range, 50)),
+                this::render);
+    }
+
+    /** What the report loads in the background. */
+    private record Loaded(SalesSummary summary, List<DailySales> days, List<TopProduct> top) {
+    }
+
+    private void render(Loaded loaded) {
+        SalesSummary s = loaded.summary();
         totalLabel.setText(Money.format(s.total()));
         invoicesLabel.setText(s.invoices() + " facturas pagadas");
         profitLabel.setText(Money.format(s.profit()));
@@ -130,7 +139,7 @@ public class ReportsController implements SectionController {
         taxLabel.setText(Money.format(s.tax()));
         discountLabel.setText("Descuentos: " + Money.format(s.discount()));
 
-        List<DailySales> days = reports.dailySales(range);
+        List<DailySales> days = loaded.days();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         if (days.size() <= 62) {
             for (DailySales d : days) series.getData().add(new XYChart.Data<>(DAY.format(d.date()), d.total()));
@@ -142,7 +151,7 @@ public class ReportsController implements SectionController {
             byMonth.forEach((m, total) -> series.getData().add(new XYChart.Data<>(month.format(m), total)));
         }
         chart.getData().setAll(List.of(series));
-        topTable.getItems().setAll(reports.topProducts(range, 50));
+        topTable.getItems().setAll(loaded.top());
     }
 
     @FXML
@@ -171,13 +180,7 @@ public class ReportsController implements SectionController {
         LocalDate from = fromDate.getValue();
         Path file = FileChoosers.saveCsv(navigator.window(), "mas-vendidos-" + (from == null ? "" : from));
         if (file == null) return;
-        dialogs.run(navigator.window(), "No se pudo exportar", () -> {
-            try {
-                csv.exportTopProducts(topTable.getItems(), file);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-            views.openFile(file);
-        });
+        List<TopProduct> rows = List.copyOf(topTable.getItems());
+        tasks.run("No se pudo exportar", () -> csv.exportTopProducts(rows, file), () -> views.openFile(file));
     }
 }
