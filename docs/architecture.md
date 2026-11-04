@@ -58,9 +58,11 @@ App_Escritorio/
 │   │   │       ├── ViewLoader.java         # Carga de vistas FXML
 │   │   │       ├── ThemeManager.java       # Tema claro / oscuro
 │   │   │       ├── Dialogs.java            # Mensajes y confirmaciones
+│   │   │       ├── TaskRunner.java         # Trabajo en segundo plano
 │   │   │       ├── component/              # Ayudas para tablas, formularios y fechas
 │   │   │       ├── controller/             # Un controlador por sección
-│   │   │       └── dialog/                 # Formularios emergentes
+│   │   │       ├── dialog/                 # Formularios emergentes
+│   │   │       └── viewmodel/              # Estado y reglas de pantallas (MVVM)
 │   │   └── resources/
 │   │       ├── application.properties
 │   │       ├── db/migration/               # Scripts SQL de Flyway
@@ -94,17 +96,48 @@ categories 1───* products *───1 suppliers
                      │
 customers 1───* invoices 1───* invoice_items *───1 products
 
-settings (clave / valor: datos del negocio, IVA, consecutivo, tema)
+settings  (clave / valor: datos del negocio, IVA, tema)
+sequences (series de numeración: prefijo y siguiente número de las facturas)
+```
+
+### Migraciones (Flyway)
+
+Cada cambio a la base de datos es un script nuevo en `db/migration/`; los anteriores **nunca se
+editan**, así la base de cualquier usuario se actualiza sola al abrir la nueva versión.
+
+| Script | Qué hace |
+|---|---|
+| `V1__initial_schema.sql` | Tablas iniciales |
+| `V2__add_indexes.sql` | Índices para búsquedas y reportes |
+| `V3__add_check_constraints.sql` | Reglas en la base: precios ≥ 0, estados y tipos válidos |
+| `V4__add_product_barcode.sql` | Código de barras opcional y único |
+| `V5__add_sequences.sql` | Tabla `sequences` para el consecutivo (copia el valor que había en `settings`) |
+
+## Interfaz: MVVM y segundo plano
+
+- **MVVM en el punto de venta:** `SaleViewModel` guarda el carrito, el cliente, el pago y calcula
+  los totales con propiedades de JavaFX. El controlador solo enlaza (*bind*) los controles a esas
+  propiedades. Así las reglas del carrito se prueban con JUnit sin abrir ventanas
+  (`SaleViewModelTest`).
+- **Segundo plano:** las consultas y exportaciones pasan por `TaskRunner`, que las ejecuta en un
+  hilo aparte (en orden) y devuelve el resultado al hilo de JavaFX. Mientras trabaja, la ventana
+  muestra "Cargando…" y nunca se congela. Patrón usado en los controladores:
+
+```java
+tasks.run("No se pudieron cargar las facturas",
+        () -> invoices.search(range, text, status),   // segundo plano: base de datos
+        this::render);                                 // hilo de JavaFX: actualizar la tabla
 ```
 
 ## Flujo de una venta
 
-1. `PointOfSaleController` arma el carrito con `InvoiceItem` y muestra los totales que calcula
-   `InvoiceService.calculateTotals`.
+1. `SaleViewModel` arma el carrito con `InvoiceItem`, revisa el stock y recalcula los totales
+   (`InvoiceService.calculateTotals`) cada vez que algo cambia.
 2. Al cobrar, `InvoiceService.issue`:
    - revisa que haya stock de todos los productos **antes** de guardar nada;
    - calcula subtotal, descuento, IVA y total; verifica el pago en efectivo;
-   - toma el siguiente consecutivo (`SettingsService`) y guarda la factura con sus líneas;
+   - toma el siguiente consecutivo (`SequenceService`, que bloquea la fila con `SELECT … FOR UPDATE`)
+     y guarda la factura con sus líneas;
    - llama a `StockService.register(..., SALE, ...)` por cada línea.
 3. Todo ocurre en una sola transacción (`@Transactional`): si algo falla, no se guarda nada.
 4. Anular la factura (`InvoiceService.cancel`) devuelve las unidades con movimientos
