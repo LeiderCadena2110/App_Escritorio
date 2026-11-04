@@ -10,6 +10,7 @@ public class Product {
 
     private Long id;
     private String sku;
+    private String barcode;
     private String name;
     private String description;
     private Long categoryId;
@@ -47,6 +48,8 @@ public class Product {
     public void setId(Long id) { this.id = id; }
     public String getSku() { return sku; }
     public void setSku(String sku) { this.sku = sku; }
+    public String getBarcode() { return barcode; }
+    public void setBarcode(String barcode) { this.barcode = barcode; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getDescription() { return description; }

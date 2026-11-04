@@ -24,6 +24,7 @@ public class ProductRepository {
         Product p = new Product();
         p.setId(rs.getLong("id"));
         p.setSku(rs.getString("sku"));
+        p.setBarcode(rs.getString("barcode"));
         p.setName(rs.getString("name"));
         p.setDescription(rs.getString("description"));
         p.setCategoryId(JdbcHelper.nullableLong(rs, "category_id"));
@@ -55,10 +56,12 @@ public class ProductRepository {
         StringBuilder sql = new StringBuilder(SELECT).append(" WHERE 1 = 1");
         List<Object> args = new ArrayList<>();
         if (text != null && !text.isBlank()) {
-            sql.append(" AND (LOWER(p.sku) LIKE ? ESCAPE '\\' OR LOWER(p.name) LIKE ? ESCAPE '\\')");
+            sql.append(" AND (LOWER(p.sku) LIKE ? ESCAPE '\\' OR LOWER(p.name) LIKE ? ESCAPE '\\'")
+                    .append(" OR p.barcode = ?)");
             String like = JdbcHelper.likePattern(text);
             args.add(like);
             args.add(like);
+            args.add(text.trim());
         }
         if (categoryId != null) {
             sql.append(" AND p.category_id = ?");
@@ -86,14 +89,18 @@ public class ProductRepository {
         return jdbc.query(SELECT + " WHERE LOWER(p.sku) = LOWER(?)", MAPPER, sku.trim()).stream().findFirst();
     }
 
+    public Optional<Product> findByBarcode(String barcode) {
+        return jdbc.query(SELECT + " WHERE p.barcode = ?", MAPPER, barcode.trim()).stream().findFirst();
+    }
+
     public Product insert(Product p) {
         LocalDateTime now = LocalDateTime.now();
         long id = JdbcHelper.insert(jdbc, """
-                INSERT INTO products (sku, name, description, category_id, supplier_id, cost_price, sale_price,
-                                      stock, min_stock, unit, active, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO products (sku, barcode, name, description, category_id, supplier_id, cost_price,
+                                      sale_price, stock, min_stock, unit, active, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                p.getSku(), p.getName(), p.getDescription(), p.getCategoryId(), p.getSupplierId(),
+                p.getSku(), p.getBarcode(), p.getName(), p.getDescription(), p.getCategoryId(), p.getSupplierId(),
                 p.getCostPrice(), p.getSalePrice(), p.getStock(), p.getMinStock(), p.getUnit(), p.isActive(),
                 JdbcHelper.timestamp(now), JdbcHelper.timestamp(now));
         p.setId(id);
@@ -106,11 +113,11 @@ public class ProductRepository {
     public void update(Product p) {
         LocalDateTime now = LocalDateTime.now();
         jdbc.update("""
-                UPDATE products SET sku = ?, name = ?, description = ?, category_id = ?, supplier_id = ?,
+                UPDATE products SET sku = ?, barcode = ?, name = ?, description = ?, category_id = ?, supplier_id = ?,
                        cost_price = ?, sale_price = ?, min_stock = ?, unit = ?, active = ?, updated_at = ?
                 WHERE id = ?
                 """,
-                p.getSku(), p.getName(), p.getDescription(), p.getCategoryId(), p.getSupplierId(),
+                p.getSku(), p.getBarcode(), p.getName(), p.getDescription(), p.getCategoryId(), p.getSupplierId(),
                 p.getCostPrice(), p.getSalePrice(), p.getMinStock(), p.getUnit(), p.isActive(),
                 JdbcHelper.timestamp(now), p.getId());
         p.setUpdatedAt(now);
