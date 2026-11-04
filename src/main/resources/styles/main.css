@@ -252,3 +252,17 @@
 .progress-bar > .bar {
     -fx-background-color: -color-accent;
 }
+
+/* Background work indicator */
+.loading-badge {
+    -fx-background-color: -color-panel;
+    -fx-background-radius: 14;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 14;
+    -fx-padding: 5 12 5 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 8, 0, 0, 2);
+}
+.loading-badge .label {
+    -fx-text-fill: -color-muted;
+    -fx-font-size: 12px;
+}

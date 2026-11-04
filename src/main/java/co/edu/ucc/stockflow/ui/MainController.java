@@ -4,6 +4,7 @@ import co.edu.ucc.stockflow.DesktopApp;
 import co.edu.ucc.stockflow.service.SettingsService;
 import java.util.EnumMap;
 import java.util.Map;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
@@ -18,6 +19,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -25,6 +27,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.util.Duration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -42,22 +45,27 @@ public class MainController {
     private VBox sidebar;
     @FXML
     private StackPane content;
+    @FXML
+    private HBox loadingBadge;
 
     private final ViewLoader views;
     private final SettingsService settings;
     private final Navigator navigator;
     private final Dialogs dialogs;
+    private final TaskRunner tasks;
 
     private final Map<Section, ViewLoader.LoadedView<Object>> loaded = new EnumMap<>(Section.class);
     private final Map<Section, ToggleButton> buttons = new EnumMap<>(Section.class);
     private final ToggleGroup group = new ToggleGroup();
     private Stage stage;
 
-    public MainController(ViewLoader views, SettingsService settings, Navigator navigator, Dialogs dialogs) {
+    public MainController(ViewLoader views, SettingsService settings, Navigator navigator, Dialogs dialogs,
+                          TaskRunner tasks) {
         this.views = views;
         this.settings = settings;
         this.navigator = navigator;
         this.dialogs = dialogs;
+        this.tasks = tasks;
     }
 
     @FXML
@@ -67,6 +75,20 @@ public class MainController {
         buildMenu();
         // On macOS the menu goes to the system bar; on Windows and Linux it stays in the window
         menuBar.setUseSystemMenuBar(true);
+        setUpLoadingBadge();
+    }
+
+    /** "Cargando…" appears only if the work takes more than 300 ms, so quick queries do not blink. */
+    private void setUpLoadingBadge() {
+        PauseTransition delay = new PauseTransition(Duration.millis(300));
+        delay.setOnFinished(e -> loadingBadge.setVisible(tasks.runningProperty().get() > 0));
+        tasks.runningProperty().addListener((o, before, now) -> {
+            if (now.intValue() > 0 && before.intValue() == 0) delay.playFromStart();
+            if (now.intValue() == 0) {
+                delay.stop();
+                loadingBadge.setVisible(false);
+            }
+        });
     }
 
     void start(Stage stage, Scene scene) {
