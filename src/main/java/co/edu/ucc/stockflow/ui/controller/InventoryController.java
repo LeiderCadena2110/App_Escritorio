@@ -6,7 +6,6 @@ import co.edu.ucc.stockflow.model.StockMovement;
 import co.edu.ucc.stockflow.service.CsvExportService;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.StockService;
-import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.SectionController;
 import co.edu.ucc.stockflow.ui.TaskRunner;
@@ -48,21 +47,18 @@ public class InventoryController implements SectionController {
     private final ProductService products;
     private final CsvExportService csv;
     private final StockMovementDialog movementDialog;
-    private final Dialogs dialogs;
     private final Navigator navigator;
     private final ViewLoader views;
     private final TaskRunner tasks;
     private boolean loading;
 
     public InventoryController(StockService stock, ProductService products, CsvExportService csv,
-                               StockMovementDialog movementDialog, Dialogs dialogs, Navigator navigator,
-                               ViewLoader views,
-                               TaskRunner tasks) {
+                               StockMovementDialog movementDialog, Navigator navigator,
+                               ViewLoader views, TaskRunner tasks) {
         this.stock = stock;
         this.products = products;
         this.csv = csv;
         this.movementDialog = movementDialog;
-        this.dialogs = dialogs;
         this.navigator = navigator;
         this.views = views;
         this.tasks = tasks;

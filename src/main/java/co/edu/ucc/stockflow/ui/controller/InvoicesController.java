@@ -60,8 +60,7 @@ public class InvoicesController implements SectionController {
 
     public InvoicesController(InvoiceService invoices, InvoicePdfService pdf, CsvExportService csv,
                               InvoiceDetailDialog detailDialog, Dialogs dialogs, Navigator navigator,
-                              ViewLoader views,
-                              TaskRunner tasks) {
+                              ViewLoader views, TaskRunner tasks) {
         this.invoices = invoices;
         this.pdf = pdf;
         this.csv = csv;

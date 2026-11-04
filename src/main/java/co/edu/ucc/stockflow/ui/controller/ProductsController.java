@@ -65,8 +65,7 @@ public class ProductsController implements SectionController {
     public ProductsController(ProductService products, CategoryService categories, CsvExportService csv,
                               ProductDialog productDialog, StockMovementDialog movementDialog,
                               CategoryManagerDialog categoryDialog, Dialogs dialogs, Navigator navigator,
-                              ViewLoader views,
-                              TaskRunner tasks) {
+                              ViewLoader views, TaskRunner tasks) {
         this.products = products;
         this.categories = categories;
         this.csv = csv;
