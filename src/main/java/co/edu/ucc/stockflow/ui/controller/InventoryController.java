@@ -9,6 +9,7 @@ import co.edu.ucc.stockflow.service.StockService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.SectionController;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.ViewLoader;
 import co.edu.ucc.stockflow.ui.component.Combos;
 import co.edu.ucc.stockflow.ui.component.DatePickers;
@@ -17,8 +18,6 @@ import co.edu.ucc.stockflow.ui.component.Tables;
 import co.edu.ucc.stockflow.ui.dialog.StockMovementDialog;
 import co.edu.ucc.stockflow.util.DateRange;
 import co.edu.ucc.stockflow.util.Money;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
@@ -52,11 +51,13 @@ public class InventoryController implements SectionController {
     private final Dialogs dialogs;
     private final Navigator navigator;
     private final ViewLoader views;
+    private final TaskRunner tasks;
     private boolean loading;
 
     public InventoryController(StockService stock, ProductService products, CsvExportService csv,
                                StockMovementDialog movementDialog, Dialogs dialogs, Navigator navigator,
-                               ViewLoader views) {
+                               ViewLoader views,
+                               TaskRunner tasks) {
         this.stock = stock;
         this.products = products;
         this.csv = csv;
@@ -64,6 +65,7 @@ public class InventoryController implements SectionController {
         this.dialogs = dialogs;
         this.navigator = navigator;
         this.views = views;
+        this.tasks = tasks;
     }
 
     @FXML
@@ -145,18 +147,28 @@ public class InventoryController implements SectionController {
         LocalDate from = fromDate.getValue() == null ? LocalDate.of(2000, 1, 1) : fromDate.getValue();
         LocalDate to = toDate.getValue() == null ? LocalDate.now().plusYears(1) : toDate.getValue();
         Product p = productBox.getValue();
-        List<StockMovement> list = stock.search(DateRange.ofDays(from, to), p == null ? null : p.getId(), typeBox.getValue());
+        Long productId = p == null ? null : p.getId();
+        MovementType type = typeBox.getValue();
+        tasks.run("No se pudo cargar el inventario",
+                () -> new Loaded(stock.search(DateRange.ofDays(from, to), productId, type),
+                        productId == null ? null : products.findById(productId).orElse(null)),
+                this::render);
+    }
+
+    /** What the inventory view loads in the background. */
+    private record Loaded(List<StockMovement> movements, Product product) {
+    }
+
+    private void render(Loaded loaded) {
+        List<StockMovement> list = loaded.movements();
         table.getItems().setAll(list);
         int in = list.stream().filter(StockMovement::isEntry).mapToInt(StockMovement::getQuantity).sum();
         int out = list.stream().filter(m -> !m.isEntry()).mapToInt(StockMovement::getQuantity).sum();
         summaryLabel.setText(list.size() + " movimientos · entradas +" + in + " · salidas " + out);
-        if (p == null) {
-            productInfoLabel.setText("");
-        } else {
-            products.findById(p.getId()).ifPresent(fresh -> productInfoLabel.setText(fresh.getSku() + " · "
-                    + fresh.getName() + ": stock actual " + fresh.getStock() + " " + fresh.getUnit()
-                    + " (mínimo " + fresh.getMinStock() + ") · costo promedio " + Money.format(fresh.getCostPrice())));
-        }
+        Product fresh = loaded.product();
+        productInfoLabel.setText(fresh == null ? "" : fresh.getSku() + " · " + fresh.getName() + ": stock actual "
+                + fresh.getStock() + " " + fresh.getUnit() + " (mínimo " + fresh.getMinStock() + ") · costo promedio "
+                + Money.format(fresh.getCostPrice()));
     }
 
     @FXML
@@ -184,13 +196,7 @@ public class InventoryController implements SectionController {
     private void exportCsv() {
         Path file = FileChoosers.saveCsv(navigator.window(), "movimientos-inventario");
         if (file == null) return;
-        dialogs.run(navigator.window(), "No se pudo exportar", () -> {
-            try {
-                csv.exportMovements(table.getItems(), file);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-            views.openFile(file);
-        });
+        List<StockMovement> rows = List.copyOf(table.getItems());
+        tasks.run("No se pudo exportar", () -> csv.exportMovements(rows, file), () -> views.openFile(file));
     }
 }
