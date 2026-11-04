@@ -22,6 +22,7 @@ public class DataSeeder {
     private final SupplierService suppliers;
     private final ProductService products;
     private final ProductRepository productRepository;
+    private int barcodeCounter;
 
     public DataSeeder(SettingsService settings, CustomerService customers, CategoryService categories,
                       SupplierService suppliers, ProductService products, ProductRepository productRepository) {
@@ -99,7 +100,18 @@ public class DataSeeder {
         p.setStock(stock);
         p.setMinStock(minStock);
         p.setUnit(category.getName().equals("Accesorios") ? "UND" : "PAR");
+        p.setBarcode(ean13("77090" + String.format("%07d", ++barcodeCounter)));
         products.create(p);
+    }
+
+    /** Adds the check digit to a 12-digit code (EAN-13 rule: weights 1 and 3). */
+    static String ean13(String twelveDigits) {
+        int sum = 0;
+        for (int i = 0; i < 12; i++) {
+            int digit = twelveDigits.charAt(i) - '0';
+            sum += i % 2 == 0 ? digit : digit * 3;
+        }
+        return twelveDigits + (10 - sum % 10) % 10;
     }
 
     private void customer(String type, String document, String name, String phone, String email) {

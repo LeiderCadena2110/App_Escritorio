@@ -72,4 +72,10 @@ class StockRulesTest {
         assertFalse(MovementType.SALE.isManual());
         assertFalse(MovementType.SALE_CANCELLATION.isManual());
     }
+
+    @Test
+    void sampleBarcodesHaveAValidEan13CheckDigit() {
+        assertEquals("4006381333931", DataSeeder.ean13("400638133393"));
+        assertEquals("7709000000012", DataSeeder.ean13("770900000001"));
+    }
 }
