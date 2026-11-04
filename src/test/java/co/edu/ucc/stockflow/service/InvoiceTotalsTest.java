@@ -66,7 +66,7 @@ class InvoiceTotalsTest {
 
     @Test
     void invoiceNumbersHaveSixDigits() {
-        assertEquals("FV-000042", SettingsService.formatInvoiceNumber("FV-", 42));
-        assertEquals("1234567", SettingsService.formatInvoiceNumber(null, 1234567));
+        assertEquals("FV-000042", SequenceService.format("FV-", 42));
+        assertEquals("1234567", SequenceService.format(null, 1234567));
     }
 }

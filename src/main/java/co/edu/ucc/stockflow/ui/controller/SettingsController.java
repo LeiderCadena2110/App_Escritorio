@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.ui.controller;
 
 import co.edu.ucc.stockflow.dto.BusinessInfo;
+import co.edu.ucc.stockflow.service.SequenceService;
 import co.edu.ucc.stockflow.service.SettingsService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
@@ -41,12 +42,15 @@ public class SettingsController implements SectionController {
     @FXML private Label dataFolderLabel;
 
     private final SettingsService settings;
+    private final SequenceService sequences;
     private final ThemeManager theme;
     private final Dialogs dialogs;
     private final Navigator navigator;
 
-    public SettingsController(SettingsService settings, ThemeManager theme, Dialogs dialogs, Navigator navigator) {
+    public SettingsController(SettingsService settings, SequenceService sequences, ThemeManager theme,
+                              Dialogs dialogs, Navigator navigator) {
         this.settings = settings;
+        this.sequences = sequences;
         this.theme = theme;
         this.dialogs = dialogs;
         this.navigator = navigator;
@@ -77,8 +81,9 @@ public class SettingsController implements SectionController {
         emailField.setText(b.email());
         footerField.setText(b.invoiceFooter());
         taxRateField.setText(settings.taxRate().stripTrailingZeros().toPlainString());
-        prefixField.setText(settings.invoicePrefix());
-        nextNumberField.setText(Long.toString(settings.nextInvoiceNumber()));
+        var series = sequences.invoiceSeries();
+        prefixField.setText(series.prefix());
+        nextNumberField.setText(Long.toString(series.nextValue()));
         (SettingsService.THEME_DARK.equals(settings.theme()) ? darkTheme : lightTheme).setSelected(true);
         businessStatus.setText("");
         invoicingStatus.setText("");
@@ -91,7 +96,7 @@ public class SettingsController implements SectionController {
         } catch (NumberFormatException e) {
             next = 1;
         }
-        exampleLabel.setText(SettingsService.formatInvoiceNumber(prefixField.getText(), next));
+        exampleLabel.setText(SequenceService.format(prefixField.getText(), next));
     }
 
     @FXML
@@ -108,8 +113,8 @@ public class SettingsController implements SectionController {
         if (dialogs.run(navigator.window(), "No se pudo guardar", () -> {
             String rate = taxRateField.getText().replace(',', '.');
             settings.setTaxRate(new BigDecimal(rate.isBlank() ? "0" : rate));
-            settings.setInvoicePrefix(prefixField.getText());
-            settings.setNextInvoiceNumber(Long.parseLong(nextNumberField.getText().isBlank() ? "1" : nextNumberField.getText()));
+            sequences.configureInvoices(prefixField.getText(),
+                    Long.parseLong(nextNumberField.getText().isBlank() ? "1" : nextNumberField.getText()));
         })) {
             flash(invoicingStatus, "Guardado ✓");
         }

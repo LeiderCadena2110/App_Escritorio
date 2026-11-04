@@ -41,6 +41,8 @@ class InvoiceFlowIntegrationTest {
     private ReportService reports;
     @Autowired
     private SettingsService settings;
+    @Autowired
+    private SequenceService sequences;
 
     private Product newProduct(String sku, String price, int units) {
         Product p = new Product();
@@ -65,7 +67,7 @@ class InvoiceFlowIntegrationTest {
 
         assertEquals(new BigDecimal("238000.00"), saved.getTotal());
         assertEquals(3, products.findById(shoe.getId()).orElseThrow().getStock());
-        assertTrue(saved.getNumber().startsWith(settings.invoicePrefix()));
+        assertTrue(saved.getNumber().startsWith(sequences.invoiceSeries().prefix()));
         assertEquals(1, reports.salesSummary(DateRange.today()).invoices());
 
         invoices.cancel(saved.getId(), "Error en la venta");

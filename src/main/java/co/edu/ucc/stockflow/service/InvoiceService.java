@@ -32,14 +32,16 @@ public class InvoiceService {
     private final StockService stockService;
     private final CustomerService customerService;
     private final SettingsService settings;
+    private final SequenceService sequences;
 
     public InvoiceService(InvoiceRepository invoices, ProductRepository products, StockService stockService,
-                          CustomerService customerService, SettingsService settings) {
+                          CustomerService customerService, SettingsService settings, SequenceService sequences) {
         this.invoices = invoices;
         this.products = products;
         this.stockService = stockService;
         this.customerService = customerService;
         this.settings = settings;
+        this.sequences = sequences;
     }
 
     /**
@@ -130,7 +132,7 @@ public class InvoiceService {
         draft.setNotes(Formats.clean(draft.getNotes()));
         draft.setStatus(InvoiceStatus.PAID);
         draft.setIssuedAt(LocalDateTime.now());
-        draft.setNumber(reserveNumber());
+        draft.setNumber(sequences.reserveInvoiceNumber(invoices::existsNumber));
 
         // 3. Save and take the units out of stock
         Invoice saved = invoices.insert(draft);
@@ -163,18 +165,5 @@ public class InvoiceService {
 
     public List<Invoice> search(DateRange range, String text, InvoiceStatus status) {
         return invoices.search(range == null ? null : range.start(), range == null ? null : range.end(), text, status);
-    }
-
-    /** Next free number (skips numbers that already exist) and moves the counter forward. */
-    private String reserveNumber() {
-        String prefix = settings.invoicePrefix();
-        long next = settings.nextInvoiceNumber();
-        String number = SettingsService.formatInvoiceNumber(prefix, next);
-        while (invoices.existsNumber(number)) {
-            next++;
-            number = SettingsService.formatInvoiceNumber(prefix, next);
-        }
-        settings.setNextInvoiceNumber(next + 1);
-        return number;
     }
 }

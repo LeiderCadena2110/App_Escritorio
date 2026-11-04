@@ -9,7 +9,7 @@ import co.edu.ucc.stockflow.service.CustomerService;
 import co.edu.ucc.stockflow.service.InvoicePdfService;
 import co.edu.ucc.stockflow.service.InvoiceService;
 import co.edu.ucc.stockflow.service.ProductService;
-import co.edu.ucc.stockflow.service.SettingsService;
+import co.edu.ucc.stockflow.service.SequenceService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.SectionController;
@@ -76,7 +76,7 @@ public class PointOfSaleController implements SectionController {
     private final CustomerService customers;
     private final InvoiceService invoices;
     private final InvoicePdfService pdf;
-    private final SettingsService settings;
+    private final SequenceService sequences;
     private final CustomerDialog customerDialog;
     private final Dialogs dialogs;
     private final Navigator navigator;
@@ -91,13 +91,13 @@ public class PointOfSaleController implements SectionController {
     private boolean shortcutsInstalled;
 
     public PointOfSaleController(ProductService products, CustomerService customers, InvoiceService invoices,
-                                 InvoicePdfService pdf, SettingsService settings, CustomerDialog customerDialog,
+                                 InvoicePdfService pdf, SequenceService sequences, CustomerDialog customerDialog,
                                  Dialogs dialogs, Navigator navigator, ViewLoader views) {
         this.products = products;
         this.customers = customers;
         this.invoices = invoices;
         this.pdf = pdf;
-        this.settings = settings;
+        this.sequences = sequences;
         this.customerDialog = customerDialog;
         this.dialogs = dialogs;
         this.navigator = navigator;
@@ -188,8 +188,7 @@ public class PointOfSaleController implements SectionController {
     private void reloadCatalog() {
         catalog.setAll(products.findActive());
         filterProducts(searchField.getText());
-        nextNumberLabel.setText("Próxima factura: "
-                + SettingsService.formatInvoiceNumber(settings.invoicePrefix(), settings.nextInvoiceNumber()));
+        nextNumberLabel.setText("Próxima factura: " + sequences.peekInvoiceNumber());
     }
 
     private void reloadCustomers(Customer select) {
