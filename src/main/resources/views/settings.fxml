@@ -69,14 +69,11 @@
                 <TextField fx:id="nextNumberField" maxWidth="120" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                 <Label text="Ejemplo" styleClass="form-label" GridPane.rowIndex="3"/>
                 <Label fx:id="exampleLabel" styleClass="total-value" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-            </GridPane>
-            <GridPane hgap="12" vgap="10">
-                <columnConstraints>
-                    <ColumnConstraints minWidth="150"/>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                </columnConstraints>
-                <Label text="IVA para productos nuevos (%)" styleClass="form-label" wrapText="true" GridPane.rowIndex="0"/>
-                <TextField fx:id="taxRateField" maxWidth="120" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="IVA de productos nuevos" styleClass="form-label" GridPane.rowIndex="4"/>
+                <HBox spacing="6" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                    <TextField fx:id="taxRateField" maxWidth="120"/>
+                    <Label text="\%" styleClass="muted"/>
+                </HBox>
             </GridPane>
             <Label styleClass="muted" wrapText="true"
                    text="Cada producto tiene su propio IVA (19 %, 5 % o exento), que se cambia al editarlo. Los precios se escriben sin IVA y el IVA se suma en la factura. Si su negocio es no responsable de IVA, las facturas no cobran IVA aunque el producto lo tenga."/>
