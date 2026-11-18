@@ -3,29 +3,35 @@ package co.edu.ucc.stockflow.ui.component;
 import co.edu.ucc.stockflow.util.Formats;
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import org.springframework.stereotype.Component;
 
-/** "Save as" dialogs that remember the last folder used. */
-public final class FileChoosers {
+/** "Save as" dialogs that remember the last folder used (one instance for the whole app). */
+@Component
+public class FileChoosers {
 
-    private static File lastFolder = new File(System.getProperty("user.home"));
+    private final Clock clock;
+    private File lastFolder = new File(System.getProperty("user.home"));
 
-    private FileChoosers() {
+    public FileChoosers(Clock clock) {
+        this.clock = clock;
     }
 
-    public static Path saveCsv(Window owner, String baseName) {
-        return save(owner, "Exportar a CSV", baseName + "-" + Formats.FILE_STAMP.format(LocalDateTime.now()) + ".csv",
+    public Path saveCsv(Window owner, String baseName) {
+        String stamp = Formats.FILE_STAMP.format(LocalDateTime.now(clock));
+        return save(owner, "Exportar a CSV", baseName + "-" + stamp + ".csv",
                 new FileChooser.ExtensionFilter("CSV (Excel)", "*.csv"));
     }
 
-    public static Path savePdf(Window owner, String fileName) {
+    public Path savePdf(Window owner, String fileName) {
         return save(owner, "Guardar factura en PDF", fileName + ".pdf",
                 new FileChooser.ExtensionFilter("PDF", "*.pdf"));
     }
 
-    private static Path save(Window owner, String title, String fileName, FileChooser.ExtensionFilter filter) {
+    private Path save(Window owner, String title, String fileName, FileChooser.ExtensionFilter filter) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle(title);
         chooser.setInitialFileName(fileName);

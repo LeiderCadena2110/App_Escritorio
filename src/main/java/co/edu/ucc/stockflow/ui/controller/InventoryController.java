@@ -49,18 +49,20 @@ public class InventoryController implements SectionController {
     private final StockMovementDialog movementDialog;
     private final Navigator navigator;
     private final ViewLoader views;
+    private final FileChoosers files;
     private final TaskRunner tasks;
     private boolean loading;
 
     public InventoryController(StockService stock, ProductService products, CsvExportService csv,
                                StockMovementDialog movementDialog, Navigator navigator,
-                               ViewLoader views, TaskRunner tasks) {
+                               ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.stock = stock;
         this.products = products;
         this.csv = csv;
         this.movementDialog = movementDialog;
         this.navigator = navigator;
         this.views = views;
+        this.files = files;
         this.tasks = tasks;
     }
 
@@ -190,7 +192,7 @@ public class InventoryController implements SectionController {
 
     @FXML
     private void exportCsv() {
-        Path file = FileChoosers.saveCsv(navigator.window(), "movimientos-inventario");
+        Path file = files.saveCsv(navigator.window(), "movimientos-inventario");
         if (file == null) return;
         List<StockMovement> rows = List.copyOf(table.getItems());
         tasks.run("No se pudo exportar", () -> csv.exportMovements(rows, file), () -> views.openFile(file));

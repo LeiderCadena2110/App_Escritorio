@@ -57,15 +57,17 @@ public class ReportsController implements SectionController {
     private final CsvExportService csv;
     private final Navigator navigator;
     private final ViewLoader views;
+    private final FileChoosers files;
     private final TaskRunner tasks;
     private boolean updating;
 
     public ReportsController(ReportService reports, CsvExportService csv, Navigator navigator,
-                             ViewLoader views, TaskRunner tasks) {
+                             ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.reports = reports;
         this.csv = csv;
         this.navigator = navigator;
         this.views = views;
+        this.files = files;
         this.tasks = tasks;
     }
 
@@ -177,7 +179,7 @@ public class ReportsController implements SectionController {
     @FXML
     private void exportTopProducts() {
         LocalDate from = fromDate.getValue();
-        Path file = FileChoosers.saveCsv(navigator.window(), "mas-vendidos-" + (from == null ? "" : from));
+        Path file = files.saveCsv(navigator.window(), "mas-vendidos-" + (from == null ? "" : from));
         if (file == null) return;
         List<TopProduct> rows = List.copyOf(topTable.getItems());
         tasks.run("No se pudo exportar", () -> csv.exportTopProducts(rows, file), () -> views.openFile(file));

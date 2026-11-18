@@ -60,12 +60,13 @@ public class ProductsController implements SectionController {
     private final Navigator navigator;
     private final ViewLoader views;
     private final PauseTransition searchDelay = new PauseTransition(Duration.millis(250));
+    private final FileChoosers files;
     private final TaskRunner tasks;
 
     public ProductsController(ProductService products, CategoryService categories, CsvExportService csv,
                               ProductDialog productDialog, StockMovementDialog movementDialog,
                               CategoryManagerDialog categoryDialog, Dialogs dialogs, Navigator navigator,
-                              ViewLoader views, TaskRunner tasks) {
+                              ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.products = products;
         this.categories = categories;
         this.csv = csv;
@@ -75,6 +76,7 @@ public class ProductsController implements SectionController {
         this.dialogs = dialogs;
         this.navigator = navigator;
         this.views = views;
+        this.files = files;
         this.tasks = tasks;
     }
 
@@ -233,7 +235,7 @@ public class ProductsController implements SectionController {
 
     @FXML
     private void exportCsv() {
-        Path file = FileChoosers.saveCsv(navigator.window(), "productos");
+        Path file = files.saveCsv(navigator.window(), "productos");
         if (file == null) return;
         List<Product> rows = List.copyOf(table.getItems());
         tasks.run("No se pudo exportar", () -> csv.exportProducts(rows, file), () -> views.openFile(file));

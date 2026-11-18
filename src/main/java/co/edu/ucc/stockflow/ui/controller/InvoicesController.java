@@ -56,11 +56,12 @@ public class InvoicesController implements SectionController {
     private final Navigator navigator;
     private final ViewLoader views;
     private final PauseTransition searchDelay = new PauseTransition(Duration.millis(250));
+    private final FileChoosers files;
     private final TaskRunner tasks;
 
     public InvoicesController(InvoiceService invoices, InvoicePdfService pdf, CsvExportService csv,
                               InvoiceDetailDialog detailDialog, Dialogs dialogs, Navigator navigator,
-                              ViewLoader views, TaskRunner tasks) {
+                              ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.invoices = invoices;
         this.pdf = pdf;
         this.csv = csv;
@@ -68,6 +69,7 @@ public class InvoicesController implements SectionController {
         this.dialogs = dialogs;
         this.navigator = navigator;
         this.views = views;
+        this.files = files;
         this.tasks = tasks;
     }
 
@@ -170,7 +172,7 @@ public class InvoicesController implements SectionController {
     }
 
     private void exportPdf(Invoice invoice) {
-        Path file = FileChoosers.savePdf(navigator.window(), invoice.getNumber());
+        Path file = files.savePdf(navigator.window(), invoice.getNumber());
         if (file == null) return;
         tasks.run("No se pudo guardar el PDF", () -> pdf.export(invoice, file), () -> views.openFile(file));
     }
@@ -193,7 +195,7 @@ public class InvoicesController implements SectionController {
 
     @FXML
     private void exportCsv() {
-        Path file = FileChoosers.saveCsv(navigator.window(), "facturas");
+        Path file = files.saveCsv(navigator.window(), "facturas");
         if (file == null) return;
         List<Invoice> rows = List.copyOf(table.getItems());
         tasks.run("No se pudo exportar", () -> csv.exportInvoices(rows, file), () -> views.openFile(file));

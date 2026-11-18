@@ -93,6 +93,7 @@ public class PointOfSaleController implements SectionController {
     private final Dialogs dialogs;
     private final Navigator navigator;
     private final ViewLoader views;
+    private final FileChoosers files;
     private final TaskRunner tasks;
 
     private final SaleViewModel sale = new SaleViewModel();
@@ -107,7 +108,7 @@ public class PointOfSaleController implements SectionController {
     public PointOfSaleController(ProductService products, CustomerService customers, InvoiceService invoices,
                                  InvoicePdfService pdf, SequenceService sequences, SettingsService settings,
                                  CustomerDialog customerDialog, Dialogs dialogs, Navigator navigator,
-                                 ViewLoader views, TaskRunner tasks) {
+                                 ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.products = products;
         this.customers = customers;
         this.invoices = invoices;
@@ -118,6 +119,7 @@ public class PointOfSaleController implements SectionController {
         this.dialogs = dialogs;
         this.navigator = navigator;
         this.views = views;
+        this.files = files;
         this.tasks = tasks;
     }
 
@@ -408,7 +410,7 @@ public class PointOfSaleController implements SectionController {
         Alert a = new Alert(Alert.AlertType.INFORMATION, msg.toString(), savePdf, ok);
         dialogs.prepare(a, navigator.window(), "Factura " + saved.getNumber() + " registrada");
         if (a.showAndWait().filter(b -> b == savePdf).isPresent()) {
-            Path file = FileChoosers.savePdf(navigator.window(), saved.getNumber());
+            Path file = files.savePdf(navigator.window(), saved.getNumber());
             if (file != null) {
                 tasks.run("No se pudo guardar el PDF",
                         () -> pdf.export(invoices.findById(saved.getId()).orElse(saved), file),
