@@ -1,8 +1,8 @@
 package co.edu.ucc.stockflow;
 
-import co.edu.ucc.stockflow.service.DataSeeder;
+import co.edu.ucc.stockflow.app.DataSeeder;
+import co.edu.ucc.stockflow.app.MainWindow;
 import co.edu.ucc.stockflow.shared.ui.ViewLoader;
-import co.edu.ucc.stockflow.ui.MainWindow;
 import java.io.InputStream;
 import javafx.application.Application;
 import javafx.application.Platform;

@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.ui;
+package co.edu.ucc.stockflow.app;
 
 import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.ui.ThemeManager;

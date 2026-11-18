@@ -11,7 +11,7 @@
 
 <!-- Main window: menu on top, fixed sidebar on the left and the changing center -->
 <BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="co.edu.ucc.stockflow.ui.MainController"
+            fx:controller="co.edu.ucc.stockflow.app.MainController"
             styleClass="window" prefWidth="1240" prefHeight="780">
     <top>
         <MenuBar fx:id="menuBar"/>

@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.service;
+package co.edu.ucc.stockflow.app;
 
 import co.edu.ucc.stockflow.catalog.application.CategoryService;
 import co.edu.ucc.stockflow.catalog.application.ProductService;
