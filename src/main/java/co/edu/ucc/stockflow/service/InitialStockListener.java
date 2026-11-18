@@ -1,7 +1,7 @@
 package co.edu.ucc.stockflow.service;
 
+import co.edu.ucc.stockflow.catalog.domain.ProductCreated;
 import co.edu.ucc.stockflow.model.MovementType;
-import co.edu.ucc.stockflow.model.ProductCreated;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 

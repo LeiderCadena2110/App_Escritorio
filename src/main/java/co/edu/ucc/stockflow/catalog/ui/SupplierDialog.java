@@ -1,7 +1,7 @@
-package co.edu.ucc.stockflow.ui.dialog;
+package co.edu.ucc.stockflow.catalog.ui;
 
-import co.edu.ucc.stockflow.model.Supplier;
-import co.edu.ucc.stockflow.service.SupplierService;
+import co.edu.ucc.stockflow.catalog.application.SupplierService;
+import co.edu.ucc.stockflow.catalog.domain.Supplier;
 import co.edu.ucc.stockflow.shared.ui.Dialogs;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
 import co.edu.ucc.stockflow.shared.ui.component.FormGrid;

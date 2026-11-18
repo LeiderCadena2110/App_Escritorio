@@ -1,9 +1,9 @@
 package co.edu.ucc.stockflow.service;
 
+import co.edu.ucc.stockflow.catalog.domain.Product;
+import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
 import co.edu.ucc.stockflow.model.MovementType;
-import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.StockMovement;
-import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.repository.StockMovementRepository;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;

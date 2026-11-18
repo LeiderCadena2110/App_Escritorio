@@ -14,7 +14,7 @@
 
 <!-- Products: catalog with search, filters and actions -->
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="co.edu.ucc.stockflow.ui.controller.ProductsController"
+      fx:controller="co.edu.ucc.stockflow.catalog.ui.ProductsController"
       styleClass="section" spacing="14">
     <HBox alignment="CENTER_LEFT" spacing="10">
         <VBox spacing="2">

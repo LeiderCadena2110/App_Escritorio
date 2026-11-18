@@ -1,6 +1,5 @@
-package co.edu.ucc.stockflow.model;
+package co.edu.ucc.stockflow.catalog.domain;
 
-import co.edu.ucc.stockflow.exception.InsufficientStockException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;

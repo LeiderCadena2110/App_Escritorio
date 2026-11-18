@@ -1,6 +1,6 @@
-package co.edu.ucc.stockflow.service;
+package co.edu.ucc.stockflow.catalog.application;
 
-import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.shared.util.CsvWriter;
 import java.io.IOException;
 import java.nio.file.Path;

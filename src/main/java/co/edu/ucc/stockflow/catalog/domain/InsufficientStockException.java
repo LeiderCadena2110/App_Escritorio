@@ -1,6 +1,5 @@
-package co.edu.ucc.stockflow.exception;
+package co.edu.ucc.stockflow.catalog.domain;
 
-import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 

@@ -1,6 +1,6 @@
-package co.edu.ucc.stockflow.repository;
+package co.edu.ucc.stockflow.catalog.infrastructure;
 
-import co.edu.ucc.stockflow.model.Category;
+import co.edu.ucc.stockflow.catalog.domain.Category;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.util.List;
 import java.util.Optional;

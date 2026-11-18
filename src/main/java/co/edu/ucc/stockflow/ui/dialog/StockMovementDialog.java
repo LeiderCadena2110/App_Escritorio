@@ -1,9 +1,9 @@
 package co.edu.ucc.stockflow.ui.dialog;
 
+import co.edu.ucc.stockflow.catalog.application.ProductService;
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.model.MovementType;
-import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.StockMovement;
-import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.StockService;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;

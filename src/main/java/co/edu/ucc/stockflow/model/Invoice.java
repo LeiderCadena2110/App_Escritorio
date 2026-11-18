@@ -1,5 +1,6 @@
 package co.edu.ucc.stockflow.model;
 
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.model.tax.TaxLine;
 import co.edu.ucc.stockflow.model.tax.TaxPolicy;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
@@ -51,7 +52,7 @@ public class Invoice {
      * Adds units of a product, or more units to its line if it is already in the invoice.
      *
      * @return the line that was added or changed
-     * @throws co.edu.ucc.stockflow.exception.InsufficientStockException if the product has not enough stock
+     * @throws co.edu.ucc.stockflow.catalog.domain.InsufficientStockException if the product has not enough stock
      */
     public InvoiceItem addLine(Product product, int units) {
         if (units <= 0) throw new BusinessException(ErrorCode.INVOICE_QUANTITY_NOT_POSITIVE);

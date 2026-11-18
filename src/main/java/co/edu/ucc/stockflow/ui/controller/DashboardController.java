@@ -1,9 +1,9 @@
 package co.edu.ucc.stockflow.ui.controller;
 
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.dto.DailySales;
 import co.edu.ucc.stockflow.dto.DashboardSummary;
 import co.edu.ucc.stockflow.dto.TopProduct;
-import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.service.ReportService;
 import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.ui.Navigator;

@@ -1,6 +1,6 @@
-package co.edu.ucc.stockflow.repository;
+package co.edu.ucc.stockflow.catalog.infrastructure;
 
-import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.math.BigDecimal;
 import java.time.Clock;

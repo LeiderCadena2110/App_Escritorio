@@ -1,6 +1,6 @@
 package co.edu.ucc.stockflow.dto;
 
-import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import java.math.BigDecimal;
 import java.util.List;
 

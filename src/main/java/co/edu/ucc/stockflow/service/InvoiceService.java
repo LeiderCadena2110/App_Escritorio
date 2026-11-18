@@ -1,14 +1,14 @@
 package co.edu.ucc.stockflow.service;
 
+import co.edu.ucc.stockflow.catalog.domain.Product;
+import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.InvoiceStatus;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.PaymentMethod;
-import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.repository.InvoiceRepository;
-import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.service.payment.PaymentPolicies;
 import co.edu.ucc.stockflow.settings.application.SequenceService;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;

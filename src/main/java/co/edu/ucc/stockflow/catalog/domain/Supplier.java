@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.model;
+package co.edu.ucc.stockflow.catalog.domain;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

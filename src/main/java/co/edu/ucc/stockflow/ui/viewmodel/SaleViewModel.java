@@ -1,10 +1,10 @@
 package co.edu.ucc.stockflow.ui.viewmodel;
 
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.PaymentMethod;
-import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.tax.TaxPolicy;
 import co.edu.ucc.stockflow.model.tax.VatResponsiblePolicy;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
@@ -88,7 +88,7 @@ public class SaleViewModel {
      * Adds one unit of the product, or one more if it is already in the sale.
      *
      * @return the line that was added or changed
-     * @throws co.edu.ucc.stockflow.exception.InsufficientStockException if there is not enough stock
+     * @throws co.edu.ucc.stockflow.catalog.domain.InsufficientStockException if there is not enough stock
      */
     public InvoiceItem add(Product product) {
         InvoiceItem line = draft.addLine(catalog.getOrDefault(product.getId(), product), 1);

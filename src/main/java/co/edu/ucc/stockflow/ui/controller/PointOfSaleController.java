@@ -1,15 +1,15 @@
 package co.edu.ucc.stockflow.ui.controller;
 
+import co.edu.ucc.stockflow.catalog.application.ProductService;
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.PaymentMethod;
-import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.tax.TaxPolicy;
 import co.edu.ucc.stockflow.service.CustomerService;
 import co.edu.ucc.stockflow.service.InvoiceDocumentExporter;
 import co.edu.ucc.stockflow.service.InvoiceService;
-import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.TaxPolicyProvider;
 import co.edu.ucc.stockflow.settings.application.SequenceService;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;

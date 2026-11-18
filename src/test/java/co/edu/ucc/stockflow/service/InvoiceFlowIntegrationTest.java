@@ -5,12 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import co.edu.ucc.stockflow.exception.InsufficientStockException;
+import co.edu.ucc.stockflow.catalog.application.ProductService;
+import co.edu.ucc.stockflow.catalog.domain.InsufficientStockException;
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceStatus;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.PaymentMethod;
-import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.settings.application.SequenceService;
 import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;

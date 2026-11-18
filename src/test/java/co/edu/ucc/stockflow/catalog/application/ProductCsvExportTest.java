@@ -1,8 +1,8 @@
-package co.edu.ucc.stockflow.service;
+package co.edu.ucc.stockflow.catalog.application;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

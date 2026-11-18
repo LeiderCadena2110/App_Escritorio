@@ -1,8 +1,8 @@
-package co.edu.ucc.stockflow.service;
+package co.edu.ucc.stockflow.catalog.application;
 
-import co.edu.ucc.stockflow.model.Product;
-import co.edu.ucc.stockflow.model.ProductCreated;
-import co.edu.ucc.stockflow.repository.ProductRepository;
+import co.edu.ucc.stockflow.catalog.domain.Product;
+import co.edu.ucc.stockflow.catalog.domain.ProductCreated;
+import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import co.edu.ucc.stockflow.shared.util.Formats;

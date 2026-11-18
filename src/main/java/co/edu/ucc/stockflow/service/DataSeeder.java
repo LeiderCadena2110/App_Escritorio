@@ -1,10 +1,13 @@
 package co.edu.ucc.stockflow.service;
 
-import co.edu.ucc.stockflow.model.Category;
+import co.edu.ucc.stockflow.catalog.application.CategoryService;
+import co.edu.ucc.stockflow.catalog.application.ProductService;
+import co.edu.ucc.stockflow.catalog.application.SupplierService;
+import co.edu.ucc.stockflow.catalog.domain.Category;
+import co.edu.ucc.stockflow.catalog.domain.Product;
+import co.edu.ucc.stockflow.catalog.domain.Supplier;
+import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
 import co.edu.ucc.stockflow.model.Customer;
-import co.edu.ucc.stockflow.model.Product;
-import co.edu.ucc.stockflow.model.Supplier;
-import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.settings.application.SettingsService;
 import java.math.BigDecimal;
 import org.slf4j.Logger;

@@ -1,11 +1,11 @@
-package co.edu.ucc.stockflow.ui.controller;
+package co.edu.ucc.stockflow.catalog.ui;
 
-import co.edu.ucc.stockflow.model.Category;
+import co.edu.ucc.stockflow.catalog.application.CategoryService;
+import co.edu.ucc.stockflow.catalog.application.ProductCsvExport;
+import co.edu.ucc.stockflow.catalog.application.ProductService;
+import co.edu.ucc.stockflow.catalog.domain.Category;
+import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.model.MovementType;
-import co.edu.ucc.stockflow.model.Product;
-import co.edu.ucc.stockflow.service.CategoryService;
-import co.edu.ucc.stockflow.service.ProductCsvExport;
-import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.shared.ui.Dialogs;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.Section;
@@ -16,8 +16,6 @@ import co.edu.ucc.stockflow.shared.ui.component.Combos;
 import co.edu.ucc.stockflow.shared.ui.component.FileChoosers;
 import co.edu.ucc.stockflow.shared.ui.component.Tables;
 import co.edu.ucc.stockflow.shared.util.Money;
-import co.edu.ucc.stockflow.ui.dialog.CategoryManagerDialog;
-import co.edu.ucc.stockflow.ui.dialog.ProductDialog;
 import co.edu.ucc.stockflow.ui.dialog.StockMovementDialog;
 import java.math.BigDecimal;
 import java.nio.file.Path;
