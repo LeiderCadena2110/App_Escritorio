@@ -88,6 +88,7 @@ public class ProductsController implements SectionController {
                 Tables.text("Categoría", Product::getCategoryName, 130),
                 Tables.money("Costo", Product::getCostPrice, 105),
                 Tables.money("Precio", Product::getSalePrice, 105),
+                Tables.text("IVA", p -> p.getTaxRate().stripTrailingZeros().toPlainString().replace('.', ',') + " %", 55),
                 Tables.text("Margen", p -> p.getMarginPercent().toPlainString().replace('.', ',') + " %", 75),
                 Tables.integer("Stock", Product::getStock, 70),
                 Tables.integer("Mín.", Product::getMinStock, 60),

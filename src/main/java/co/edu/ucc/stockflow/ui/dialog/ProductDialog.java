@@ -5,6 +5,7 @@ import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.Supplier;
 import co.edu.ucc.stockflow.service.CategoryService;
 import co.edu.ucc.stockflow.service.ProductService;
+import co.edu.ucc.stockflow.service.SettingsService;
 import co.edu.ucc.stockflow.service.SupplierService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.TaskRunner;
@@ -13,6 +14,7 @@ import co.edu.ucc.stockflow.ui.component.FormGrid;
 import co.edu.ucc.stockflow.util.Money;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -20,23 +22,29 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Window;
+import javafx.util.StringConverter;
 import org.springframework.stereotype.Component;
 
 /** Create / edit product form. */
 @Component
 public class ProductDialog {
 
+    /** VAT rates used in Colombia: general, reduced, and exempt/excluded. */
+    private static final List<BigDecimal> VAT_RATES = List.of(new BigDecimal("19"), new BigDecimal("5"), BigDecimal.ZERO);
+
     private static final String[] UNITS = {"UND", "PAR", "CAJA", "PAQ", "KG", "M"};
 
     private final ProductService products;
     private final CategoryService categories;
     private final SupplierService suppliers;
+    private final SettingsService settings;
     private final Dialogs dialogs;
     private final TaskRunner tasks;
 
     public ProductDialog(ProductService products, CategoryService categories, SupplierService suppliers,
-                         Dialogs dialogs, TaskRunner tasks) {
+                         SettingsService settings, Dialogs dialogs, TaskRunner tasks) {
         this.products = products;
+        this.settings = settings;
         this.categories = categories;
         this.suppliers = suppliers;
         this.dialogs = dialogs;
@@ -76,6 +84,28 @@ public class ProductDialog {
 
         TextField cost = form.add("Precio de costo", FormGrid.money(isNew ? null : p.getCostPrice()));
         TextField price = form.add("Precio de venta *", FormGrid.money(isNew ? null : p.getSalePrice()));
+        ComboBox<BigDecimal> vat = form.add("IVA", new ComboBox<>());
+        vat.getItems().addAll(VAT_RATES);
+        vat.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(BigDecimal rate) {
+                if (rate == null) return "";
+                String text = rate.stripTrailingZeros().toPlainString().replace('.', ',') + " %";
+                return rate.signum() == 0 ? text + " (exento o excluido)" : text;
+            }
+
+            @Override
+            public BigDecimal fromString(String text) {
+                return null;
+            }
+        });
+        BigDecimal currentRate = isNew ? settings.defaultTaxRate() : p.getTaxRate();
+        vat.setValue(vat.getItems().stream().filter(r -> r.compareTo(currentRate) == 0).findFirst().orElseGet(() -> {
+            vat.getItems().add(currentRate);
+            return currentRate;
+        }));
+        Label priceHint = form.add("", new Label("El precio de venta se escribe sin IVA; el IVA se suma en la factura."));
+        priceHint.getStyleClass().add("muted");
         Label margin = form.add("Margen", new Label());
         margin.getStyleClass().add("muted");
         Runnable updateMargin = () -> margin.setText(marginText(cost.getText(), price.getText()));
@@ -109,6 +139,7 @@ public class ProductDialog {
             p.setUnit(unit.getValue() == null ? "UND" : unit.getValue().trim().toUpperCase());
             p.setCostPrice(FormGrid.moneyValue(cost));
             p.setSalePrice(FormGrid.moneyValue(price));
+            p.setTaxRate(vat.getValue());
             p.setMinStock(FormGrid.intValue(minStock));
             p.setDescription(description.getText());
             if (isNew) {
