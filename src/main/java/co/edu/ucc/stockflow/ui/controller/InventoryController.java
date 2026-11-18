@@ -3,7 +3,7 @@ package co.edu.ucc.stockflow.ui.controller;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.StockMovement;
-import co.edu.ucc.stockflow.service.CsvExportService;
+import co.edu.ucc.stockflow.service.StockMovementCsvExport;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.StockService;
 import co.edu.ucc.stockflow.ui.Navigator;
@@ -45,7 +45,7 @@ public class InventoryController implements SectionController {
 
     private final StockService stock;
     private final ProductService products;
-    private final CsvExportService csv;
+    private final StockMovementCsvExport csv;
     private final StockMovementDialog movementDialog;
     private final Navigator navigator;
     private final ViewLoader views;
@@ -53,7 +53,7 @@ public class InventoryController implements SectionController {
     private final TaskRunner tasks;
     private boolean loading;
 
-    public InventoryController(StockService stock, ProductService products, CsvExportService csv,
+    public InventoryController(StockService stock, ProductService products, StockMovementCsvExport csv,
                                StockMovementDialog movementDialog, Navigator navigator,
                                ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.stock = stock;
@@ -201,6 +201,6 @@ public class InventoryController implements SectionController {
         Path file = files.saveCsv(navigator.window(), "movimientos-inventario");
         if (file == null) return;
         List<StockMovement> rows = List.copyOf(table.getItems());
-        tasks.run("No se pudo exportar", () -> csv.exportMovements(rows, file), () -> views.openFile(file));
+        tasks.run("No se pudo exportar", () -> csv.export(rows, file), () -> views.openFile(file));
     }
 }

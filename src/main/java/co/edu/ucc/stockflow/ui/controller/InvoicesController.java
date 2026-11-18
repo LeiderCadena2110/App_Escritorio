@@ -2,7 +2,7 @@ package co.edu.ucc.stockflow.ui.controller;
 
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceStatus;
-import co.edu.ucc.stockflow.service.CsvExportService;
+import co.edu.ucc.stockflow.service.InvoiceCsvExport;
 import co.edu.ucc.stockflow.service.InvoicePdfService;
 import co.edu.ucc.stockflow.service.InvoiceService;
 import co.edu.ucc.stockflow.ui.Dialogs;
@@ -50,7 +50,7 @@ public class InvoicesController implements SectionController {
 
     private final InvoiceService invoices;
     private final InvoicePdfService pdf;
-    private final CsvExportService csv;
+    private final InvoiceCsvExport csv;
     private final InvoiceDetailDialog detailDialog;
     private final Dialogs dialogs;
     private final Navigator navigator;
@@ -59,7 +59,7 @@ public class InvoicesController implements SectionController {
     private final FileChoosers files;
     private final TaskRunner tasks;
 
-    public InvoicesController(InvoiceService invoices, InvoicePdfService pdf, CsvExportService csv,
+    public InvoicesController(InvoiceService invoices, InvoicePdfService pdf, InvoiceCsvExport csv,
                               InvoiceDetailDialog detailDialog, Dialogs dialogs, Navigator navigator,
                               ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.invoices = invoices;
@@ -198,6 +198,6 @@ public class InvoicesController implements SectionController {
         Path file = files.saveCsv(navigator.window(), "facturas");
         if (file == null) return;
         List<Invoice> rows = List.copyOf(table.getItems());
-        tasks.run("No se pudo exportar", () -> csv.exportInvoices(rows, file), () -> views.openFile(file));
+        tasks.run("No se pudo exportar", () -> csv.export(rows, file), () -> views.openFile(file));
     }
 }

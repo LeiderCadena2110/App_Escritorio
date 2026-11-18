@@ -4,7 +4,7 @@ import co.edu.ucc.stockflow.model.Category;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.service.CategoryService;
-import co.edu.ucc.stockflow.service.CsvExportService;
+import co.edu.ucc.stockflow.service.ProductCsvExport;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
@@ -53,7 +53,7 @@ public class ProductsController implements SectionController {
 
     private final ProductService products;
     private final CategoryService categories;
-    private final CsvExportService csv;
+    private final ProductCsvExport csv;
     private final ProductDialog productDialog;
     private final StockMovementDialog movementDialog;
     private final CategoryManagerDialog categoryDialog;
@@ -64,7 +64,7 @@ public class ProductsController implements SectionController {
     private final FileChoosers files;
     private final TaskRunner tasks;
 
-    public ProductsController(ProductService products, CategoryService categories, CsvExportService csv,
+    public ProductsController(ProductService products, CategoryService categories, ProductCsvExport csv,
                               ProductDialog productDialog, StockMovementDialog movementDialog,
                               CategoryManagerDialog categoryDialog, Dialogs dialogs, Navigator navigator,
                               ViewLoader views, FileChoosers files, TaskRunner tasks) {
@@ -241,7 +241,7 @@ public class ProductsController implements SectionController {
         Path file = files.saveCsv(navigator.window(), "productos");
         if (file == null) return;
         List<Product> rows = List.copyOf(table.getItems());
-        tasks.run("No se pudo exportar", () -> csv.exportProducts(rows, file), () -> views.openFile(file));
+        tasks.run("No se pudo exportar", () -> csv.export(rows, file), () -> views.openFile(file));
     }
 
     private static String statusText(Product p) {

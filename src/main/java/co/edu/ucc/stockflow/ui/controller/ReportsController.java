@@ -3,7 +3,7 @@ package co.edu.ucc.stockflow.ui.controller;
 import co.edu.ucc.stockflow.dto.DailySales;
 import co.edu.ucc.stockflow.dto.SalesSummary;
 import co.edu.ucc.stockflow.dto.TopProduct;
-import co.edu.ucc.stockflow.service.CsvExportService;
+import co.edu.ucc.stockflow.service.TopProductCsvExport;
 import co.edu.ucc.stockflow.service.ReportService;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.SectionController;
@@ -54,14 +54,14 @@ public class ReportsController implements SectionController {
     @FXML private TableView<TopProduct> topTable;
 
     private final ReportService reports;
-    private final CsvExportService csv;
+    private final TopProductCsvExport csv;
     private final Navigator navigator;
     private final ViewLoader views;
     private final FileChoosers files;
     private final TaskRunner tasks;
     private boolean updating;
 
-    public ReportsController(ReportService reports, CsvExportService csv, Navigator navigator,
+    public ReportsController(ReportService reports, TopProductCsvExport csv, Navigator navigator,
                              ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.reports = reports;
         this.csv = csv;
@@ -182,6 +182,6 @@ public class ReportsController implements SectionController {
         Path file = files.saveCsv(navigator.window(), "mas-vendidos-" + (from == null ? "" : from));
         if (file == null) return;
         List<TopProduct> rows = List.copyOf(topTable.getItems());
-        tasks.run("No se pudo exportar", () -> csv.exportTopProducts(rows, file), () -> views.openFile(file));
+        tasks.run("No se pudo exportar", () -> csv.export(rows, file), () -> views.openFile(file));
     }
 }
