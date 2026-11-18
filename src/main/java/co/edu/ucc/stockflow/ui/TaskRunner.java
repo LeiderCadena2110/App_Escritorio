@@ -64,6 +64,29 @@ public class TaskRunner {
         worker.execute(task);
     }
 
+    /**
+     * Runs {@code work} in the background and lets the caller handle errors (no dialog is shown).
+     * Used by forms that show the error inside themselves.
+     */
+    public <T> void submit(Callable<T> work, Consumer<T> onSuccess, Consumer<Throwable> onFailure) {
+        Task<T> task = new Task<>() {
+            @Override
+            protected T call() throws Exception {
+                return work.call();
+            }
+        };
+        running.set(running.get() + 1);
+        task.setOnSucceeded(e -> {
+            running.set(running.get() - 1);
+            onSuccess.accept(task.getValue());
+        });
+        task.setOnFailed(e -> {
+            running.set(running.get() - 1);
+            onFailure.accept(task.getException());
+        });
+        worker.execute(task);
+    }
+
     /** Same as {@link #run(String, Callable, Consumer)} for work that returns nothing. */
     public void run(String errorTitle, ThrowingRunnable work, Runnable onSuccess) {
         run(errorTitle, () -> {
