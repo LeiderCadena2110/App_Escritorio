@@ -1,6 +1,6 @@
-package co.edu.ucc.stockflow.service;
+package co.edu.ucc.stockflow.inventory.application;
 
-import co.edu.ucc.stockflow.model.StockMovement;
+import co.edu.ucc.stockflow.inventory.domain.StockMovement;
 import co.edu.ucc.stockflow.shared.util.CsvWriter;
 import co.edu.ucc.stockflow.shared.util.Formats;
 import java.io.IOException;

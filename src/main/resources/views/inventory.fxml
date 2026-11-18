@@ -11,7 +11,7 @@
 
 <!-- Inventory: stock history (kardex) and manual movements -->
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="co.edu.ucc.stockflow.ui.controller.InventoryController"
+      fx:controller="co.edu.ucc.stockflow.inventory.ui.InventoryController"
       styleClass="section" spacing="14">
     <HBox alignment="CENTER_LEFT" spacing="10">
         <VBox spacing="2">

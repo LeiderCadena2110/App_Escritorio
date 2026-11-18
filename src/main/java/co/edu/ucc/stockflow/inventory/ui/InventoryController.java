@@ -1,11 +1,11 @@
-package co.edu.ucc.stockflow.ui.controller;
+package co.edu.ucc.stockflow.inventory.ui;
 
 import co.edu.ucc.stockflow.catalog.application.ProductService;
 import co.edu.ucc.stockflow.catalog.domain.Product;
-import co.edu.ucc.stockflow.model.MovementType;
-import co.edu.ucc.stockflow.model.StockMovement;
-import co.edu.ucc.stockflow.service.StockMovementCsvExport;
-import co.edu.ucc.stockflow.service.StockService;
+import co.edu.ucc.stockflow.inventory.application.StockMovementCsvExport;
+import co.edu.ucc.stockflow.inventory.application.StockService;
+import co.edu.ucc.stockflow.inventory.domain.MovementType;
+import co.edu.ucc.stockflow.inventory.domain.StockMovement;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
@@ -16,7 +16,6 @@ import co.edu.ucc.stockflow.shared.ui.component.FileChoosers;
 import co.edu.ucc.stockflow.shared.ui.component.Tables;
 import co.edu.ucc.stockflow.shared.util.DateRange;
 import co.edu.ucc.stockflow.shared.util.Money;
-import co.edu.ucc.stockflow.ui.dialog.StockMovementDialog;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;

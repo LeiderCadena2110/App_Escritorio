@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.model;
+package co.edu.ucc.stockflow.inventory.domain;
 
 /**
  * Reason for a stock change. The sign says whether units come in (+1) or go out (-1);

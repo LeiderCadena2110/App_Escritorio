@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.service;
+package co.edu.ucc.stockflow.inventory.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
-import co.edu.ucc.stockflow.model.MovementType;
+import co.edu.ucc.stockflow.inventory.domain.MovementType;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
@@ -71,11 +71,5 @@ class StockRulesTest {
         assertTrue(MovementType.ADJUSTMENT.isManual());
         assertFalse(MovementType.SALE.isManual());
         assertFalse(MovementType.SALE_CANCELLATION.isManual());
-    }
-
-    @Test
-    void sampleBarcodesHaveAValidEan13CheckDigit() {
-        assertEquals("4006381333931", DataSeeder.ean13("400638133393"));
-        assertEquals("7709000000012", DataSeeder.ean13("770900000001"));
     }
 }

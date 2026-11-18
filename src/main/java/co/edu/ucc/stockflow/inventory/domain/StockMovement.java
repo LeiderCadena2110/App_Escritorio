@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.model;
+package co.edu.ucc.stockflow.inventory.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
