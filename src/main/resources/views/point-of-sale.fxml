@@ -14,7 +14,7 @@
 
 <!-- Point of sale: find products, build the cart, choose customer and payment, issue the invoice -->
 <HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="co.edu.ucc.stockflow.ui.controller.PointOfSaleController"
+      fx:controller="co.edu.ucc.stockflow.sales.ui.PointOfSaleController"
       styleClass="section" spacing="18">
 
     <VBox spacing="12" HBox.hgrow="ALWAYS">

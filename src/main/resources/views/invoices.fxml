@@ -12,7 +12,7 @@
 
 <!-- Invoices: search issued invoices, view the detail, export to PDF or cancel -->
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="co.edu.ucc.stockflow.ui.controller.InvoicesController"
+      fx:controller="co.edu.ucc.stockflow.sales.ui.InvoicesController"
       styleClass="section" spacing="14">
     <HBox alignment="CENTER_LEFT" spacing="10">
         <VBox spacing="2">

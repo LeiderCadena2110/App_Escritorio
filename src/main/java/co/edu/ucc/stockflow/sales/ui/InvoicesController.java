@@ -1,0 +1,202 @@
+package co.edu.ucc.stockflow.sales.ui;
+
+import co.edu.ucc.stockflow.sales.application.InvoiceCsvExport;
+import co.edu.ucc.stockflow.sales.application.InvoiceDocumentExporter;
+import co.edu.ucc.stockflow.sales.application.InvoiceService;
+import co.edu.ucc.stockflow.sales.domain.Invoice;
+import co.edu.ucc.stockflow.sales.domain.InvoiceStatus;
+import co.edu.ucc.stockflow.shared.ui.Dialogs;
+import co.edu.ucc.stockflow.shared.ui.Navigator;
+import co.edu.ucc.stockflow.shared.ui.Section;
+import co.edu.ucc.stockflow.shared.ui.SectionController;
+import co.edu.ucc.stockflow.shared.ui.TaskRunner;
+import co.edu.ucc.stockflow.shared.ui.ViewLoader;
+import co.edu.ucc.stockflow.shared.ui.component.Combos;
+import co.edu.ucc.stockflow.shared.ui.component.DatePickers;
+import co.edu.ucc.stockflow.shared.ui.component.FileChoosers;
+import co.edu.ucc.stockflow.shared.ui.component.Tables;
+import co.edu.ucc.stockflow.shared.util.DateRange;
+import co.edu.ucc.stockflow.shared.util.Money;
+import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.util.List;
+import javafx.animation.PauseTransition;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.util.Duration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Component
+@Scope("prototype")
+public class InvoicesController implements SectionController {
+
+    @FXML private DatePicker fromDate;
+    @FXML private DatePicker toDate;
+    @FXML private TextField searchField;
+    @FXML private ComboBox<InvoiceStatus> statusBox;
+    @FXML private TableView<Invoice> table;
+    @FXML private Button detailButton;
+    @FXML private Button pdfButton;
+    @FXML private Button cancelButton;
+    @FXML private Label summaryLabel;
+
+    private final InvoiceService invoices;
+    private final InvoiceDocumentExporter pdf;
+    private final InvoiceCsvExport csv;
+    private final InvoiceDetailDialog detailDialog;
+    private final Dialogs dialogs;
+    private final Navigator navigator;
+    private final ViewLoader views;
+    private final PauseTransition searchDelay = new PauseTransition(Duration.millis(250));
+    private final FileChoosers files;
+    private final TaskRunner tasks;
+
+    public InvoicesController(InvoiceService invoices, InvoiceDocumentExporter pdf, InvoiceCsvExport csv,
+                              InvoiceDetailDialog detailDialog, Dialogs dialogs, Navigator navigator,
+                              ViewLoader views, FileChoosers files, TaskRunner tasks) {
+        this.invoices = invoices;
+        this.pdf = pdf;
+        this.csv = csv;
+        this.detailDialog = detailDialog;
+        this.dialogs = dialogs;
+        this.navigator = navigator;
+        this.views = views;
+        this.files = files;
+        this.tasks = tasks;
+    }
+
+    @FXML
+    private void initialize() {
+        table.getColumns().setAll(List.of(
+                Tables.text("Número", Invoice::getNumber, 110),
+                Tables.dateTime("Fecha", Invoice::getIssuedAt, 140),
+                Tables.text("Cliente", Invoice::getCustomerName, 230),
+                Tables.text("Documento", Invoice::getCustomerDocument, 140),
+                Tables.text("Pago", i -> i.getPaymentMethod().label(), 110),
+                Tables.money("Total", Invoice::getTotal, 130),
+                Tables.badge("Estado", i -> i.getStatus().label(),
+                        i -> i.isCancelled() ? "badge-danger" : "badge-ok", 100)));
+        Tables.fill(table, 2);
+        Tables.placeholder(table, "No hay facturas en ese periodo.");
+        Tables.styledRows(table, i -> i.isCancelled() ? "row-cancelled" : null, this::open);
+
+        var none = table.getSelectionModel().selectedItemProperty().isNull();
+        detailButton.disableProperty().bind(none);
+        pdfButton.disableProperty().bind(none);
+        cancelButton.disableProperty().bind(none);
+
+        statusBox.getItems().setAll((InvoiceStatus) null);
+        statusBox.getItems().addAll(InvoiceStatus.values());
+        Combos.nullText(statusBox, "Todos los estados");
+
+        DatePickers.dayMonthYear(fromDate, toDate);
+        DateRange month = DateRange.thisMonth();
+        fromDate.setValue(month.start().toLocalDate());
+        toDate.setValue(month.end().toLocalDate().minusDays(1));
+        fromDate.valueProperty().addListener((o, a, b) -> reload());
+        toDate.valueProperty().addListener((o, a, b) -> reload());
+        statusBox.valueProperty().addListener((o, a, b) -> reload());
+        searchDelay.setOnFinished(e -> reload());
+        searchField.textProperty().addListener((o, a, b) -> searchDelay.playFromStart());
+    }
+
+    @Override
+    public void onShow() {
+        reload();
+    }
+
+    private void reload() {
+        LocalDate from = fromDate.getValue() == null ? LocalDate.of(2000, 1, 1) : fromDate.getValue();
+        LocalDate to = toDate.getValue() == null ? LocalDate.now().plusYears(1) : toDate.getValue();
+        String text = searchField.getText();
+        InvoiceStatus status = statusBox.getValue();
+        tasks.run("No se pudieron cargar las facturas",
+                () -> invoices.search(DateRange.ofDays(from, to), text, status), this::render);
+    }
+
+    private void render(List<Invoice> list) {
+        table.getItems().setAll(list);
+        BigDecimal total = list.stream().filter(i -> !i.isCancelled()).map(Invoice::getTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        long cancelled = list.stream().filter(Invoice::isCancelled).count();
+        summaryLabel.setText(list.size() + " facturas · " + cancelled + " anuladas · total vendido " + Money.format(total));
+    }
+
+    @FXML
+    private void today() {
+        fromDate.setValue(LocalDate.now());
+        toDate.setValue(LocalDate.now());
+    }
+
+    @FXML
+    private void thisMonth() {
+        DateRange month = DateRange.thisMonth();
+        fromDate.setValue(month.start().toLocalDate());
+        toDate.setValue(month.end().toLocalDate().minusDays(1));
+    }
+
+    @FXML
+    private void newSale() {
+        navigator.goTo(Section.POINT_OF_SALE);
+    }
+
+    @FXML
+    private void openSelected() {
+        Invoice i = table.getSelectionModel().getSelectedItem();
+        if (i != null) open(i);
+    }
+
+    private void open(Invoice summary) {
+        Invoice invoice = invoices.findById(summary.getId()).orElse(null);
+        if (invoice == null) return;
+        detailDialog.show(navigator.window(), invoice).ifPresent(action -> {
+            switch (action) {
+                case EXPORT_PDF -> exportPdf(invoice);
+                case CANCEL_INVOICE -> cancel(invoice);
+            }
+        });
+    }
+
+    @FXML
+    private void exportPdf() {
+        Invoice i = table.getSelectionModel().getSelectedItem();
+        if (i != null) invoices.findById(i.getId()).ifPresent(this::exportPdf);
+    }
+
+    private void exportPdf(Invoice invoice) {
+        Path file = files.savePdf(navigator.window(), invoice.getNumber());
+        if (file == null) return;
+        tasks.run("No se pudo guardar el PDF", () -> pdf.export(invoice, file), () -> views.openFile(file));
+    }
+
+    @FXML
+    private void cancelSelected() {
+        Invoice i = table.getSelectionModel().getSelectedItem();
+        if (i != null) cancel(i);
+    }
+
+    private void cancel(Invoice invoice) {
+        if (invoice.isCancelled()) {
+            dialogs.info(navigator.window(), "Factura anulada", "La factura " + invoice.getNumber() + " ya está anulada.");
+            return;
+        }
+        dialogs.askText(navigator.window(), "Anular factura " + invoice.getNumber(),
+                "Motivo de la anulación (los productos vuelven al inventario):", "").ifPresent(reason ->
+                tasks.run("No se pudo anular", () -> invoices.cancel(invoice.getId(), reason), this::reload));
+    }
+
+    @FXML
+    private void exportCsv() {
+        Path file = files.saveCsv(navigator.window(), "facturas");
+        if (file == null) return;
+        List<Invoice> rows = List.copyOf(table.getItems());
+        tasks.run("No se pudo exportar", () -> csv.export(rows, file), () -> views.openFile(file));
+    }
+}
