@@ -1,12 +1,27 @@
 package co.edu.ucc.stockflow.exception;
 
+import java.util.Arrays;
+
 /**
  * A business rule was broken (duplicated SKU, not enough stock, empty invoice...).
- * The message is written for the user and is shown as is in a dialog.
+ * It carries an {@link ErrorCode} for the logic and tests, and a ready-to-show message for the user.
  */
 public class BusinessException extends RuntimeException {
 
-    public BusinessException(String message) {
-        super(message);
+    private final ErrorCode code;
+    private final transient Object[] args;
+
+    public BusinessException(ErrorCode code, Object... args) {
+        super(Messages.format(code, args));
+        this.code = code;
+        this.args = args.clone();
+    }
+
+    public ErrorCode getCode() {
+        return code;
+    }
+
+    public Object[] getArgs() {
+        return Arrays.copyOf(args, args.length);
     }
 }

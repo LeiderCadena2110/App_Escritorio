@@ -8,8 +8,7 @@ public class InsufficientStockException extends BusinessException {
     private final int requested;
 
     public InsufficientStockException(String sku, String name, int available, int requested) {
-        super("No hay stock suficiente de " + sku + " · " + name + ": hay " + available
-                + " y se necesitan " + requested + ".");
+        super(ErrorCode.STOCK_INSUFFICIENT, sku, name, available, requested);
         this.sku = sku;
         this.available = available;
         this.requested = requested;
