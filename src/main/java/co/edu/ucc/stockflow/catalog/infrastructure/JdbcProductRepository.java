@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.catalog.infrastructure;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
+import co.edu.ucc.stockflow.catalog.domain.ProductRepository;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -13,7 +14,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ProductRepository {
+public class JdbcProductRepository implements ProductRepository {
 
     private static final String SELECT = """
             SELECT p.*, c.name AS category_name, s.name AS supplier_name
@@ -48,7 +49,7 @@ public class ProductRepository {
     private final JdbcTemplate jdbc;
     private final Clock clock;
 
-    public ProductRepository(JdbcTemplate jdbc, Clock clock) {
+    public JdbcProductRepository(JdbcTemplate jdbc, Clock clock) {
         this.jdbc = jdbc;
         this.clock = clock;
     }
@@ -57,6 +58,7 @@ public class ProductRepository {
      * Products that match the text (SKU, name or exact barcode), the category and the stock filter.
      * Any argument may be null/false to skip that filter.
      */
+    @Override
     public List<Product> search(String text, Long categoryId, boolean lowStockOnly, boolean includeInactive) {
         StringBuilder sql = new StringBuilder(SELECT).append(" WHERE 1 = 1");
         List<Object> args = new ArrayList<>();
@@ -78,26 +80,32 @@ public class ProductRepository {
         return jdbc.query(sql.toString(), MAPPER, args.toArray());
     }
 
+    @Override
     public List<Product> findActive() {
         return search(null, null, false, false);
     }
 
+    @Override
     public List<Product> findLowStock() {
         return search(null, null, true, false);
     }
 
+    @Override
     public Optional<Product> findById(long id) {
         return jdbc.query(SELECT + " WHERE p.id = ?", MAPPER, id).stream().findFirst();
     }
 
+    @Override
     public Optional<Product> findBySku(String sku) {
         return jdbc.query(SELECT + " WHERE LOWER(p.sku) = LOWER(?)", MAPPER, sku.trim()).stream().findFirst();
     }
 
+    @Override
     public Optional<Product> findByBarcode(String barcode) {
         return jdbc.query(SELECT + " WHERE p.barcode = ?", MAPPER, barcode.trim()).stream().findFirst();
     }
 
+    @Override
     public Product insert(Product p) {
         LocalDateTime now = LocalDateTime.now(clock);
         long id = JdbcHelper.insert(jdbc, """
@@ -116,6 +124,7 @@ public class ProductRepository {
     }
 
     /** Updates the product data. The stock is NOT changed here: it only changes through stock movements. */
+    @Override
     public void update(Product p) {
         LocalDateTime now = LocalDateTime.now(clock);
         jdbc.update("""
@@ -129,15 +138,18 @@ public class ProductRepository {
         p.setUpdatedAt(now);
     }
 
+    @Override
     public void updateStock(long id, int newStock) {
         jdbc.update("UPDATE products SET stock = ?, updated_at = ? WHERE id = ?",
                 newStock, JdbcHelper.timestamp(LocalDateTime.now(clock)), id);
     }
 
+    @Override
     public void updateCostPrice(long id, BigDecimal costPrice) {
         jdbc.update("UPDATE products SET cost_price = ? WHERE id = ?", costPrice, id);
     }
 
+    @Override
     public void setActive(long id, boolean active) {
         jdbc.update("UPDATE products SET active = ?, updated_at = ? WHERE id = ?",
                 active, JdbcHelper.timestamp(LocalDateTime.now(clock)), id);
@@ -147,37 +159,44 @@ public class ProductRepository {
      * Deletes a product that never moved: only its "initial inventory" entry is removed with it.
      * Products with any other movement must be deactivated instead (see ProductService.delete).
      */
+    @Override
     public void delete(long id) {
         jdbc.update("DELETE FROM stock_movements WHERE product_id = ? AND movement_type = 'INITIAL'", id);
         jdbc.update("DELETE FROM products WHERE id = ?", id);
     }
 
     /** Movements other than the initial inventory (purchases, sales, adjustments...). */
+    @Override
     public int countHistory(long id) {
         return jdbc.queryForObject(
                 "SELECT COUNT(*) FROM stock_movements WHERE product_id = ? AND movement_type <> 'INITIAL'",
                 Integer.class, id);
     }
 
+    @Override
     public int countSales(long id) {
         return jdbc.queryForObject("SELECT COUNT(*) FROM invoice_items WHERE product_id = ?", Integer.class, id);
     }
 
+    @Override
     public int countActive() {
         return jdbc.queryForObject("SELECT COUNT(*) FROM products WHERE active = TRUE", Integer.class);
     }
 
+    @Override
     public int countLowStock() {
         return jdbc.queryForObject(
                 "SELECT COUNT(*) FROM products WHERE active = TRUE AND stock <= min_stock", Integer.class);
     }
 
     /** Value of all the units in stock at cost price. */
+    @Override
     public BigDecimal totalStockValue() {
         return jdbc.queryForObject(
                 "SELECT COALESCE(SUM(cost_price * stock), 0) FROM products WHERE active = TRUE", BigDecimal.class);
     }
 
+    @Override
     public int totalUnits() {
         return jdbc.queryForObject(
                 "SELECT COALESCE(SUM(stock), 0) FROM products WHERE active = TRUE", Integer.class);

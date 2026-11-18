@@ -1,7 +1,7 @@
 package co.edu.ucc.stockflow.settings.application;
 
-import co.edu.ucc.stockflow.settings.infrastructure.SequenceRepository.Series;
-import co.edu.ucc.stockflow.settings.infrastructure.SequenceRepository;
+import co.edu.ucc.stockflow.settings.domain.SequenceRepository.Series;
+import co.edu.ucc.stockflow.settings.domain.SequenceRepository;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import java.util.function.Predicate;

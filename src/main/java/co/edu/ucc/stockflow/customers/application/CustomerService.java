@@ -1,7 +1,7 @@
 package co.edu.ucc.stockflow.customers.application;
 
 import co.edu.ucc.stockflow.customers.domain.Customer;
-import co.edu.ucc.stockflow.customers.infrastructure.CustomerRepository;
+import co.edu.ucc.stockflow.customers.domain.CustomerRepository;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import co.edu.ucc.stockflow.shared.domain.NotFoundException;

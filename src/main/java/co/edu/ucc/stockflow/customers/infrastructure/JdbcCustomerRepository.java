@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.customers.infrastructure;
 
 import co.edu.ucc.stockflow.customers.domain.Customer;
+import co.edu.ucc.stockflow.customers.domain.CustomerRepository;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class CustomerRepository {
+public class JdbcCustomerRepository implements CustomerRepository {
 
     private static final RowMapper<Customer> MAPPER = (rs, n) -> {
         Customer c = new Customer();
@@ -29,11 +30,12 @@ public class CustomerRepository {
     private final JdbcTemplate jdbc;
     private final Clock clock;
 
-    public CustomerRepository(JdbcTemplate jdbc, Clock clock) {
+    public JdbcCustomerRepository(JdbcTemplate jdbc, Clock clock) {
         this.jdbc = jdbc;
         this.clock = clock;
     }
 
+    @Override
     public List<Customer> search(String text) {
         if (text == null || text.isBlank()) {
             return jdbc.query("SELECT * FROM customers ORDER BY name", MAPPER);
@@ -47,15 +49,18 @@ public class CustomerRepository {
                 """, MAPPER, like, like, like);
     }
 
+    @Override
     public Optional<Customer> findById(long id) {
         return jdbc.query("SELECT * FROM customers WHERE id = ?", MAPPER, id).stream().findFirst();
     }
 
+    @Override
     public Optional<Customer> findByDocument(String documentNumber) {
         return jdbc.query("SELECT * FROM customers WHERE document_number = ?", MAPPER, documentNumber.trim())
                 .stream().findFirst();
     }
 
+    @Override
     public Customer save(Customer c) {
         if (c.getId() == null) {
             LocalDateTime now = LocalDateTime.now(clock);
@@ -79,14 +84,17 @@ public class CustomerRepository {
         return c;
     }
 
+    @Override
     public void delete(long id) {
         jdbc.update("DELETE FROM customers WHERE id = ?", id);
     }
 
+    @Override
     public int countInvoices(long id) {
         return jdbc.queryForObject("SELECT COUNT(*) FROM invoices WHERE customer_id = ?", Integer.class, id);
     }
 
+    @Override
     public int count() {
         return jdbc.queryForObject("SELECT COUNT(*) FROM customers", Integer.class);
     }

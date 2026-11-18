@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.reporting.infrastructure;
 
 import co.edu.ucc.stockflow.reporting.application.DailySales;
+import co.edu.ucc.stockflow.reporting.application.ReportQueries;
 import co.edu.ucc.stockflow.reporting.application.SalesSummary;
 import co.edu.ucc.stockflow.reporting.application.TopProduct;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
@@ -11,14 +12,15 @@ import org.springframework.stereotype.Repository;
 
 /** Aggregated sales queries. Only PAID invoices count; dates are [from, to). */
 @Repository
-public class ReportRepository {
+public class JdbcReportQueries implements ReportQueries {
 
     private final JdbcTemplate jdbc;
 
-    public ReportRepository(JdbcTemplate jdbc) {
+    public JdbcReportQueries(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
+    @Override
     public SalesSummary salesSummary(LocalDateTime from, LocalDateTime to) {
         return jdbc.queryForObject("""
                 SELECT COUNT(*) AS invoices,
@@ -42,6 +44,7 @@ public class ReportRepository {
                 JdbcHelper.timestamp(from), JdbcHelper.timestamp(to));
     }
 
+    @Override
     public List<TopProduct> topProducts(LocalDateTime from, LocalDateTime to, int limit) {
         return jdbc.query("""
                 SELECT it.product_sku, it.product_name, SUM(it.quantity) AS quantity,
@@ -58,6 +61,7 @@ public class ReportRepository {
                 JdbcHelper.timestamp(from), JdbcHelper.timestamp(to), limit);
     }
 
+    @Override
     public List<DailySales> dailySales(LocalDateTime from, LocalDateTime to) {
         return jdbc.query("""
                 SELECT CAST(issued_at AS DATE) AS sale_date, COUNT(*) AS invoices, SUM(total) AS total

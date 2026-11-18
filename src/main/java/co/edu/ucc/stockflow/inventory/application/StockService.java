@@ -1,10 +1,10 @@
 package co.edu.ucc.stockflow.inventory.application;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
-import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
+import co.edu.ucc.stockflow.catalog.domain.ProductRepository;
 import co.edu.ucc.stockflow.inventory.domain.MovementType;
 import co.edu.ucc.stockflow.inventory.domain.StockMovement;
-import co.edu.ucc.stockflow.inventory.infrastructure.StockMovementRepository;
+import co.edu.ucc.stockflow.inventory.domain.StockMovementRepository;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import co.edu.ucc.stockflow.shared.domain.NotFoundException;

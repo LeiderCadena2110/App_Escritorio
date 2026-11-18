@@ -2,6 +2,7 @@ package co.edu.ucc.stockflow.sales.infrastructure;
 
 import co.edu.ucc.stockflow.sales.domain.Invoice;
 import co.edu.ucc.stockflow.sales.domain.InvoiceItem;
+import co.edu.ucc.stockflow.sales.domain.InvoiceRepository;
 import co.edu.ucc.stockflow.sales.domain.InvoiceStatus;
 import co.edu.ucc.stockflow.sales.domain.PaymentMethod;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
@@ -14,7 +15,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class InvoiceRepository {
+public class JdbcInvoiceRepository implements InvoiceRepository {
 
     private static final String SELECT = """
             SELECT i.*, c.name AS customer_name, c.document_type, c.document_number
@@ -61,11 +62,12 @@ public class InvoiceRepository {
 
     private final JdbcTemplate jdbc;
 
-    public InvoiceRepository(JdbcTemplate jdbc) {
+    public JdbcInvoiceRepository(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
     /** Saves the invoice and all its lines. */
+    @Override
     public Invoice insert(Invoice inv) {
         long id = JdbcHelper.insert(jdbc, """
                 INSERT INTO invoices (number, customer_id, issued_at, subtotal, discount, tax_rate, tax, total,
@@ -91,17 +93,20 @@ public class InvoiceRepository {
     }
 
     /** The invoice with its lines. */
+    @Override
     public Optional<Invoice> findById(long id) {
         Optional<Invoice> found = jdbc.query(SELECT + " WHERE i.id = ?", MAPPER, id).stream().findFirst();
         found.ifPresent(inv -> inv.restoreLines(findItems(id)));
         return found;
     }
 
+    @Override
     public List<InvoiceItem> findItems(long invoiceId) {
         return jdbc.query("SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id", ITEM_MAPPER, invoiceId);
     }
 
     /** Invoices (without lines) between two dates, newest first. Null filters are skipped. */
+    @Override
     public List<Invoice> search(LocalDateTime from, LocalDateTime to, String text, InvoiceStatus status) {
         StringBuilder sql = new StringBuilder(SELECT).append(" WHERE 1 = 1");
         List<Object> args = new ArrayList<>();
@@ -129,6 +134,7 @@ public class InvoiceRepository {
         return jdbc.query(sql.toString(), MAPPER, args.toArray());
     }
 
+    @Override
     public void markCancelled(long id, LocalDateTime when, String reason) {
         jdbc.update("""
                 UPDATE invoices SET status = ?, cancelled_at = ?,
@@ -137,6 +143,7 @@ public class InvoiceRepository {
                 """, InvoiceStatus.CANCELLED.name(), JdbcHelper.timestamp(when), reason, id);
     }
 
+    @Override
     public boolean existsNumber(String number) {
         return jdbc.queryForObject("SELECT COUNT(*) FROM invoices WHERE number = ?", Integer.class, number) > 0;
     }

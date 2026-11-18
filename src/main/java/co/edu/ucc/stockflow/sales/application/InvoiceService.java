@@ -1,7 +1,7 @@
 package co.edu.ucc.stockflow.sales.application;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
-import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
+import co.edu.ucc.stockflow.catalog.domain.ProductRepository;
 import co.edu.ucc.stockflow.customers.application.CustomerService;
 import co.edu.ucc.stockflow.customers.domain.Customer;
 import co.edu.ucc.stockflow.inventory.application.StockService;
@@ -9,9 +9,9 @@ import co.edu.ucc.stockflow.inventory.domain.MovementType;
 import co.edu.ucc.stockflow.sales.application.payment.PaymentPolicies;
 import co.edu.ucc.stockflow.sales.domain.Invoice;
 import co.edu.ucc.stockflow.sales.domain.InvoiceItem;
+import co.edu.ucc.stockflow.sales.domain.InvoiceRepository;
 import co.edu.ucc.stockflow.sales.domain.InvoiceStatus;
 import co.edu.ucc.stockflow.sales.domain.PaymentMethod;
-import co.edu.ucc.stockflow.sales.infrastructure.InvoiceRepository;
 import co.edu.ucc.stockflow.settings.application.SequenceService;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;

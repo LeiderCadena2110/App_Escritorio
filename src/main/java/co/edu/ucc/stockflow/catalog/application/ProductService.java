@@ -2,7 +2,7 @@ package co.edu.ucc.stockflow.catalog.application;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.catalog.domain.ProductCreated;
-import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
+import co.edu.ucc.stockflow.catalog.domain.ProductRepository;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import co.edu.ucc.stockflow.shared.util.Formats;

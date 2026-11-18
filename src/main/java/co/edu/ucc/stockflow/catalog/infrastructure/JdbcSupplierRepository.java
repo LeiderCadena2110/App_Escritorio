@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.catalog.infrastructure;
 
 import co.edu.ucc.stockflow.catalog.domain.Supplier;
+import co.edu.ucc.stockflow.catalog.domain.SupplierRepository;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class SupplierRepository {
+public class JdbcSupplierRepository implements SupplierRepository {
 
     private static final RowMapper<Supplier> MAPPER = (rs, n) -> {
         Supplier s = new Supplier();
@@ -30,11 +31,12 @@ public class SupplierRepository {
     private final JdbcTemplate jdbc;
     private final Clock clock;
 
-    public SupplierRepository(JdbcTemplate jdbc, Clock clock) {
+    public JdbcSupplierRepository(JdbcTemplate jdbc, Clock clock) {
         this.jdbc = jdbc;
         this.clock = clock;
     }
 
+    @Override
     public List<Supplier> search(String text) {
         if (text == null || text.isBlank()) {
             return jdbc.query("SELECT * FROM suppliers ORDER BY name", MAPPER);
@@ -48,14 +50,17 @@ public class SupplierRepository {
                 """, MAPPER, like, like, like);
     }
 
+    @Override
     public List<Supplier> findActive() {
         return jdbc.query("SELECT * FROM suppliers WHERE active = TRUE ORDER BY name", MAPPER);
     }
 
+    @Override
     public Optional<Supplier> findById(long id) {
         return jdbc.query("SELECT * FROM suppliers WHERE id = ?", MAPPER, id).stream().findFirst();
     }
 
+    @Override
     public Supplier save(Supplier s) {
         if (s.getId() == null) {
             LocalDateTime now = LocalDateTime.now(clock);
@@ -79,10 +84,12 @@ public class SupplierRepository {
         return s;
     }
 
+    @Override
     public void delete(long id) {
         jdbc.update("DELETE FROM suppliers WHERE id = ?", id);
     }
 
+    @Override
     public int countProducts(long id) {
         return jdbc.queryForObject("SELECT COUNT(*) FROM products WHERE supplier_id = ?", Integer.class, id);
     }

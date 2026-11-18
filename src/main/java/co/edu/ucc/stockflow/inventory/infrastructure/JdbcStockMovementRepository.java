@@ -2,6 +2,7 @@ package co.edu.ucc.stockflow.inventory.infrastructure;
 
 import co.edu.ucc.stockflow.inventory.domain.MovementType;
 import co.edu.ucc.stockflow.inventory.domain.StockMovement;
+import co.edu.ucc.stockflow.inventory.domain.StockMovementRepository;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class StockMovementRepository {
+public class JdbcStockMovementRepository implements StockMovementRepository {
 
     private static final RowMapper<StockMovement> MAPPER = (rs, n) -> {
         StockMovement m = new StockMovement();
@@ -33,11 +34,12 @@ public class StockMovementRepository {
     private final JdbcTemplate jdbc;
     private final Clock clock;
 
-    public StockMovementRepository(JdbcTemplate jdbc, Clock clock) {
+    public JdbcStockMovementRepository(JdbcTemplate jdbc, Clock clock) {
         this.jdbc = jdbc;
         this.clock = clock;
     }
 
+    @Override
     public StockMovement insert(StockMovement m) {
         if (m.getCreatedAt() == null) m.setCreatedAt(LocalDateTime.now(clock));
         long id = JdbcHelper.insert(jdbc, """
@@ -52,6 +54,7 @@ public class StockMovementRepository {
     }
 
     /** Movements between two dates (inclusive start, exclusive end), newest first. Null filters are skipped. */
+    @Override
     public List<StockMovement> search(LocalDateTime from, LocalDateTime to, Long productId, MovementType type) {
         StringBuilder sql = new StringBuilder("""
                 SELECT m.*, p.sku, p.name AS product_name
@@ -79,6 +82,7 @@ public class StockMovementRepository {
         return jdbc.query(sql.toString(), MAPPER, args.toArray());
     }
 
+    @Override
     public List<StockMovement> findByProduct(long productId) {
         return search(null, null, productId, null);
     }

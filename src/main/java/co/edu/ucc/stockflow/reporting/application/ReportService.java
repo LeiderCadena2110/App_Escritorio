@@ -1,9 +1,8 @@
 package co.edu.ucc.stockflow.reporting.application;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
-import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
-import co.edu.ucc.stockflow.customers.infrastructure.CustomerRepository;
-import co.edu.ucc.stockflow.reporting.infrastructure.ReportRepository;
+import co.edu.ucc.stockflow.catalog.domain.ProductRepository;
+import co.edu.ucc.stockflow.customers.domain.CustomerRepository;
 import co.edu.ucc.stockflow.shared.util.DateRange;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -18,12 +17,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportService {
 
-    private final ReportRepository reports;
+    private final ReportQueries reports;
     private final ProductRepository products;
     private final CustomerRepository customers;
     private final Clock clock;
 
-    public ReportService(ReportRepository reports, ProductRepository products, CustomerRepository customers,
+    public ReportService(ReportQueries reports, ProductRepository products, CustomerRepository customers,
                          Clock clock) {
         this.reports = reports;
         this.products = products;
