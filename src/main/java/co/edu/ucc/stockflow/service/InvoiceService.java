@@ -21,12 +21,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Issues and cancels sales invoices, keeping the stock in sync. */
 @Service
 public class InvoiceService {
+
+    private static final Logger log = LoggerFactory.getLogger(InvoiceService.class);
 
     private final InvoiceRepository invoices;
     private final ProductRepository products;
@@ -143,6 +149,8 @@ public class InvoiceService {
             stockService.register(item.getProductId(), MovementType.SALE, item.getQuantity(), item.getUnitCost(),
                     saved.getNumber(), null);
         }
+        log.info("Invoice {} issued: {} lines, total {}, {}", saved.getNumber(), saved.getItems().size(),
+                saved.getTotal(), saved.getPaymentMethod());
         return saved;
     }
 
@@ -159,6 +167,7 @@ public class InvoiceService {
         }
         LocalDateTime now = LocalDateTime.now(clock);
         invoices.markCancelled(invoiceId, now, "[Anulada: " + why + "]");
+        log.info("Invoice {} cancelled: {}", invoice.getNumber(), why);
         return invoices.findById(invoiceId).orElseThrow();
     }
 

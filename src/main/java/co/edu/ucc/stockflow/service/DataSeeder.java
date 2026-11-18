@@ -6,7 +6,11 @@ import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.Supplier;
 import co.edu.ucc.stockflow.repository.ProductRepository;
 import java.math.BigDecimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -15,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class DataSeeder {
+
+    private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
     private final SettingsService settings;
     private final CustomerService customers;
@@ -46,6 +52,7 @@ public class DataSeeder {
 
     @Transactional
     public void loadSampleData() {
+        log.info("Loading the sample shoe-store catalog");
         Category sports = category("Deportivos", "Tenis para correr, fútbol y entrenamiento");
         Category casual = category("Casuales", "Calzado para el día a día");
         Category formal = category("Formales", "Zapatos de vestir");

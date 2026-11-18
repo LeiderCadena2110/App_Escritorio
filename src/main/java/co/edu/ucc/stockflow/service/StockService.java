@@ -14,7 +14,11 @@ import co.edu.ucc.stockflow.util.Money;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -23,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class StockService {
+
+    private static final Logger log = LoggerFactory.getLogger(StockService.class);
 
     private final ProductRepository products;
     private final StockMovementRepository movements;
@@ -63,6 +69,7 @@ public class StockService {
         m.setUnitCost(unitCost != null ? Money.round(unitCost) : product.getCostPrice());
         m.setReference(Formats.clean(reference));
         m.setNotes(Formats.clean(notes));
+        log.debug("Stock {} {} {} -> {}", product.getSku(), type, change, newStock);
         return movements.insert(m);
     }
 

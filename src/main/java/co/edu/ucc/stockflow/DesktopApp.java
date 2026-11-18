@@ -14,6 +14,8 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -22,6 +24,8 @@ import org.springframework.context.ConfigurableApplicationContext;
  * database, and then opens the main window.
  */
 public class DesktopApp extends Application {
+
+    private static final Logger log = LoggerFactory.getLogger(DesktopApp.class);
 
     public static final String NAME = "StockFlow";
 
@@ -55,6 +59,7 @@ public class DesktopApp extends Application {
             views.openMainWindow(stage);
         });
         startup.setOnFailed(e -> {
+            log.error("StockFlow could not start", startup.getException());
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle(NAME);
             alert.setHeaderText("No se pudo iniciar StockFlow");
