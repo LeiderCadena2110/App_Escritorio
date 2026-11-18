@@ -68,7 +68,10 @@ public class SettingsController implements SectionController {
         themeGroup.selectedToggleProperty().addListener((o, a, b) -> {
             if (b == null) return;
             String selected = b == darkTheme ? SettingsService.THEME_DARK : SettingsService.THEME_LIGHT;
-            if (!selected.equals(settings.theme())) theme.change(selected);
+            if (!selected.equals(settings.theme())) {
+                settings.set(SettingsService.THEME, selected);
+                theme.setDark(SettingsService.THEME_DARK.equals(selected));
+            }
         });
         dataFolderLabel.setText("Los datos se guardan en este equipo, en "
                 + Path.of(System.getProperty("user.home"), ".stockflow"));

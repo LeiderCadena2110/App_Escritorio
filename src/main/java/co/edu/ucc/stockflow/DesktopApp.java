@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow;
 
 import co.edu.ucc.stockflow.service.DataSeeder;
+import co.edu.ucc.stockflow.ui.MainWindow;
 import co.edu.ucc.stockflow.ui.ViewLoader;
 import java.io.InputStream;
 import javafx.application.Application;
@@ -56,7 +57,7 @@ public class DesktopApp extends Application {
             context = startup.getValue();
             ViewLoader views = context.getBean(ViewLoader.class);
             views.setHostServices(getHostServices());
-            views.openMainWindow(stage);
+            context.getBean(MainWindow.class).open(stage);
         });
         startup.setOnFailed(e -> {
             log.error("StockFlow could not start", startup.getException());

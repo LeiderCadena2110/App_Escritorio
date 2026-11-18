@@ -1,23 +1,21 @@
 package co.edu.ucc.stockflow.ui;
 
-import co.edu.ucc.stockflow.service.SettingsService;
 import javafx.scene.Scene;
 import javafx.scene.control.DialogPane;
 import org.springframework.stereotype.Component;
 
-/** Light or dark theme (Settings › Appearance). Applied instantly. */
+/**
+ * Light or dark theme, applied instantly to the main window and every dialog.
+ * It only knows how to paint; which theme the user chose is saved by the settings module.
+ */
 @Component
 public class ThemeManager {
 
     private static final String MAIN = "/styles/main.css";
     private static final String DARK = "/styles/dark.css";
 
-    private final SettingsService settings;
     private Scene mainScene;
-
-    public ThemeManager(SettingsService settings) {
-        this.settings = settings;
-    }
+    private boolean dark;
 
     public void apply(Scene scene) {
         this.mainScene = scene;
@@ -29,16 +27,18 @@ public class ThemeManager {
         pane.getStylesheets().setAll(stylesheets());
     }
 
-    public void change(String theme) {
-        settings.set(SettingsService.THEME, theme);
+    public void setDark(boolean dark) {
+        this.dark = dark;
         if (mainScene != null) mainScene.getStylesheets().setAll(stylesheets());
+    }
+
+    public boolean isDark() {
+        return dark;
     }
 
     private String[] stylesheets() {
         String main = ThemeManager.class.getResource(MAIN).toExternalForm();
-        if (SettingsService.THEME_DARK.equals(settings.theme())) {
-            return new String[]{main, ThemeManager.class.getResource(DARK).toExternalForm()};
-        }
+        if (dark) return new String[]{main, ThemeManager.class.getResource(DARK).toExternalForm()};
         return new String[]{main};
     }
 }

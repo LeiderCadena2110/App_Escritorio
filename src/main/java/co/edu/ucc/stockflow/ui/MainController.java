@@ -95,7 +95,7 @@ public class MainController implements NavigationHost {
         });
     }
 
-    void start(Stage stage, Scene scene) {
+    public void start(Stage stage, Scene scene) {
         this.stage = stage;
         stage.setTitle(DesktopApp.NAME + " · " + settings.businessInfo().name());
         stage.setMinWidth(1000);

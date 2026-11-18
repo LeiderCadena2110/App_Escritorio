@@ -6,8 +6,6 @@ import java.net.URL;
 import javafx.application.HostServices;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +18,10 @@ public class ViewLoader {
     }
 
     private final ApplicationContext context;
-    private final ThemeManager theme;
     private HostServices hostServices;
 
-    public ViewLoader(ApplicationContext context, ThemeManager theme) {
+    public ViewLoader(ApplicationContext context) {
         this.context = context;
-        this.theme = theme;
     }
 
     public <T> LoadedView<T> load(String name) {
@@ -39,13 +35,6 @@ public class ViewLoader {
         } catch (IOException e) {
             throw new UncheckedIOException("Could not load " + name + ".fxml", e);
         }
-    }
-
-    public void openMainWindow(Stage stage) {
-        LoadedView<MainController> main = load("main");
-        Scene scene = new Scene(main.root());
-        theme.apply(scene);
-        main.controller().start(stage, scene);
     }
 
     /** Opens a file (PDF, CSV) with the program the system uses for it. */
