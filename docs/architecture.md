@@ -112,6 +112,32 @@ editan**, así la base de cualquier usuario se actualiza sola al abrir la nueva 
 | `V3__add_check_constraints.sql` | Reglas en la base: precios ≥ 0, estados y tipos válidos |
 | `V4__add_product_barcode.sql` | Código de barras opcional y único |
 | `V5__add_sequences.sql` | Tabla `sequences` para el consecutivo (copia el valor que había en `settings`) |
+| `V6__add_tax_rate_per_product.sql` | IVA por producto y por línea de factura (conserva la tarifa configurada) |
+
+## Modelo de dominio
+
+Las reglas del negocio viven en el modelo, no en las pantallas ni repartidas entre servicios:
+
+| Regla | Dónde vive | Quién la usa |
+|---|---|---|
+| No sacar más unidades de las que hay | `Product.checkCanTakeOut(int)` | Carrito, `InvoiceService`, `StockService` |
+| Líneas, descuento y totales de una factura | Agregado `Invoice` (`addLine`, `changeQuantity`, `calculate`) | `SaleViewModel`, `InvoiceService` |
+| Qué IVA paga cada línea | Estrategia `TaxPolicy` (`VatResponsiblePolicy`, `NotVatResponsiblePolicy`) | `Invoice.calculate` |
+| Cómo se paga | Estrategia `PaymentPolicy` (efectivo, tarjeta, transferencia, crédito) + `PaymentPolicies` | `InvoiceService.issue` |
+
+**Agregado `Invoice`.** Las líneas son de solo lectura desde afuera (`getItems()` no se puede
+modificar); se cambian con sus métodos, que aplican la regla de stock. `calculate(TaxPolicy)`
+calcula todo en un solo lugar:
+
+1. cada línea toma la tarifa que le da la política (la del producto, o 0 % si el negocio es no
+   responsable de IVA);
+2. subtotal = suma de las líneas; el descuento se limita entre 0 y el subtotal;
+3. el descuento se reparte entre las tarifas en proporción a su valor, **en pesos enteros**;
+4. IVA de cada tarifa = base × tarifa / 100, redondeado al peso; total = subtotal − descuento + IVA.
+
+**Estrategias (patrón Strategy).** Agregar una forma de pago (por ejemplo, pagos mixtos) es crear
+una clase que implemente `PaymentPolicy` con `@Component`; `PaymentPolicies` la encuentra sola y
+`InvoiceService` no cambia (principio abierto/cerrado).
 
 ## Interfaz: MVVM y segundo plano
 

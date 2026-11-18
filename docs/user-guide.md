@@ -9,7 +9,10 @@ Puede editar o eliminar esos datos cuando quiera.
 **Configuración** (Ctrl + 9):
 
 - Escriba el nombre, NIT, dirección y teléfono del negocio: salen en las facturas.
-- Revise el **IVA** (19 % por defecto; escriba 0 si no cobra IVA).
+- Elija el **régimen de IVA**: *Responsable de IVA* (cada factura cobra el IVA de cada producto) o
+  *No responsable de IVA* (las facturas no cobran IVA).
+- El **IVA de productos nuevos** (19 % por defecto) es la tarifa que se propone al crear un producto;
+  cada producto puede tener la suya.
 - El **prefijo** y el **siguiente número** definen el consecutivo: `FV-000001`, `FV-000002`…
 - Elija el tema claro u oscuro.
 
@@ -23,6 +26,7 @@ Puede editar o eliminar esos datos cuando quiera.
 | Código de barras | `7709000000012` | Opcional y único; permite vender con lector |
 | Precio de costo | `98.000` | Lo que le cuesta a usted |
 | Precio de venta | `159.900` | Sin IVA. El margen se calcula solo |
+| IVA | `19 %` | 19 %, 5 % o 0 % (exento o excluido); se suma en la factura |
 | Stock inicial | `12` | Queda como movimiento "Inventario inicial" |
 | Stock mínimo | `4` | Por debajo de este valor el producto sale como **stock bajo** |
 

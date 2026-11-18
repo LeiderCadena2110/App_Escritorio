@@ -2,6 +2,23 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] · Paso 3: modelo de dominio
+
+### Agregado
+- **IVA por producto** (19 %, 5 % o exento) y **régimen de IVA** del negocio (responsable o no responsable).
+- Facturas con IVA desglosado por tarifa en el detalle y en el PDF.
+- `TaxPolicy` y `PaymentPolicy` (patrón Strategy) para el IVA y las formas de pago.
+- Las ventas a crédito exigen un cliente registrado (no "Consumidor final").
+
+### Cambiado
+- `Invoice` es un agregado: maneja sus líneas, aplica la regla de stock y calcula sus totales.
+- La regla de stock está solo en `Product.checkCanTakeOut` (antes estaba en tres clases).
+- El carrito (`SaleViewModel`) delega en el agregado en lugar de repetir las reglas.
+- El descuento se reparte entre tarifas y el IVA se redondea al peso.
+
+### Base de datos
+- `V6`: `products.tax_rate` e `invoice_items.tax_rate`; `invoices.tax_rate` pasa a ser opcional.
+
 ## [Sin publicar] · Paso 2: bases para producción
 
 ### Agregado
