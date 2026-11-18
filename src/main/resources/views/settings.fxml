@@ -55,8 +55,14 @@
                     <ColumnConstraints minWidth="150"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
-                <Label text="IVA (%)" styleClass="form-label" GridPane.rowIndex="0"/>
-                <TextField fx:id="taxRateField" maxWidth="120" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="Régimen de IVA" styleClass="form-label" GridPane.rowIndex="0"/>
+                <HBox spacing="18" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <fx:define>
+                        <ToggleGroup fx:id="regimeGroup"/>
+                    </fx:define>
+                    <RadioButton fx:id="vatResponsible" text="Responsable de IVA" toggleGroup="$regimeGroup"/>
+                    <RadioButton fx:id="notVatResponsible" text="No responsable de IVA" toggleGroup="$regimeGroup"/>
+                </HBox>
                 <Label text="Prefijo de factura" styleClass="form-label" GridPane.rowIndex="1"/>
                 <TextField fx:id="prefixField" maxWidth="120" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                 <Label text="Siguiente número" styleClass="form-label" GridPane.rowIndex="2"/>
@@ -64,8 +70,16 @@
                 <Label text="Ejemplo" styleClass="form-label" GridPane.rowIndex="3"/>
                 <Label fx:id="exampleLabel" styleClass="total-value" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
             </GridPane>
+            <GridPane hgap="12" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="150"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+                <Label text="IVA para productos nuevos (%)" styleClass="form-label" wrapText="true" GridPane.rowIndex="0"/>
+                <TextField fx:id="taxRateField" maxWidth="120" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            </GridPane>
             <Label styleClass="muted" wrapText="true"
-                   text="Los precios de los productos se escriben sin IVA; el IVA se suma al final de cada factura. Use 0 si su negocio no cobra IVA."/>
+                   text="Cada producto tiene su propio IVA (19 %, 5 % o exento), que se cambia al editarlo. Los precios se escriben sin IVA y el IVA se suma en la factura. Si su negocio es no responsable de IVA, las facturas no cobran IVA aunque el producto lo tenga."/>
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <Button text="Guardar facturación" styleClass="primary-button" onAction="#saveInvoicing"/>
                 <Label fx:id="invoicingStatus" styleClass="success-text"/>

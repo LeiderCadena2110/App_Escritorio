@@ -32,6 +32,9 @@ public class SettingsController implements SectionController {
     @FXML private TextField footerField;
     @FXML private Label businessStatus;
     @FXML private TextField taxRateField;
+    @FXML private ToggleGroup regimeGroup;
+    @FXML private RadioButton vatResponsible;
+    @FXML private RadioButton notVatResponsible;
     @FXML private TextField prefixField;
     @FXML private TextField nextNumberField;
     @FXML private Label exampleLabel;
@@ -81,6 +84,7 @@ public class SettingsController implements SectionController {
         emailField.setText(b.email());
         footerField.setText(b.invoiceFooter());
         taxRateField.setText(settings.defaultTaxRate().stripTrailingZeros().toPlainString());
+        (settings.isVatResponsible() ? vatResponsible : notVatResponsible).setSelected(true);
         var series = sequences.invoiceSeries();
         prefixField.setText(series.prefix());
         nextNumberField.setText(Long.toString(series.nextValue()));
@@ -113,6 +117,7 @@ public class SettingsController implements SectionController {
         if (dialogs.run(navigator.window(), "No se pudo guardar", () -> {
             String rate = taxRateField.getText().replace(',', '.');
             settings.setDefaultTaxRate(new BigDecimal(rate.isBlank() ? "0" : rate));
+            settings.setVatResponsible(vatResponsible.isSelected());
             sequences.configureInvoices(prefixField.getText(),
                     Long.parseLong(nextNumberField.getText().isBlank() ? "1" : nextNumberField.getText()));
         })) {
