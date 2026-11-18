@@ -4,6 +4,7 @@ import co.edu.ucc.stockflow.exception.BusinessException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
+import java.util.UUID;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -11,11 +12,15 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /** Modal dialogs with the app theme and clear texts. Esc closes them. */
 @Component
 public class Dialogs {
+
+    private static final Logger log = LoggerFactory.getLogger(Dialogs.class);
 
     private final ThemeManager theme;
 
@@ -37,9 +42,13 @@ public class Dialogs {
      */
     public void error(Window owner, String title, Throwable e) {
         if (e instanceof BusinessException) {
+            log.info("{}: {}", title, e.getMessage());
             show(Alert.AlertType.WARNING, owner, title, e.getMessage(), null);
         } else {
-            show(Alert.AlertType.ERROR, owner, title, clearMessage(e), e);
+            String incident = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+            log.error("[{}] {}", incident, title, e);
+            show(Alert.AlertType.ERROR, owner, title, clearMessage(e) + "\n\nCódigo del error: " + incident
+                    + " (está en el archivo ~/.stockflow/app.log)", e);
         }
     }
 
