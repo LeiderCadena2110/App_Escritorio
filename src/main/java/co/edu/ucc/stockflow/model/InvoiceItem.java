@@ -17,8 +17,26 @@ public class InvoiceItem {
     private BigDecimal unitPrice = BigDecimal.ZERO;
     private BigDecimal unitCost = BigDecimal.ZERO;
     private BigDecimal lineTotal = BigDecimal.ZERO;
+    /** VAT rate of the product when it was added (what the product says). */
+    private BigDecimal productTaxRate = BigDecimal.ZERO;
+    /** VAT rate the line actually pays, after the business tax regime (saved with the invoice). */
+    private BigDecimal taxRate = BigDecimal.ZERO;
 
     public InvoiceItem() {
+    }
+
+    /** Copy of the line (used to hand a draft to the service without sharing objects with the screen). */
+    public InvoiceItem copy() {
+        InvoiceItem c = new InvoiceItem();
+        c.productId = productId;
+        c.productSku = productSku;
+        c.productName = productName;
+        c.unitPrice = unitPrice;
+        c.unitCost = unitCost;
+        c.productTaxRate = productTaxRate;
+        c.taxRate = taxRate;
+        c.setQuantity(quantity);
+        return c;
     }
 
     public static InvoiceItem of(Product product, int quantity) {
@@ -28,6 +46,8 @@ public class InvoiceItem {
         item.setProductName(product.getName());
         item.setUnitPrice(product.getSalePrice());
         item.setUnitCost(product.getCostPrice());
+        item.setProductTaxRate(product.getTaxRate());
+        item.setTaxRate(product.getTaxRate());
         item.setQuantity(quantity);
         return item;
     }
@@ -57,6 +77,10 @@ public class InvoiceItem {
     public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; recalculate(); }
     public BigDecimal getUnitCost() { return unitCost; }
     public void setUnitCost(BigDecimal unitCost) { this.unitCost = unitCost; }
+    public BigDecimal getProductTaxRate() { return productTaxRate; }
+    public void setProductTaxRate(BigDecimal rate) { this.productTaxRate = rate == null ? BigDecimal.ZERO : rate; }
+    public BigDecimal getTaxRate() { return taxRate; }
+    public void setTaxRate(BigDecimal rate) { this.taxRate = rate == null ? BigDecimal.ZERO : rate; }
     public BigDecimal getLineTotal() { return lineTotal; }
     public void setLineTotal(BigDecimal lineTotal) { this.lineTotal = lineTotal; }
 }
