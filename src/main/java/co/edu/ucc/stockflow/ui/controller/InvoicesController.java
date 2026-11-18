@@ -3,7 +3,7 @@ package co.edu.ucc.stockflow.ui.controller;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceStatus;
 import co.edu.ucc.stockflow.service.InvoiceCsvExport;
-import co.edu.ucc.stockflow.service.InvoicePdfService;
+import co.edu.ucc.stockflow.service.InvoiceDocumentExporter;
 import co.edu.ucc.stockflow.service.InvoiceService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
@@ -49,7 +49,7 @@ public class InvoicesController implements SectionController {
     @FXML private Label summaryLabel;
 
     private final InvoiceService invoices;
-    private final InvoicePdfService pdf;
+    private final InvoiceDocumentExporter pdf;
     private final InvoiceCsvExport csv;
     private final InvoiceDetailDialog detailDialog;
     private final Dialogs dialogs;
@@ -59,7 +59,7 @@ public class InvoicesController implements SectionController {
     private final FileChoosers files;
     private final TaskRunner tasks;
 
-    public InvoicesController(InvoiceService invoices, InvoicePdfService pdf, InvoiceCsvExport csv,
+    public InvoicesController(InvoiceService invoices, InvoiceDocumentExporter pdf, InvoiceCsvExport csv,
                               InvoiceDetailDialog detailDialog, Dialogs dialogs, Navigator navigator,
                               ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.invoices = invoices;

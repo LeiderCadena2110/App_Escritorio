@@ -8,7 +8,7 @@ import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.tax.TaxPolicy;
 import co.edu.ucc.stockflow.service.CustomerService;
-import co.edu.ucc.stockflow.service.InvoicePdfService;
+import co.edu.ucc.stockflow.service.InvoiceDocumentExporter;
 import co.edu.ucc.stockflow.service.InvoiceService;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.SequenceService;
@@ -87,7 +87,7 @@ public class PointOfSaleController implements SectionController {
     private final ProductService products;
     private final CustomerService customers;
     private final InvoiceService invoices;
-    private final InvoicePdfService pdf;
+    private final InvoiceDocumentExporter pdf;
     private final SequenceService sequences;
     private final TaxPolicyProvider taxPolicies;
     private final CustomerDialog customerDialog;
@@ -107,7 +107,7 @@ public class PointOfSaleController implements SectionController {
     private Customer finalConsumer;
 
     public PointOfSaleController(ProductService products, CustomerService customers, InvoiceService invoices,
-                                 InvoicePdfService pdf, SequenceService sequences, TaxPolicyProvider taxPolicies,
+                                 InvoiceDocumentExporter pdf, SequenceService sequences, TaxPolicyProvider taxPolicies,
                                  CustomerDialog customerDialog, Dialogs dialogs, Navigator navigator,
                                  ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.products = products;

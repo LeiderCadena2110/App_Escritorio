@@ -21,9 +21,9 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.stereotype.Service;
 
-/** Draws the invoice as a letter-size PDF with Apache PDFBox (no internet or external programs needed). */
+/** Adapter of {@link InvoiceDocumentExporter}: draws the invoice as a letter-size PDF with Apache PDFBox (no internet or external programs needed). */
 @Service
-public class InvoicePdfService {
+public class PdfInvoiceExporter implements InvoiceDocumentExporter {
 
     private static final PDFont REGULAR = PDType1Font.HELVETICA;
     private static final PDFont BOLD = PDType1Font.HELVETICA_BOLD;
@@ -39,10 +39,11 @@ public class InvoicePdfService {
 
     private final SettingsService settings;
 
-    public InvoicePdfService(SettingsService settings) {
+    public PdfInvoiceExporter(SettingsService settings) {
         this.settings = settings;
     }
 
+    @Override
     public void export(Invoice invoice, Path file) throws IOException {
         BusinessInfo business = settings.businessInfo();
         Path parent = file.toAbsolutePath().getParent();
