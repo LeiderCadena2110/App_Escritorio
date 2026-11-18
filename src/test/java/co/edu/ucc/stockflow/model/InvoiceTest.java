@@ -158,4 +158,19 @@ class InvoiceTest {
         inv.addLine(product(1, "1000", "19", 5), 1);
         assertThrows(UnsupportedOperationException.class, () -> inv.getItems().clear());
     }
+
+    @Test
+    void mixedRatesProduceWholePesos() {
+        Invoice inv = new Invoice();
+        inv.addLine(product(1, "229900", "19", 5), 1);
+        inv.addLine(product(2, "18900", "5", 5), 2);
+        inv.setDiscount(new BigDecimal("10000"));
+        inv.calculate(new VatResponsiblePolicy());
+        for (TaxLine vat : inv.getTaxBreakdown()) {
+            assertEquals(0, vat.base().remainder(BigDecimal.ONE).signum(), "base " + vat);
+            assertEquals(0, vat.tax().remainder(BigDecimal.ONE).signum(), "tax " + vat);
+        }
+        assertEquals(0, inv.getTotal().remainder(BigDecimal.ONE).signum());
+        assertEquals(new BigDecimal("301568.00"), inv.getTotal()); // 267.700 − 10.000 + 42.049 + 1.819
+    }
 }

@@ -146,8 +146,8 @@ public class Invoice {
 
     /**
      * VAT grouped by rate, highest rate first. The invoice discount is spread over the rates in
-     * proportion to their value (the biggest group absorbs the rounding), and each group pays
-     * base × rate / 100.
+     * proportion to their value, in whole pesos (the biggest group absorbs the rounding), and each
+     * group pays base × rate / 100 rounded to the peso, as Colombian invoices do.
      */
     public List<TaxLine> getTaxBreakdown() {
         Map<BigDecimal, BigDecimal> grossByRate = new TreeMap<>(Comparator.reverseOrder());
@@ -167,7 +167,7 @@ public class Invoice {
         BigDecimal spread = BigDecimal.ZERO;
         for (Map.Entry<BigDecimal, BigDecimal> e : grossByRate.entrySet()) {
             if (e.getKey().equals(biggestRate) || gross.signum() == 0) continue;
-            BigDecimal share = Money.round(d.multiply(e.getValue()).divide(gross, 6, RoundingMode.HALF_UP));
+            BigDecimal share = d.multiply(e.getValue()).divide(gross, 0, RoundingMode.HALF_UP).setScale(Money.SCALE);
             discountByRate.put(e.getKey(), share);
             spread = spread.add(share);
         }
@@ -176,7 +176,8 @@ public class Invoice {
         List<TaxLine> lines = new ArrayList<>();
         for (Map.Entry<BigDecimal, BigDecimal> e : grossByRate.entrySet()) {
             BigDecimal base = Money.round(e.getValue()).subtract(discountByRate.get(e.getKey()));
-            lines.add(new TaxLine(e.getKey(), base, Money.percentOf(base, e.getKey())));
+            BigDecimal tax = Money.percentOf(base, e.getKey()).setScale(0, RoundingMode.HALF_UP).setScale(Money.SCALE);
+            lines.add(new TaxLine(e.getKey(), base, tax));
         }
         return lines;
     }
