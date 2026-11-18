@@ -6,14 +6,15 @@ import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.Product;
-import co.edu.ucc.stockflow.service.InvoiceService;
+import co.edu.ucc.stockflow.model.tax.TaxPolicy;
+import co.edu.ucc.stockflow.model.tax.VatResponsiblePolicy;
 import co.edu.ucc.stockflow.util.Formats;
 import co.edu.ucc.stockflow.util.Money;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -31,11 +32,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 /**
- * State and rules of the sale being built in the point of sale (MVVM view model).
+ * State of the sale being built in the point of sale (MVVM view model).
  *
- * <p>It knows nothing about the screen: the controller binds its fields and labels to these
- * properties, and the totals are recalculated automatically whenever something changes. That
- * makes the cart logic testable with plain JUnit.</p>
+ * <p>The rules (stock, discount, VAT) belong to the {@link Invoice} aggregate; this class keeps a
+ * draft invoice, exposes it as JavaFX properties for the screen, and recalculates it whenever
+ * something changes. It knows nothing about controls, so it is tested with plain JUnit.</p>
  */
 public class SaleViewModel {
 
@@ -45,7 +46,7 @@ public class SaleViewModel {
     private final ObjectProperty<BigDecimal> discount = new SimpleObjectProperty<>(BigDecimal.ZERO);
     private final ObjectProperty<BigDecimal> received = new SimpleObjectProperty<>(BigDecimal.ZERO);
     private final StringProperty notes = new SimpleStringProperty("");
-    private final ObjectProperty<BigDecimal> taxRate = new SimpleObjectProperty<>(BigDecimal.ZERO);
+    private final ObjectProperty<TaxPolicy> taxPolicy = new SimpleObjectProperty<>(new VatResponsiblePolicy());
 
     private final ReadOnlyObjectWrapper<BigDecimal> subtotal = new ReadOnlyObjectWrapper<>(BigDecimal.ZERO);
     private final ReadOnlyObjectWrapper<BigDecimal> appliedDiscount = new ReadOnlyObjectWrapper<>(BigDecimal.ZERO);
@@ -56,6 +57,10 @@ public class SaleViewModel {
     private final ReadOnlyBooleanWrapper cash = new ReadOnlyBooleanWrapper(true);
     private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper(true);
     private final ReadOnlyStringWrapper warning = new ReadOnlyStringWrapper("");
+    private final ReadOnlyStringWrapper taxLabel = new ReadOnlyStringWrapper("IVA");
+
+    /** The invoice being built: it owns the lines and the rules. */
+    private final Invoice draft = new Invoice();
 
     /** Latest data of each product in the catalog, to check the stock. */
     private final Map<Long, Product> catalog = new HashMap<>();
@@ -63,7 +68,7 @@ public class SaleViewModel {
     private String notice = "";
 
     public SaleViewModel() {
-        Observable[] inputs = {items, customer, paymentMethod, discount, received, taxRate};
+        Observable[] inputs = {items, customer, paymentMethod, discount, received, taxPolicy};
         for (Observable o : inputs) o.addListener(x -> {
             notice = "";
             recalculate();
@@ -83,33 +88,18 @@ public class SaleViewModel {
      * Adds one unit of the product, or one more if it is already in the sale.
      *
      * @return the line that was added or changed
-     * @throws BusinessException if there is not enough stock
+     * @throws co.edu.ucc.stockflow.exception.InsufficientStockException if there is not enough stock
      */
     public InvoiceItem add(Product product) {
-        Product p = catalog.getOrDefault(product.getId(), product);
-        Optional<InvoiceItem> existing = find(p.getId());
-        int wanted = existing.map(i -> i.getQuantity() + 1).orElse(1);
-        checkStock(p.getId(), p.getName(), wanted);
-        if (existing.isPresent()) {
-            InvoiceItem item = existing.get();
-            item.setQuantity(wanted);
-            touch(item);
-            return item;
-        }
-        InvoiceItem item = InvoiceItem.of(p, 1);
-        items.add(item);
-        return item;
+        InvoiceItem line = draft.addLine(catalog.getOrDefault(product.getId(), product), 1);
+        sync();
+        return line;
     }
 
     /** Changes the quantity of a line; 0 or less removes it. */
     public void setQuantity(InvoiceItem item, int quantity) {
-        if (quantity <= 0) {
-            remove(item);
-            return;
-        }
-        checkStock(item.getProductId(), item.getProductName(), quantity);
-        item.setQuantity(quantity);
-        touch(item);
+        draft.changeQuantity(item, quantity, catalog.get(item.getProductId()));
+        sync();
     }
 
     public void increase(InvoiceItem item) {
@@ -121,11 +111,13 @@ public class SaleViewModel {
     }
 
     public void remove(InvoiceItem item) {
-        items.remove(item);
+        draft.removeLine(item);
+        sync();
     }
 
     /** Empties the sale and goes back to cash payment, without discount or notes. */
     public void clear(Customer defaultCustomer) {
+        for (InvoiceItem line : List.copyOf(draft.getItems())) draft.removeLine(line);
         items.clear();
         discount.set(BigDecimal.ZERO);
         received.set(BigDecimal.ZERO);
@@ -142,63 +134,48 @@ public class SaleViewModel {
         recalculate();
     }
 
-    /** The invoice ready to be issued, with copies of the lines. */
+    /** The invoice ready to be issued: a copy of the draft, so the screen keeps its own. */
     public Invoice toInvoice() {
-        Invoice inv = new Invoice();
-        for (InvoiceItem item : items) {
-            InvoiceItem copy = new InvoiceItem();
-            copy.setProductId(item.getProductId());
-            copy.setProductSku(item.getProductSku());
-            copy.setProductName(item.getProductName());
-            copy.setUnitCost(item.getUnitCost());
-            copy.setUnitPrice(item.getUnitPrice());
-            copy.setQuantity(item.getQuantity());
-            inv.getItems().add(copy);
-        }
-        inv.setCustomerId(customer.get() == null ? null : customer.get().getId());
-        inv.setPaymentMethod(paymentMethod.get());
-        inv.setDiscount(discount.get());
-        inv.setAmountPaid(paymentMethod.get() == PaymentMethod.CASH ? received.get() : BigDecimal.ZERO);
-        inv.setNotes(Formats.clean(notes.get()));
-        return inv;
+        fillDraft();
+        return draft.copy();
     }
 
-    private Optional<InvoiceItem> find(Long productId) {
-        return items.stream().filter(i -> i.getProductId().equals(productId)).findFirst();
+    /** Copies what the user chose (customer, payment, discount...) into the draft. */
+    private void fillDraft() {
+        draft.setCustomerId(customer.get() == null ? null : customer.get().getId());
+        draft.setPaymentMethod(paymentMethod.get());
+        draft.setDiscount(discount.get() == null ? BigDecimal.ZERO : discount.get());
+        draft.setAmountPaid(paymentMethod.get() == PaymentMethod.CASH && received.get() != null
+                ? received.get() : BigDecimal.ZERO);
+        draft.setNotes(Formats.clean(notes.get()));
     }
 
-    private void checkStock(Long productId, String name, int wanted) {
-        Product p = catalog.get(productId);
-        if (p != null) p.checkCanTakeOut(wanted);
-    }
-
-    /** Tells the list (and the table) that a line changed. */
-    private void touch(InvoiceItem item) {
-        int index = items.indexOf(item);
-        if (index >= 0) items.set(index, item);
+    /** Shows the lines of the draft in the observable list (the table refreshes). */
+    private void sync() {
+        items.setAll(draft.getItems());
     }
 
     // ------------------------------------------------------------------ totals
 
     private void recalculate() {
-        Invoice preview = toInvoice();
-        BigDecimal rate = taxRate.get() == null ? BigDecimal.ZERO : taxRate.get();
-        InvoiceService.calculateTotals(preview, rate);
-        subtotal.set(preview.getSubtotal());
-        appliedDiscount.set(preview.getDiscount());
-        tax.set(preview.getTax());
-        total.set(preview.getTotal());
-        units.set(items.stream().mapToInt(InvoiceItem::getQuantity).sum());
-        empty.set(items.isEmpty());
+        fillDraft();
+        BigDecimal requested = draft.getDiscount();
+        draft.calculate(taxPolicy.get() == null ? new VatResponsiblePolicy() : taxPolicy.get());
+        subtotal.set(draft.getSubtotal());
+        appliedDiscount.set(draft.getDiscount());
+        tax.set(draft.getTax());
+        total.set(draft.getTotal());
+        units.set(draft.getItemCount());
+        empty.set(draft.isEmpty());
         cash.set(paymentMethod.get() == PaymentMethod.CASH);
+        taxLabel.set(draft.singleTaxRate().map(r -> "IVA (" + r.toPlainString().replace('.', ',') + " %)").orElse("IVA"));
 
         BigDecimal paid = received.get() == null ? BigDecimal.ZERO : received.get();
-        BigDecimal difference = paid.subtract(preview.getTotal());
+        BigDecimal difference = paid.subtract(draft.getTotal());
         change.set(cash.get() && paid.signum() > 0 && difference.signum() > 0 ? difference : BigDecimal.ZERO);
 
         String w = "";
-        BigDecimal requested = discount.get() == null ? BigDecimal.ZERO : discount.get();
-        if (!items.isEmpty() && requested.compareTo(preview.getSubtotal()) > 0) {
+        if (!draft.isEmpty() && requested.compareTo(draft.getSubtotal()) > 0) {
             w = "El descuento es mayor que el subtotal.";
         } else if (cash.get() && paid.signum() > 0 && difference.signum() < 0) {
             w = "Faltan " + Money.format(difference.negate()) + " para completar el pago.";
@@ -214,7 +191,7 @@ public class SaleViewModel {
     public ObjectProperty<BigDecimal> discountProperty() { return discount; }
     public ObjectProperty<BigDecimal> receivedProperty() { return received; }
     public StringProperty notesProperty() { return notes; }
-    public ObjectProperty<BigDecimal> taxRateProperty() { return taxRate; }
+    public ObjectProperty<TaxPolicy> taxPolicyProperty() { return taxPolicy; }
 
     public ReadOnlyObjectProperty<BigDecimal> subtotalProperty() { return subtotal.getReadOnlyProperty(); }
     public ReadOnlyObjectProperty<BigDecimal> appliedDiscountProperty() { return appliedDiscount.getReadOnlyProperty(); }
@@ -225,6 +202,7 @@ public class SaleViewModel {
     public ReadOnlyBooleanProperty cashProperty() { return cash.getReadOnlyProperty(); }
     public ReadOnlyBooleanProperty emptyProperty() { return empty.getReadOnlyProperty(); }
     public ReadOnlyStringProperty warningProperty() { return warning.getReadOnlyProperty(); }
+    public ReadOnlyStringProperty taxLabelProperty() { return taxLabel.getReadOnlyProperty(); }
 
     public BigDecimal getSubtotal() { return subtotal.get(); }
     public BigDecimal getAppliedDiscount() { return appliedDiscount.get(); }

@@ -6,6 +6,7 @@ import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.model.tax.TaxPolicy;
 import co.edu.ucc.stockflow.service.CustomerService;
 import co.edu.ucc.stockflow.service.InvoicePdfService;
 import co.edu.ucc.stockflow.service.InvoiceService;
@@ -206,8 +207,7 @@ public class PointOfSaleController implements SectionController {
         discountLabel.textProperty().bind(Bindings.createStringBinding(() -> sale.getAppliedDiscount().signum() > 0
                 ? "- " + Money.format(sale.getAppliedDiscount()) : Money.format(BigDecimal.ZERO),
                 sale.appliedDiscountProperty()));
-        taxNameLabel.textProperty().bind(Bindings.createStringBinding(() -> "IVA ("
-                + sale.taxRateProperty().get().stripTrailingZeros().toPlainString() + " %)", sale.taxRateProperty()));
+        taxNameLabel.textProperty().bind(sale.taxLabelProperty());
         taxLabel.textProperty().bind(money(sale.taxProperty()));
         totalLabel.textProperty().bind(money(sale.totalProperty()));
         changeLabel.textProperty().bind(money(sale.changeProperty()));
@@ -246,21 +246,21 @@ public class PointOfSaleController implements SectionController {
 
     /** Everything the screen needs from the database, loaded in the background. */
     private record Loaded(List<Product> catalog, List<Customer> customers, Customer finalConsumer,
-                          String nextNumber, BigDecimal taxRate) {
+                          String nextNumber, TaxPolicy taxPolicy) {
     }
 
     /** Reloads products (stock), customers, VAT and the next invoice number; selects {@code customer} if given. */
     private void reloadData(Customer customer) {
         tasks.run("No se pudieron cargar los productos",
                 () -> new Loaded(products.findActive(), customers.search(null), customers.finalConsumer(),
-                        sequences.peekInvoiceNumber(), settings.defaultTaxRate()),
+                        sequences.peekInvoiceNumber(), settings.taxPolicy()),
                 loaded -> render(loaded, customer));
     }
 
     private void render(Loaded loaded, Customer select) {
         catalog.setAll(loaded.catalog());
         sale.updateCatalog(loaded.catalog());
-        sale.taxRateProperty().set(loaded.taxRate());
+        sale.taxPolicyProperty().set(loaded.taxPolicy());
         filterProducts(searchField.getText());
         nextNumberLabel.setText("Próxima factura: " + loaded.nextNumber());
 

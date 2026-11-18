@@ -10,6 +10,8 @@ import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.model.tax.NotVatResponsiblePolicy;
+import co.edu.ucc.stockflow.model.tax.VatResponsiblePolicy;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +39,7 @@ class SaleViewModelTest {
     @BeforeEach
     void setUp() {
         sale = new SaleViewModel();
-        sale.taxRateProperty().set(new BigDecimal("19"));
+        sale.taxPolicyProperty().set(new VatResponsiblePolicy());
         shoes = product(1, "DEP-001", "229900", 2);
         socks = product(2, "ACC-001", "18900", 10);
         sale.updateCatalog(List.of(shoes, socks));
@@ -161,5 +163,23 @@ class SaleViewModelTest {
         assertTrue(sale.isEmpty());
         assertEquals(PaymentMethod.CASH, sale.paymentMethodProperty().get());
         assertEquals(0, sale.discountProperty().get().signum());
+    }
+
+    @Test
+    void theVatLabelShowsTheRateOnlyWhenThereIsOne() {
+        sale.add(shoes);
+        assertEquals("IVA (19 %)", sale.taxLabelProperty().get());
+        Product book = product(4, "BOOK", "20000", 3);
+        book.setTaxRate(new BigDecimal("5"));
+        sale.add(book);
+        assertEquals("IVA", sale.taxLabelProperty().get());
+    }
+
+    @Test
+    void changingTheTaxRegimeRecalculatesTheTotals() {
+        sale.add(socks);
+        assertEquals(new BigDecimal("22491.00"), sale.getTotal());
+        sale.taxPolicyProperty().set(new NotVatResponsiblePolicy());
+        assertEquals(new BigDecimal("18900.00"), sale.getTotal());
     }
 }
