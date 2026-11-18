@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.repository;
 
 import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;

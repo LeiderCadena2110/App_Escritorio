@@ -2,6 +2,7 @@ package co.edu.ucc.stockflow.repository;
 
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.StockMovement;
+import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

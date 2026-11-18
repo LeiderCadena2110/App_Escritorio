@@ -1,6 +1,8 @@
 package co.edu.ucc.stockflow.exception;
 
 import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 
 /** Trying to take out more units than there are in stock (see {@link Product#checkCanTakeOut(int)}). */
 public class InsufficientStockException extends BusinessException {

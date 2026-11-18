@@ -1,7 +1,7 @@
 package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.dto.TopProduct;
-import co.edu.ucc.stockflow.util.CsvWriter;
+import co.edu.ucc.stockflow.shared.util.CsvWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;

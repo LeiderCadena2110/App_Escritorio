@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.repository;
 
 import co.edu.ucc.stockflow.model.Customer;
+import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;

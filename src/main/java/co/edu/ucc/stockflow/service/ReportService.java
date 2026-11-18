@@ -8,7 +8,7 @@ import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.repository.CustomerRepository;
 import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.repository.ReportRepository;
-import co.edu.ucc.stockflow.util.DateRange;
+import co.edu.ucc.stockflow.shared.util.DateRange;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;

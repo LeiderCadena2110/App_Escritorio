@@ -1,6 +1,5 @@
 package co.edu.ucc.stockflow.ui.viewmodel;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
@@ -8,8 +7,9 @@ import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.tax.TaxPolicy;
 import co.edu.ucc.stockflow.model.tax.VatResponsiblePolicy;
-import co.edu.ucc.stockflow.util.Formats;
-import co.edu.ucc.stockflow.util.Money;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.util.Formats;
+import co.edu.ucc.stockflow.shared.util.Money;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;

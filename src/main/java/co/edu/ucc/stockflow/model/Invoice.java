@@ -1,10 +1,10 @@
 package co.edu.ucc.stockflow.model;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.tax.TaxLine;
 import co.edu.ucc.stockflow.model.tax.TaxPolicy;
-import co.edu.ucc.stockflow.util.Money;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
+import co.edu.ucc.stockflow.shared.util.Money;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;

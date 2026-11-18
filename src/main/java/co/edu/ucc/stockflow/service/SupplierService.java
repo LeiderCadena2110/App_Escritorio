@@ -1,10 +1,10 @@
 package co.edu.ucc.stockflow.service;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.Supplier;
 import co.edu.ucc.stockflow.repository.SupplierRepository;
-import co.edu.ucc.stockflow.util.Formats;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
+import co.edu.ucc.stockflow.shared.util.Formats;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

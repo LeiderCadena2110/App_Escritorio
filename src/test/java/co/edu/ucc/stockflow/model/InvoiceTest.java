@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.exception.InsufficientStockException;
 import co.edu.ucc.stockflow.model.tax.NotVatResponsiblePolicy;
 import co.edu.ucc.stockflow.model.tax.TaxLine;
 import co.edu.ucc.stockflow.model.tax.VatResponsiblePolicy;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;

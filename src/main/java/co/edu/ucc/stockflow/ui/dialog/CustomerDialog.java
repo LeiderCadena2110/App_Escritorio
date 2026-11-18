@@ -2,9 +2,10 @@ package co.edu.ucc.stockflow.ui.dialog;
 
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.service.CustomerService;
-import co.edu.ucc.stockflow.ui.Dialogs;
-import co.edu.ucc.stockflow.ui.TaskRunner;
-import co.edu.ucc.stockflow.ui.component.FormGrid;
+import co.edu.ucc.stockflow.shared.ui.Dialogs;
+import co.edu.ucc.stockflow.shared.ui.TaskRunner;
+import co.edu.ucc.stockflow.shared.ui.component.FormGrid;
+import co.edu.ucc.stockflow.shared.ui.dialog.FormDialog;
 import java.util.Optional;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;

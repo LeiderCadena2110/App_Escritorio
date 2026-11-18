@@ -1,16 +1,16 @@
 package co.edu.ucc.stockflow.service;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
-import co.edu.ucc.stockflow.exception.NotFoundException;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.StockMovement;
 import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.repository.StockMovementRepository;
-import co.edu.ucc.stockflow.util.DateRange;
-import co.edu.ucc.stockflow.util.Formats;
-import co.edu.ucc.stockflow.util.Money;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
+import co.edu.ucc.stockflow.shared.domain.NotFoundException;
+import co.edu.ucc.stockflow.shared.util.DateRange;
+import co.edu.ucc.stockflow.shared.util.Formats;
+import co.edu.ucc.stockflow.shared.util.Money;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;

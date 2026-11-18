@@ -1,11 +1,11 @@
 package co.edu.ucc.stockflow.service;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.ProductCreated;
 import co.edu.ucc.stockflow.repository.ProductRepository;
-import co.edu.ucc.stockflow.util.Formats;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
+import co.edu.ucc.stockflow.shared.util.Formats;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;

@@ -18,7 +18,7 @@ public interface PaymentPolicy {
      * @param total    total of the invoice
      * @param received money the customer gave (only meaningful for cash; 0 if not typed)
      * @param customer customer of the invoice
-     * @throws co.edu.ucc.stockflow.exception.BusinessException when the payment is not valid
+     * @throws co.edu.ucc.stockflow.shared.domain.BusinessException when the payment is not valid
      */
     BigDecimal settle(BigDecimal total, BigDecimal received, Customer customer);
 }

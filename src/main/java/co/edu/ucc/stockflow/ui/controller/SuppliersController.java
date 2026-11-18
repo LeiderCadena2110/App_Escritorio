@@ -2,10 +2,10 @@ package co.edu.ucc.stockflow.ui.controller;
 
 import co.edu.ucc.stockflow.model.Supplier;
 import co.edu.ucc.stockflow.service.SupplierService;
-import co.edu.ucc.stockflow.ui.Dialogs;
-import co.edu.ucc.stockflow.ui.Navigator;
-import co.edu.ucc.stockflow.ui.SectionController;
-import co.edu.ucc.stockflow.ui.component.Tables;
+import co.edu.ucc.stockflow.shared.ui.Dialogs;
+import co.edu.ucc.stockflow.shared.ui.Navigator;
+import co.edu.ucc.stockflow.shared.ui.SectionController;
+import co.edu.ucc.stockflow.shared.ui.component.Tables;
 import co.edu.ucc.stockflow.ui.dialog.SupplierDialog;
 import java.util.List;
 import javafx.animation.PauseTransition;

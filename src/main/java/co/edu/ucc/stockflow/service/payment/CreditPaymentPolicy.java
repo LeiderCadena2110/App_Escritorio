@@ -1,10 +1,10 @@
 package co.edu.ucc.stockflow.service.payment;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.payment.PaymentPolicy;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 

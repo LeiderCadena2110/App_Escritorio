@@ -2,7 +2,7 @@ package co.edu.ucc.stockflow.ui.dialog;
 
 import co.edu.ucc.stockflow.model.Category;
 import co.edu.ucc.stockflow.service.CategoryService;
-import co.edu.ucc.stockflow.ui.Dialogs;
+import co.edu.ucc.stockflow.shared.ui.Dialogs;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;

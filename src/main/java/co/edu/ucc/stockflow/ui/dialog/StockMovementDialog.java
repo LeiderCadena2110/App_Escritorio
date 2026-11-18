@@ -1,16 +1,17 @@
 package co.edu.ucc.stockflow.ui.dialog;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.StockMovement;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.StockService;
-import co.edu.ucc.stockflow.ui.Dialogs;
-import co.edu.ucc.stockflow.ui.TaskRunner;
-import co.edu.ucc.stockflow.ui.component.FormGrid;
-import co.edu.ucc.stockflow.util.Money;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
+import co.edu.ucc.stockflow.shared.ui.Dialogs;
+import co.edu.ucc.stockflow.shared.ui.TaskRunner;
+import co.edu.ucc.stockflow.shared.ui.component.FormGrid;
+import co.edu.ucc.stockflow.shared.ui.dialog.FormDialog;
+import co.edu.ucc.stockflow.shared.util.Money;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Optional;

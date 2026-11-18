@@ -1,8 +1,5 @@
 package co.edu.ucc.stockflow.service;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
-import co.edu.ucc.stockflow.exception.NotFoundException;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
@@ -13,8 +10,11 @@ import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.repository.InvoiceRepository;
 import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.service.payment.PaymentPolicies;
-import co.edu.ucc.stockflow.util.DateRange;
-import co.edu.ucc.stockflow.util.Formats;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
+import co.edu.ucc.stockflow.shared.domain.NotFoundException;
+import co.edu.ucc.stockflow.shared.util.DateRange;
+import co.edu.ucc.stockflow.shared.util.Formats;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;

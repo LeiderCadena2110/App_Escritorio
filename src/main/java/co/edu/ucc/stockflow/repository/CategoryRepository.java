@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.repository;
 
 import co.edu.ucc.stockflow.model.Category;
+import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;

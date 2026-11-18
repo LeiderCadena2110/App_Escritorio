@@ -1,9 +1,9 @@
 package co.edu.ucc.stockflow.service;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
-import co.edu.ucc.stockflow.repository.SequenceRepository;
 import co.edu.ucc.stockflow.repository.SequenceRepository.Series;
+import co.edu.ucc.stockflow.repository.SequenceRepository;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import java.util.function.Predicate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,11 +1,11 @@
 package co.edu.ucc.stockflow.service;
 
-import co.edu.ucc.stockflow.exception.BusinessException;
-import co.edu.ucc.stockflow.exception.ErrorCode;
-import co.edu.ucc.stockflow.exception.NotFoundException;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.repository.CustomerRepository;
-import co.edu.ucc.stockflow.util.Formats;
+import co.edu.ucc.stockflow.shared.domain.BusinessException;
+import co.edu.ucc.stockflow.shared.domain.ErrorCode;
+import co.edu.ucc.stockflow.shared.domain.NotFoundException;
+import co.edu.ucc.stockflow.shared.util.Formats;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;

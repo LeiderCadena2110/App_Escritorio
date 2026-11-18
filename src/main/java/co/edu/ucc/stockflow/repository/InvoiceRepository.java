@@ -4,6 +4,7 @@ import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.InvoiceStatus;
 import co.edu.ucc.stockflow.model.PaymentMethod;
+import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
