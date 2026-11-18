@@ -2,6 +2,24 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] · Paso 2: bases para producción
+
+### Agregado
+- `Clock` inyectado: los servicios y repositorios ya no llaman `now()` directamente; las pruebas pueden fijar la fecha.
+- Logging con SLF4J: arranque, ventas, anulaciones y movimientos quedan en `~/.stockflow/app.log`.
+- Los errores inesperados muestran un **código de error** que también queda en el log.
+- `ErrorCode` + `i18n/messages.properties`: las reglas de negocio lanzan códigos; el texto vive en un archivo de mensajes.
+- Menú *Ayuda › Cargar datos de ejemplo* (solo con el catálogo vacío).
+
+### Cambiado
+- Los formularios guardan en segundo plano y muestran los errores de validación dentro del mismo formulario.
+- El catálogo de ejemplo ya no se carga solo: requiere `stockflow.sample-data=true` o el menú *Ayuda*.
+- `FileChoosers` pasa a ser un componente de Spring (sin estado estático).
+- Los mensajes largos de los diálogos se ajustan en varias líneas.
+
+### Corregido
+- Eliminar un producto con compras o ajustes borraba su historial de inventario; ahora se desactiva.
+
 ## [1.1.0] · Fase 1: estructura y base de datos
 
 ### Agregado
