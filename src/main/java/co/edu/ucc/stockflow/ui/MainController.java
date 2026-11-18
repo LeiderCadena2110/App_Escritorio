@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.ui;
 
 import co.edu.ucc.stockflow.DesktopApp;
+import co.edu.ucc.stockflow.service.DataSeeder;
 import co.edu.ucc.stockflow.service.SettingsService;
 import java.util.EnumMap;
 import java.util.Map;
@@ -53,19 +54,22 @@ public class MainController {
     private final Navigator navigator;
     private final Dialogs dialogs;
     private final TaskRunner tasks;
+    private final DataSeeder seeder;
 
     private final Map<Section, ViewLoader.LoadedView<Object>> loaded = new EnumMap<>(Section.class);
     private final Map<Section, ToggleButton> buttons = new EnumMap<>(Section.class);
     private final ToggleGroup group = new ToggleGroup();
     private Stage stage;
+    private Section current = Section.DASHBOARD;
 
     public MainController(ViewLoader views, SettingsService settings, Navigator navigator, Dialogs dialogs,
-                          TaskRunner tasks) {
+                          TaskRunner tasks, DataSeeder seeder) {
         this.views = views;
         this.settings = settings;
         this.navigator = navigator;
         this.dialogs = dialogs;
         this.tasks = tasks;
+        this.seeder = seeder;
     }
 
     @FXML
@@ -111,6 +115,7 @@ public class MainController {
     }
 
     public void show(Section section) {
+        current = section;
         ViewLoader.LoadedView<Object> view = loaded.computeIfAbsent(section, s -> views.load(s.fxml()));
         content.getChildren().setAll(view.root());
         buttons.get(section).setSelected(true);
@@ -173,8 +178,28 @@ public class MainController {
                 "StockFlow 1.1\nInventario y facturación para pequeños negocios.\n\n"
                         + "Los datos se guardan en este equipo, en la carpeta .stockflow de su usuario.\n"
                         + "Universidad Cooperativa de Colombia, sede Pasto."));
-        Menu help = new Menu("Ayuda", null, about);
+        MenuItem sample = item("Cargar datos de ejemplo", null, this::loadSampleData);
+        Menu help = new Menu("Ayuda", null, sample, new SeparatorMenuItem(), about);
         menuBar.getMenus().setAll(file, go, help);
+    }
+
+    /** Fills an empty business with the sample shoe-store catalog (to try the app or present it). */
+    private void loadSampleData() {
+        tasks.run("No se pudieron cargar los datos de ejemplo", seeder::canLoadSampleData, allowed -> {
+            if (!allowed) {
+                dialogs.info(stage, "Datos de ejemplo",
+                        "Los datos de ejemplo solo se pueden cargar en un negocio sin productos, y una sola vez.");
+                return;
+            }
+            if (!dialogs.confirm(stage, "Datos de ejemplo", "Se crearán 13 productos de calzado, 5 categorías, "
+                    + "3 proveedores y 3 clientes de ejemplo. Puede editarlos o borrarlos después.", "Cargar")) {
+                return;
+            }
+            tasks.run("No se pudieron cargar los datos de ejemplo", () -> {
+                seeder.loadSampleData();
+                return true;
+            }, done -> show(current));
+        });
     }
 
     private static KeyCombination shortcut(KeyCode code) {

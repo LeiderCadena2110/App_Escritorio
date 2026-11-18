@@ -8,14 +8,16 @@ import co.edu.ucc.stockflow.repository.ProductRepository;
 import java.math.BigDecimal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Prepares the database on start: the "final consumer" customer always, and a small sample
- * catalog (a shoe store) the first time, so the app can be tried right away.
+ * Prepares the database on start: the "final consumer" customer always. The sample catalog
+ * (a shoe store) is only loaded when {@code stockflow.sample-data=true} or when the user asks for
+ * it from Ayuda › Cargar datos de ejemplo, so a real business never gets fake products.
  */
 @Service
 public class DataSeeder {
@@ -28,31 +30,37 @@ public class DataSeeder {
     private final SupplierService suppliers;
     private final ProductService products;
     private final ProductRepository productRepository;
+    private final boolean sampleDataOnStart;
     private int barcodeCounter;
 
     public DataSeeder(SettingsService settings, CustomerService customers, CategoryService categories,
-                      SupplierService suppliers, ProductService products, ProductRepository productRepository) {
+                      SupplierService suppliers, ProductService products, ProductRepository productRepository,
+                      @Value("${stockflow.sample-data:false}") boolean sampleDataOnStart) {
         this.settings = settings;
         this.customers = customers;
         this.categories = categories;
         this.suppliers = suppliers;
         this.products = products;
         this.productRepository = productRepository;
+        this.sampleDataOnStart = sampleDataOnStart;
     }
 
     @Transactional
     public void prepare() {
         customers.finalConsumer();
+        if (sampleDataOnStart && canLoadSampleData()) loadSampleData();
+    }
+
+    /** The sample catalog is only offered while the business has no products and it was never loaded. */
+    public boolean canLoadSampleData() {
         boolean alreadyLoaded = Boolean.parseBoolean(settings.get(SettingsService.SAMPLE_DATA_LOADED, "false"));
-        if (!alreadyLoaded && productRepository.countActive() == 0) {
-            loadSampleData();
-        }
-        settings.set(SettingsService.SAMPLE_DATA_LOADED, "true");
+        return !alreadyLoaded && productRepository.countActive() == 0;
     }
 
     @Transactional
     public void loadSampleData() {
         log.info("Loading the sample shoe-store catalog");
+        settings.set(SettingsService.SAMPLE_DATA_LOADED, "true");
         Category sports = category("Deportivos", "Tenis para correr, fútbol y entrenamiento");
         Category casual = category("Casuales", "Calzado para el día a día");
         Category formal = category("Formales", "Zapatos de vestir");
