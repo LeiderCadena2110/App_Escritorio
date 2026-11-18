@@ -10,13 +10,11 @@ import co.edu.ucc.stockflow.model.InvoiceStatus;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.Product;
-import co.edu.ucc.stockflow.model.tax.VatResponsiblePolicy;
 import co.edu.ucc.stockflow.repository.InvoiceRepository;
 import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.service.payment.PaymentPolicies;
 import co.edu.ucc.stockflow.util.DateRange;
 import co.edu.ucc.stockflow.util.Formats;
-import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,8 +23,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Issues and cancels sales invoices, keeping the stock in sync. */
@@ -55,17 +51,6 @@ public class InvoiceService {
         this.sequences = sequences;
         this.payments = payments;
         this.clock = clock;
-    }
-
-    /**
-     * Totals with one VAT rate for every line.
-     *
-     * @deprecated kept only while the point of sale moves to {@link Invoice#calculate}; use that instead.
-     */
-    @Deprecated(forRemoval = true)
-    public static void calculateTotals(Invoice invoice, BigDecimal taxRate) {
-        for (InvoiceItem item : invoice.getItems()) item.setProductTaxRate(taxRate);
-        invoice.calculate(new VatResponsiblePolicy());
     }
 
     /**

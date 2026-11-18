@@ -92,7 +92,7 @@ public class InvoiceRepository {
     /** The invoice with its lines. */
     public Optional<Invoice> findById(long id) {
         Optional<Invoice> found = jdbc.query(SELECT + " WHERE i.id = ?", MAPPER, id).stream().findFirst();
-        found.ifPresent(inv -> inv.setItems(findItems(id)));
+        found.ifPresent(inv -> inv.restoreLines(findItems(id)));
         return found;
     }
 

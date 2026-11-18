@@ -9,7 +9,6 @@ import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.exception.InsufficientStockException;
 import co.edu.ucc.stockflow.model.Invoice;
-import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.InvoiceStatus;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.PaymentMethod;
@@ -62,7 +61,7 @@ class InvoiceFlowIntegrationTest {
         Product shoe = newProduct("IT-001", "100000", 5);
 
         Invoice draft = new Invoice();
-        draft.getItems().add(InvoiceItem.of(shoe, 2));
+        draft.addLine(shoe, 2);
         draft.setPaymentMethod(PaymentMethod.CARD);
         Invoice saved = invoices.issue(draft);
 
@@ -81,10 +80,12 @@ class InvoiceFlowIntegrationTest {
     }
 
     @Test
-    void cannotSellMoreThanTheStock() {
-        Product shoe = newProduct("IT-002", "50000", 1);
+    void stockIsCheckedAgainWhenIssuing() {
+        Product shoe = newProduct("IT-002", "50000", 2);
         Invoice draft = new Invoice();
-        draft.getItems().add(InvoiceItem.of(shoe, 2));
+        draft.addLine(shoe, 2);
+        // Meanwhile one pair is registered as damaged: the draft no longer fits the stock
+        stock.register(shoe.getId(), MovementType.DAMAGE, 1, null, null, "Roto");
         assertThrows(InsufficientStockException.class, () -> invoices.issue(draft));
         assertEquals(1, products.findById(shoe.getId()).orElseThrow().getStock());
     }
@@ -93,7 +94,7 @@ class InvoiceFlowIntegrationTest {
     void cashMustCoverTheTotal() {
         Product shoe = newProduct("IT-003", "50000", 3);
         Invoice draft = new Invoice();
-        draft.getItems().add(InvoiceItem.of(shoe, 1));
+        draft.addLine(shoe, 1);
         draft.setPaymentMethod(PaymentMethod.CASH);
         draft.setAmountPaid(new BigDecimal("1000"));
         assertThrows(BusinessException.class, () -> invoices.issue(draft));
@@ -103,9 +104,9 @@ class InvoiceFlowIntegrationTest {
     void invoiceNumbersAreConsecutive() {
         Product shoe = newProduct("IT-004", "10000", 10);
         Invoice a = new Invoice();
-        a.getItems().add(InvoiceItem.of(shoe, 1));
+        a.addLine(shoe, 1);
         Invoice b = new Invoice();
-        b.getItems().add(InvoiceItem.of(shoe, 1));
+        b.addLine(shoe, 1);
         String first = invoices.issue(a).getNumber();
         String second = invoices.issue(b).getNumber();
         long n1 = Long.parseLong(first.replaceAll("\\D", ""));
@@ -123,7 +124,7 @@ class InvoiceFlowIntegrationTest {
     void soldProductsAreDeactivatedInsteadOfDeleted() {
         Product shoe = newProduct("IT-006", "10000", 2);
         Invoice draft = new Invoice();
-        draft.getItems().add(InvoiceItem.of(shoe, 1));
+        draft.addLine(shoe, 1);
         invoices.issue(draft);
         assertFalse(products.delete(shoe));
         assertFalse(products.findById(shoe.getId()).orElseThrow().isActive());
@@ -143,7 +144,7 @@ class InvoiceFlowIntegrationTest {
         sequences.configureInvoices("POS-", 500);
         Product shoe = newProduct("IT-008", "10000", 3);
         Invoice draft = new Invoice();
-        draft.getItems().add(InvoiceItem.of(shoe, 1));
+        draft.addLine(shoe, 1);
         assertEquals("POS-000500", invoices.issue(draft).getNumber());
         assertEquals("POS-000501", sequences.peekInvoiceNumber());
     }

@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,7 +43,7 @@ public class Invoice {
     private InvoiceStatus status = InvoiceStatus.PAID;
     private String notes;
     private LocalDateTime cancelledAt;
-    private List<InvoiceItem> items = new ArrayList<>();
+    private final List<InvoiceItem> items = new ArrayList<>();
 
     // ------------------------------------------------------------------ lines
 
@@ -230,6 +231,7 @@ public class Invoice {
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
     public BigDecimal getDiscount() { return discount; }
     public void setDiscount(BigDecimal discount) { this.discount = discount; }
+    /** The rate when all lines pay the same one; null when rates are mixed (see getTaxBreakdown). */
     public BigDecimal getTaxRate() { return taxRate; }
     public void setTaxRate(BigDecimal taxRate) { this.taxRate = taxRate; }
     public BigDecimal getTax() { return tax; }
@@ -246,6 +248,12 @@ public class Invoice {
     public void setNotes(String notes) { this.notes = notes; }
     public LocalDateTime getCancelledAt() { return cancelledAt; }
     public void setCancelledAt(LocalDateTime cancelledAt) { this.cancelledAt = cancelledAt; }
-    public List<InvoiceItem> getItems() { return items; }
-    public void setItems(List<InvoiceItem> items) { this.items = items; }
+    /** The lines, read-only: they change through addLine, changeQuantity and removeLine. */
+    public List<InvoiceItem> getItems() { return Collections.unmodifiableList(items); }
+
+    /** Puts back the lines of an invoice read from the database (used by the repository). */
+    public void restoreLines(List<InvoiceItem> saved) {
+        items.clear();
+        items.addAll(saved);
+    }
 }

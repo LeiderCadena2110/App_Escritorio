@@ -141,4 +141,21 @@ class InvoiceTest {
         assertEquals(ErrorCode.INVOICE_QUANTITY_NOT_POSITIVE, assertThrows(BusinessException.class,
                 () -> new Invoice().addLine(product(1, "1", "19", 5), 0)).getCode());
     }
+
+    @Test
+    void changeIsNeverNegative() {
+        Invoice inv = new Invoice();
+        inv.setTotal(new BigDecimal("50000"));
+        inv.setAmountPaid(new BigDecimal("40000"));
+        assertEquals(BigDecimal.ZERO, inv.getChange());
+        inv.setAmountPaid(new BigDecimal("100000"));
+        assertEquals(new BigDecimal("50000"), inv.getChange());
+    }
+
+    @Test
+    void linesCanOnlyChangeThroughTheAggregate() {
+        Invoice inv = new Invoice();
+        inv.addLine(product(1, "1000", "19", 5), 1);
+        assertThrows(UnsupportedOperationException.class, () -> inv.getItems().clear());
+    }
 }
