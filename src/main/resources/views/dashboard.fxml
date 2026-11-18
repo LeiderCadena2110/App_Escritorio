@@ -14,7 +14,7 @@
 
 <!-- Dashboard: today's and this month's sales, stock alerts and best sellers -->
 <ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="co.edu.ucc.stockflow.ui.controller.DashboardController"
+            fx:controller="co.edu.ucc.stockflow.reporting.ui.DashboardController"
             fitToWidth="true">
     <VBox styleClass="section" spacing="16">
         <HBox alignment="CENTER_LEFT" spacing="12">

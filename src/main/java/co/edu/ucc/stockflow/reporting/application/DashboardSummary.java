@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.dto;
+package co.edu.ucc.stockflow.reporting.application;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
 import java.math.BigDecimal;

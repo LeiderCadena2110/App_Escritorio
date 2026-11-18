@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.dto;
+package co.edu.ucc.stockflow.reporting.application;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

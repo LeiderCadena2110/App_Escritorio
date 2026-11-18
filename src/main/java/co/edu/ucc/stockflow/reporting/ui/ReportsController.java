@@ -1,10 +1,10 @@
-package co.edu.ucc.stockflow.ui.controller;
+package co.edu.ucc.stockflow.reporting.ui;
 
-import co.edu.ucc.stockflow.dto.DailySales;
-import co.edu.ucc.stockflow.dto.SalesSummary;
-import co.edu.ucc.stockflow.dto.TopProduct;
-import co.edu.ucc.stockflow.service.ReportService;
-import co.edu.ucc.stockflow.service.TopProductCsvExport;
+import co.edu.ucc.stockflow.reporting.application.DailySales;
+import co.edu.ucc.stockflow.reporting.application.ReportService;
+import co.edu.ucc.stockflow.reporting.application.SalesSummary;
+import co.edu.ucc.stockflow.reporting.application.TopProduct;
+import co.edu.ucc.stockflow.reporting.application.TopProductCsvExport;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;

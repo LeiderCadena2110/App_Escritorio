@@ -1,8 +1,8 @@
-package co.edu.ucc.stockflow.repository;
+package co.edu.ucc.stockflow.reporting.infrastructure;
 
-import co.edu.ucc.stockflow.dto.DailySales;
-import co.edu.ucc.stockflow.dto.SalesSummary;
-import co.edu.ucc.stockflow.dto.TopProduct;
+import co.edu.ucc.stockflow.reporting.application.DailySales;
+import co.edu.ucc.stockflow.reporting.application.SalesSummary;
+import co.edu.ucc.stockflow.reporting.application.TopProduct;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.time.LocalDateTime;
 import java.util.List;

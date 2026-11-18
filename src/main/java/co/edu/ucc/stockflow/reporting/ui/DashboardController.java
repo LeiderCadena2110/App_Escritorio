@@ -1,10 +1,10 @@
-package co.edu.ucc.stockflow.ui.controller;
+package co.edu.ucc.stockflow.reporting.ui;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
-import co.edu.ucc.stockflow.dto.DailySales;
-import co.edu.ucc.stockflow.dto.DashboardSummary;
-import co.edu.ucc.stockflow.dto.TopProduct;
-import co.edu.ucc.stockflow.service.ReportService;
+import co.edu.ucc.stockflow.reporting.application.DailySales;
+import co.edu.ucc.stockflow.reporting.application.DashboardSummary;
+import co.edu.ucc.stockflow.reporting.application.ReportService;
+import co.edu.ucc.stockflow.reporting.application.TopProduct;
 import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.Section;
