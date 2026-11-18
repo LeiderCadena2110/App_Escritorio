@@ -140,9 +140,20 @@ public class ProductRepository {
                 active, JdbcHelper.timestamp(LocalDateTime.now(clock)), id);
     }
 
+    /**
+     * Deletes a product that never moved: only its "initial inventory" entry is removed with it.
+     * Products with any other movement must be deactivated instead (see ProductService.delete).
+     */
     public void delete(long id) {
-        jdbc.update("DELETE FROM stock_movements WHERE product_id = ?", id);
+        jdbc.update("DELETE FROM stock_movements WHERE product_id = ? AND movement_type = 'INITIAL'", id);
         jdbc.update("DELETE FROM products WHERE id = ?", id);
+    }
+
+    /** Movements other than the initial inventory (purchases, sales, adjustments...). */
+    public int countHistory(long id) {
+        return jdbc.queryForObject(
+                "SELECT COUNT(*) FROM stock_movements WHERE product_id = ? AND movement_type <> 'INITIAL'",
+                Integer.class, id);
     }
 
     public int countSales(long id) {

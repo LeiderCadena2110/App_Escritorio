@@ -211,7 +211,8 @@ public class ProductsController implements SectionController {
         if (p == null) return;
         if (!dialogs.confirm(navigator.window(), "Eliminar producto",
                 "¿Eliminar " + p.getSku() + " · " + p.getName() + "?\n\n"
-                        + "Si el producto ya tiene ventas, solo se desactivará para conservar el historial.",
+                        + "Si el producto ya tiene ventas o movimientos de inventario, solo se desactivará "
+                        + "para conservar el historial.",
                 "Eliminar")) {
             return;
         }
@@ -219,7 +220,7 @@ public class ProductsController implements SectionController {
             boolean deleted = products.delete(p);
             if (!deleted) {
                 dialogs.info(navigator.window(), "Producto desactivado",
-                        p.getName() + " tiene ventas registradas, así que se desactivó en lugar de borrarse.\n"
+                        p.getName() + " tiene ventas o movimientos registrados, así que se desactivó en lugar de borrarse.\n"
                                 + "Puede verlo marcando \"Mostrar inactivos\".");
             }
             reload();

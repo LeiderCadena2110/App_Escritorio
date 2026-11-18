@@ -73,14 +73,14 @@ public class ProductService {
     }
 
     /**
-     * Removes the product. Products that were already sold are only deactivated so the invoices keep
-     * their history.
+     * Removes the product. Products that were sold or had any stock movement after being created
+     * (a purchase, an adjustment...) are only deactivated, so invoices and the stock history stay complete.
      *
      * @return true if it was deleted, false if it was deactivated
      */
     @Transactional
     public boolean delete(Product product) {
-        if (repository.countSales(product.getId()) > 0) {
+        if (repository.countSales(product.getId()) > 0 || repository.countHistory(product.getId()) > 0) {
             repository.setActive(product.getId(), false);
             return false;
         }

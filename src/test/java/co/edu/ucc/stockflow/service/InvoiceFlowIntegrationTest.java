@@ -159,4 +159,16 @@ class InvoiceFlowIntegrationTest {
         other.setBarcode("7709000000017");
         assertThrows(BusinessException.class, () -> products.update(other));
     }
+
+    @Test
+    void productsWithStockHistoryAreDeactivatedNotDeleted() {
+        Product bought = newProduct("IT-011", "10000", 0);
+        stock.register(bought.getId(), MovementType.PURCHASE, 5, new BigDecimal("1000"), "FC-9", null);
+        assertFalse(products.delete(bought));
+        assertEquals(1, stock.history(bought.getId()).size());
+
+        Product untouched = newProduct("IT-012", "10000", 3);
+        assertTrue(products.delete(untouched));
+        assertTrue(products.findById(untouched.getId()).isEmpty());
+    }
 }
