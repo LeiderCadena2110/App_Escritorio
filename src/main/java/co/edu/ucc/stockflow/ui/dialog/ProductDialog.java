@@ -106,6 +106,7 @@ public class ProductDialog {
         }));
         Label priceHint = form.add("", new Label("El precio de venta se escribe sin IVA; el IVA se suma en la factura."));
         priceHint.getStyleClass().add("muted");
+        priceHint.setWrapText(true);
         Label margin = form.add("Margen", new Label());
         margin.getStyleClass().add("muted");
         Runnable updateMargin = () -> margin.setText(marginText(cost.getText(), price.getText()));
