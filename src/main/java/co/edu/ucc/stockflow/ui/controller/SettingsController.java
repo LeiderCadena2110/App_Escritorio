@@ -80,7 +80,7 @@ public class SettingsController implements SectionController {
         phoneField.setText(b.phone());
         emailField.setText(b.email());
         footerField.setText(b.invoiceFooter());
-        taxRateField.setText(settings.taxRate().stripTrailingZeros().toPlainString());
+        taxRateField.setText(settings.defaultTaxRate().stripTrailingZeros().toPlainString());
         var series = sequences.invoiceSeries();
         prefixField.setText(series.prefix());
         nextNumberField.setText(Long.toString(series.nextValue()));
@@ -112,7 +112,7 @@ public class SettingsController implements SectionController {
     private void saveInvoicing() {
         if (dialogs.run(navigator.window(), "No se pudo guardar", () -> {
             String rate = taxRateField.getText().replace(',', '.');
-            settings.setTaxRate(new BigDecimal(rate.isBlank() ? "0" : rate));
+            settings.setDefaultTaxRate(new BigDecimal(rate.isBlank() ? "0" : rate));
             sequences.configureInvoices(prefixField.getText(),
                     Long.parseLong(nextNumberField.getText().isBlank() ? "1" : nextNumberField.getText()));
         })) {

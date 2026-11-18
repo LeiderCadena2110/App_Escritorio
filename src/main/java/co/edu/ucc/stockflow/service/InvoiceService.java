@@ -78,7 +78,7 @@ public class InvoiceService {
 
     /** Totals with the VAT rate of the settings (used by the point of sale while editing). */
     public void calculateTotals(Invoice invoice) {
-        calculateTotals(invoice, settings.taxRate());
+        calculateTotals(invoice, settings.defaultTaxRate());
     }
 
     /**
@@ -120,7 +120,7 @@ public class InvoiceService {
                 throw new BusinessException(ErrorCode.INVOICE_DISCOUNT_ABOVE_SUBTOTAL);
             }
         }
-        calculateTotals(draft, settings.taxRate());
+        calculateTotals(draft, settings.defaultTaxRate());
         if (draft.getCustomerId() == null) draft.setCustomerId(customerService.finalConsumer().getId());
         if (draft.getPaymentMethod() == null) draft.setPaymentMethod(PaymentMethod.CASH);
         if (draft.getPaymentMethod() == PaymentMethod.CASH) {

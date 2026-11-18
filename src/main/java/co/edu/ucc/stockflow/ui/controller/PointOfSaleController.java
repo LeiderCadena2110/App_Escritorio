@@ -253,7 +253,7 @@ public class PointOfSaleController implements SectionController {
     private void reloadData(Customer customer) {
         tasks.run("No se pudieron cargar los productos",
                 () -> new Loaded(products.findActive(), customers.search(null), customers.finalConsumer(),
-                        sequences.peekInvoiceNumber(), settings.taxRate()),
+                        sequences.peekInvoiceNumber(), settings.defaultTaxRate()),
                 loaded -> render(loaded, customer));
     }
 

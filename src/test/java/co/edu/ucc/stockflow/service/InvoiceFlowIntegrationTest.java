@@ -57,7 +57,7 @@ class InvoiceFlowIntegrationTest {
 
     @Test
     void sellingTakesUnitsOutOfStockAndCancellingPutsThemBack() {
-        settings.setTaxRate(new BigDecimal("19"));
+        settings.setDefaultTaxRate(new BigDecimal("19"));
         Product shoe = newProduct("IT-001", "100000", 5);
 
         Invoice draft = new Invoice();
