@@ -10,6 +10,7 @@ import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.repository.ReportRepository;
 import co.edu.ucc.stockflow.util.DateRange;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,18 +25,22 @@ public class ReportService {
     private final ReportRepository reports;
     private final ProductRepository products;
     private final CustomerRepository customers;
+    private final Clock clock;
 
-    public ReportService(ReportRepository reports, ProductRepository products, CustomerRepository customers) {
+    public ReportService(ReportRepository reports, ProductRepository products, CustomerRepository customers,
+                         Clock clock) {
         this.reports = reports;
         this.products = products;
         this.customers = customers;
+        this.clock = clock;
     }
 
     public DashboardSummary dashboard() {
-        DateRange month = DateRange.thisMonth();
+        DateRange month = DateRange.thisMonth(clock);
+        DateRange today = DateRange.today(clock);
         List<Product> lowStock = products.findLowStock();
         return new DashboardSummary(
-                reports.salesSummary(DateRange.today().start(), DateRange.today().end()),
+                reports.salesSummary(today.start(), today.end()),
                 reports.salesSummary(month.start(), month.end()),
                 products.countActive(),
                 lowStock.size(),
@@ -44,7 +49,7 @@ public class ReportService {
                 customers.count(),
                 lowStock.size() > 8 ? lowStock.subList(0, 8) : lowStock,
                 reports.topProducts(month.start(), month.end(), 5),
-                dailySales(DateRange.lastDays(7)));
+                dailySales(DateRange.lastDays(7, clock)));
     }
 
     public SalesSummary salesSummary(DateRange range) {

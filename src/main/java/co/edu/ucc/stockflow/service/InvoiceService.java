@@ -15,6 +15,7 @@ import co.edu.ucc.stockflow.util.DateRange;
 import co.edu.ucc.stockflow.util.Formats;
 import co.edu.ucc.stockflow.util.Money;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,15 +34,17 @@ public class InvoiceService {
     private final CustomerService customerService;
     private final SettingsService settings;
     private final SequenceService sequences;
+    private final Clock clock;
 
     public InvoiceService(InvoiceRepository invoices, ProductRepository products, StockService stockService,
-                          CustomerService customerService, SettingsService settings, SequenceService sequences) {
+                          CustomerService customerService, SettingsService settings, SequenceService sequences, Clock clock) {
         this.invoices = invoices;
         this.products = products;
         this.stockService = stockService;
         this.customerService = customerService;
         this.settings = settings;
         this.sequences = sequences;
+        this.clock = clock;
     }
 
     /**
@@ -131,7 +134,7 @@ public class InvoiceService {
         }
         draft.setNotes(Formats.clean(draft.getNotes()));
         draft.setStatus(InvoiceStatus.PAID);
-        draft.setIssuedAt(LocalDateTime.now());
+        draft.setIssuedAt(LocalDateTime.now(clock));
         draft.setNumber(sequences.reserveInvoiceNumber(invoices::existsNumber));
 
         // 3. Save and take the units out of stock
@@ -154,7 +157,7 @@ public class InvoiceService {
             stockService.register(item.getProductId(), MovementType.SALE_CANCELLATION, item.getQuantity(),
                     item.getUnitCost(), invoice.getNumber(), why);
         }
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         invoices.markCancelled(invoiceId, now, "[Anulada: " + why + "]");
         return invoices.findById(invoiceId).orElseThrow();
     }

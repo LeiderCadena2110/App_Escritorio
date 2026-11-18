@@ -2,6 +2,7 @@ package co.edu.ucc.stockflow.repository;
 
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.StockMovement;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +30,15 @@ public class StockMovementRepository {
     };
 
     private final JdbcTemplate jdbc;
+    private final Clock clock;
 
-    public StockMovementRepository(JdbcTemplate jdbc) {
+    public StockMovementRepository(JdbcTemplate jdbc, Clock clock) {
         this.jdbc = jdbc;
+        this.clock = clock;
     }
 
     public StockMovement insert(StockMovement m) {
-        if (m.getCreatedAt() == null) m.setCreatedAt(LocalDateTime.now());
+        if (m.getCreatedAt() == null) m.setCreatedAt(LocalDateTime.now(clock));
         long id = JdbcHelper.insert(jdbc, """
                 INSERT INTO stock_movements (product_id, movement_type, quantity, stock_after, unit_cost, reference,
                                              notes, created_at)

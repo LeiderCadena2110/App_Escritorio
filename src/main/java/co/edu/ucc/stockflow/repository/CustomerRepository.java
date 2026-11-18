@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.repository;
 
 import co.edu.ucc.stockflow.model.Customer;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +26,11 @@ public class CustomerRepository {
     };
 
     private final JdbcTemplate jdbc;
+    private final Clock clock;
 
-    public CustomerRepository(JdbcTemplate jdbc) {
+    public CustomerRepository(JdbcTemplate jdbc, Clock clock) {
         this.jdbc = jdbc;
+        this.clock = clock;
     }
 
     public List<Customer> search(String text) {
@@ -54,7 +57,7 @@ public class CustomerRepository {
 
     public Customer save(Customer c) {
         if (c.getId() == null) {
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime now = LocalDateTime.now(clock);
             long id = JdbcHelper.insert(jdbc, """
                     INSERT INTO customers (document_type, document_number, name, phone, email, address, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?)

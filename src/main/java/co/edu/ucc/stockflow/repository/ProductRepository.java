@@ -2,6 +2,7 @@ package co.edu.ucc.stockflow.repository;
 
 import co.edu.ucc.stockflow.model.Product;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +44,11 @@ public class ProductRepository {
     };
 
     private final JdbcTemplate jdbc;
+    private final Clock clock;
 
-    public ProductRepository(JdbcTemplate jdbc) {
+    public ProductRepository(JdbcTemplate jdbc, Clock clock) {
         this.jdbc = jdbc;
+        this.clock = clock;
     }
 
     /**
@@ -94,7 +97,7 @@ public class ProductRepository {
     }
 
     public Product insert(Product p) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         long id = JdbcHelper.insert(jdbc, """
                 INSERT INTO products (sku, barcode, name, description, category_id, supplier_id, cost_price,
                                       sale_price, stock, min_stock, unit, active, created_at, updated_at)
@@ -111,7 +114,7 @@ public class ProductRepository {
 
     /** Updates the product data. The stock is NOT changed here: it only changes through stock movements. */
     public void update(Product p) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         jdbc.update("""
                 UPDATE products SET sku = ?, barcode = ?, name = ?, description = ?, category_id = ?, supplier_id = ?,
                        cost_price = ?, sale_price = ?, min_stock = ?, unit = ?, active = ?, updated_at = ?
@@ -125,7 +128,7 @@ public class ProductRepository {
 
     public void updateStock(long id, int newStock) {
         jdbc.update("UPDATE products SET stock = ?, updated_at = ? WHERE id = ?",
-                newStock, JdbcHelper.timestamp(LocalDateTime.now()), id);
+                newStock, JdbcHelper.timestamp(LocalDateTime.now(clock)), id);
     }
 
     public void updateCostPrice(long id, BigDecimal costPrice) {
@@ -134,7 +137,7 @@ public class ProductRepository {
 
     public void setActive(long id, boolean active) {
         jdbc.update("UPDATE products SET active = ?, updated_at = ? WHERE id = ?",
-                active, JdbcHelper.timestamp(LocalDateTime.now()), id);
+                active, JdbcHelper.timestamp(LocalDateTime.now(clock)), id);
     }
 
     public void delete(long id) {

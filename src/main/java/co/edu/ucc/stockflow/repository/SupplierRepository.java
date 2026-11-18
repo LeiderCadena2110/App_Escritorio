@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.repository;
 
 import co.edu.ucc.stockflow.model.Supplier;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -26,9 +27,11 @@ public class SupplierRepository {
     };
 
     private final JdbcTemplate jdbc;
+    private final Clock clock;
 
-    public SupplierRepository(JdbcTemplate jdbc) {
+    public SupplierRepository(JdbcTemplate jdbc, Clock clock) {
         this.jdbc = jdbc;
+        this.clock = clock;
     }
 
     public List<Supplier> search(String text) {
@@ -54,7 +57,7 @@ public class SupplierRepository {
 
     public Supplier save(Supplier s) {
         if (s.getId() == null) {
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime now = LocalDateTime.now(clock);
             long id = JdbcHelper.insert(jdbc, """
                     INSERT INTO suppliers (tax_id, name, contact_name, phone, email, address, active, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)

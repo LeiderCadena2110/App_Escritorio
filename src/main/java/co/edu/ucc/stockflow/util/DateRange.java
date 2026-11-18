@@ -1,5 +1,6 @@
 package co.edu.ucc.stockflow.util;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -18,17 +19,30 @@ public record DateRange(LocalDateTime start, LocalDateTime end) {
     }
 
     public static DateRange today() {
-        LocalDate d = LocalDate.now();
+        return today(Clock.systemDefaultZone());
+    }
+
+    public static DateRange today(Clock clock) {
+        LocalDate d = LocalDate.now(clock);
         return ofDays(d, d);
     }
 
     public static DateRange thisMonth() {
-        YearMonth m = YearMonth.now();
+        return thisMonth(Clock.systemDefaultZone());
+    }
+
+    public static DateRange thisMonth(Clock clock) {
+        YearMonth m = YearMonth.now(clock);
         return ofDays(m.atDay(1), m.atEndOfMonth());
     }
 
     public static DateRange lastDays(int days) {
-        LocalDate d = LocalDate.now();
+        return lastDays(days, Clock.systemDefaultZone());
+    }
+
+    /** The last {@code days} days, today included. */
+    public static DateRange lastDays(int days, Clock clock) {
+        LocalDate d = LocalDate.now(clock);
         return ofDays(d.minusDays(days - 1L), d);
     }
 }
