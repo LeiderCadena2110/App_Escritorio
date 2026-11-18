@@ -12,7 +12,7 @@ import co.edu.ucc.stockflow.service.InvoicePdfService;
 import co.edu.ucc.stockflow.service.InvoiceService;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.SequenceService;
-import co.edu.ucc.stockflow.service.SettingsService;
+import co.edu.ucc.stockflow.service.TaxPolicyProvider;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
 import co.edu.ucc.stockflow.ui.SectionController;
@@ -89,7 +89,7 @@ public class PointOfSaleController implements SectionController {
     private final InvoiceService invoices;
     private final InvoicePdfService pdf;
     private final SequenceService sequences;
-    private final SettingsService settings;
+    private final TaxPolicyProvider taxPolicies;
     private final CustomerDialog customerDialog;
     private final Dialogs dialogs;
     private final Navigator navigator;
@@ -107,7 +107,7 @@ public class PointOfSaleController implements SectionController {
     private Customer finalConsumer;
 
     public PointOfSaleController(ProductService products, CustomerService customers, InvoiceService invoices,
-                                 InvoicePdfService pdf, SequenceService sequences, SettingsService settings,
+                                 InvoicePdfService pdf, SequenceService sequences, TaxPolicyProvider taxPolicies,
                                  CustomerDialog customerDialog, Dialogs dialogs, Navigator navigator,
                                  ViewLoader views, FileChoosers files, TaskRunner tasks) {
         this.products = products;
@@ -115,7 +115,7 @@ public class PointOfSaleController implements SectionController {
         this.invoices = invoices;
         this.pdf = pdf;
         this.sequences = sequences;
-        this.settings = settings;
+        this.taxPolicies = taxPolicies;
         this.customerDialog = customerDialog;
         this.dialogs = dialogs;
         this.navigator = navigator;
@@ -253,7 +253,7 @@ public class PointOfSaleController implements SectionController {
     private void reloadData(Customer customer) {
         tasks.run("No se pudieron cargar los productos",
                 () -> new Loaded(products.findActive(), customers.search(null), customers.finalConsumer(),
-                        sequences.peekInvoiceNumber(), settings.taxPolicy()),
+                        sequences.peekInvoiceNumber(), taxPolicies.current()),
                 loaded -> render(loaded, customer));
     }
 

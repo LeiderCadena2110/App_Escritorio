@@ -35,19 +35,19 @@ public class InvoiceService {
     private final ProductRepository products;
     private final StockService stockService;
     private final CustomerService customerService;
-    private final SettingsService settings;
+    private final TaxPolicyProvider taxPolicies;
     private final SequenceService sequences;
     private final PaymentPolicies payments;
     private final Clock clock;
 
     public InvoiceService(InvoiceRepository invoices, ProductRepository products, StockService stockService,
-                          CustomerService customerService, SettingsService settings, SequenceService sequences,
+                          CustomerService customerService, TaxPolicyProvider taxPolicies, SequenceService sequences,
                           PaymentPolicies payments, Clock clock) {
         this.invoices = invoices;
         this.products = products;
         this.stockService = stockService;
         this.customerService = customerService;
-        this.settings = settings;
+        this.taxPolicies = taxPolicies;
         this.sequences = sequences;
         this.payments = payments;
         this.clock = clock;
@@ -73,7 +73,7 @@ public class InvoiceService {
         }
 
         // 2. Totals with the VAT regime of the business
-        draft.calculate(settings.taxPolicy());
+        draft.calculate(taxPolicies.current());
 
         // 3. Customer and payment (each payment method has its own policy)
         Customer customer = draft.getCustomerId() == null ? customerService.finalConsumer()

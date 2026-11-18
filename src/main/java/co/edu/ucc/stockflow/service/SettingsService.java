@@ -3,7 +3,6 @@ package co.edu.ucc.stockflow.service;
 import co.edu.ucc.stockflow.dto.BusinessInfo;
 import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.exception.ErrorCode;
-import co.edu.ucc.stockflow.model.tax.TaxPolicy;
 import co.edu.ucc.stockflow.repository.SettingRepository;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
@@ -85,11 +84,6 @@ public class SettingsService {
 
     public void setVatResponsible(boolean responsible) {
         set(VAT_RESPONSIBLE, Boolean.toString(responsible));
-    }
-
-    /** The VAT rule of the business, used to calculate every invoice. */
-    public TaxPolicy taxPolicy() {
-        return TaxPolicy.forRegime(isVatResponsible());
     }
 
     public void setDefaultTaxRate(BigDecimal rate) {
