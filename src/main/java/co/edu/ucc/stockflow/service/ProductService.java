@@ -2,13 +2,14 @@ package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.exception.ErrorCode;
-import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.model.ProductCreated;
 import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.util.Formats;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private final ProductRepository repository;
-    private final StockService stockService;
+    private final ApplicationEventPublisher events;
 
-    public ProductService(ProductRepository repository, StockService stockService) {
+    public ProductService(ProductRepository repository, ApplicationEventPublisher events) {
         this.repository = repository;
-        this.stockService = stockService;
+        this.events = events;
     }
 
     public List<Product> search(String text, Long categoryId, boolean lowStockOnly, boolean includeInactive) {
@@ -47,8 +48,8 @@ public class ProductService {
     }
 
     /**
-     * Creates a product. If it has units, they are registered as the initial inventory so the stock
-     * history starts with them.
+     * Creates a product. If it has units, it publishes {@link ProductCreated} and the inventory
+     * registers them as the initial inventory, so the stock history starts with them.
      */
     @Transactional
     public Product create(Product product) {
@@ -58,8 +59,7 @@ public class ProductService {
         product.setStock(0);
         Product saved = repository.insert(product);
         if (initialStock > 0) {
-            stockService.register(saved.getId(), MovementType.INITIAL, initialStock, saved.getCostPrice(),
-                    null, "Stock al crear el producto");
+            events.publishEvent(new ProductCreated(saved.getId(), initialStock, saved.getCostPrice()));
             saved.setStock(initialStock);
         }
         return saved;
