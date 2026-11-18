@@ -19,6 +19,8 @@ public class Product {
     private String supplierName;
     private BigDecimal costPrice = BigDecimal.ZERO;
     private BigDecimal salePrice = BigDecimal.ZERO;
+    /** VAT percentage of this product: 19, 5 or 0 (exempt). The sale price is written without VAT. */
+    private BigDecimal taxRate = new BigDecimal("19");
     private int stock;
     private int minStock;
     private String unit = "UND";
@@ -66,6 +68,8 @@ public class Product {
     public void setCostPrice(BigDecimal costPrice) { this.costPrice = costPrice == null ? BigDecimal.ZERO : costPrice; }
     public BigDecimal getSalePrice() { return salePrice; }
     public void setSalePrice(BigDecimal salePrice) { this.salePrice = salePrice == null ? BigDecimal.ZERO : salePrice; }
+    public BigDecimal getTaxRate() { return taxRate; }
+    public void setTaxRate(BigDecimal taxRate) { this.taxRate = taxRate == null ? BigDecimal.ZERO : taxRate; }
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }
     public int getMinStock() { return minStock; }

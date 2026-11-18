@@ -6,6 +6,7 @@ import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.util.Formats;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -108,6 +109,9 @@ public class ProductService {
         if (p.getCostPrice().signum() < 0) throw new BusinessException(ErrorCode.PRODUCT_COST_NEGATIVE);
         if (p.getSalePrice().signum() <= 0) throw new BusinessException(ErrorCode.PRODUCT_PRICE_NOT_POSITIVE);
         if (p.getMinStock() < 0) throw new BusinessException(ErrorCode.PRODUCT_MIN_STOCK_NEGATIVE);
+        if (p.getTaxRate().signum() < 0 || p.getTaxRate().compareTo(BigDecimal.valueOf(100)) > 0) {
+            throw new BusinessException(ErrorCode.PRODUCT_TAX_RATE_OUT_OF_RANGE);
+        }
         if (p.getUnit() == null || p.getUnit().isBlank()) p.setUnit("UND");
         repository.findBySku(p.getSku())
                 .filter(other -> !other.getId().equals(p.getId()))

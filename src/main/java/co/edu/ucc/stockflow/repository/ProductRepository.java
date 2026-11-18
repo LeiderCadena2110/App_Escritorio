@@ -34,6 +34,7 @@ public class ProductRepository {
         p.setSupplierName(rs.getString("supplier_name"));
         p.setCostPrice(rs.getBigDecimal("cost_price"));
         p.setSalePrice(rs.getBigDecimal("sale_price"));
+        p.setTaxRate(rs.getBigDecimal("tax_rate"));
         p.setStock(rs.getInt("stock"));
         p.setMinStock(rs.getInt("min_stock"));
         p.setUnit(rs.getString("unit"));
@@ -100,11 +101,12 @@ public class ProductRepository {
         LocalDateTime now = LocalDateTime.now(clock);
         long id = JdbcHelper.insert(jdbc, """
                 INSERT INTO products (sku, barcode, name, description, category_id, supplier_id, cost_price,
-                                      sale_price, stock, min_stock, unit, active, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                      sale_price, tax_rate, stock, min_stock, unit, active, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 p.getSku(), p.getBarcode(), p.getName(), p.getDescription(), p.getCategoryId(), p.getSupplierId(),
-                p.getCostPrice(), p.getSalePrice(), p.getStock(), p.getMinStock(), p.getUnit(), p.isActive(),
+                p.getCostPrice(), p.getSalePrice(), p.getTaxRate(), p.getStock(), p.getMinStock(), p.getUnit(),
+                p.isActive(),
                 JdbcHelper.timestamp(now), JdbcHelper.timestamp(now));
         p.setId(id);
         p.setCreatedAt(now);
@@ -117,11 +119,11 @@ public class ProductRepository {
         LocalDateTime now = LocalDateTime.now(clock);
         jdbc.update("""
                 UPDATE products SET sku = ?, barcode = ?, name = ?, description = ?, category_id = ?, supplier_id = ?,
-                       cost_price = ?, sale_price = ?, min_stock = ?, unit = ?, active = ?, updated_at = ?
+                       cost_price = ?, sale_price = ?, tax_rate = ?, min_stock = ?, unit = ?, active = ?, updated_at = ?
                 WHERE id = ?
                 """,
                 p.getSku(), p.getBarcode(), p.getName(), p.getDescription(), p.getCategoryId(), p.getSupplierId(),
-                p.getCostPrice(), p.getSalePrice(), p.getMinStock(), p.getUnit(), p.isActive(),
+                p.getCostPrice(), p.getSalePrice(), p.getTaxRate(), p.getMinStock(), p.getUnit(), p.isActive(),
                 JdbcHelper.timestamp(now), p.getId());
         p.setUpdatedAt(now);
     }
