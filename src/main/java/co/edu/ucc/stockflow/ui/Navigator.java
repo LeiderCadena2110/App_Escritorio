@@ -1,38 +1,32 @@
 package co.edu.ucc.stockflow.ui;
 
-import co.edu.ucc.stockflow.model.Product;
-import co.edu.ucc.stockflow.ui.controller.InventoryController;
-import co.edu.ucc.stockflow.ui.controller.PointOfSaleController;
 import javafx.stage.Window;
 import org.springframework.stereotype.Component;
 
-/** Lets any section move to another one. */
+/**
+ * Lets any section move to another one, optionally with some data, without knowing the other
+ * section's controller class (so modules do not depend on each other's screens).
+ */
 @Component
 public class Navigator {
 
-    private MainController main;
+    private NavigationHost host;
 
-    void register(MainController main) {
-        this.main = main;
+    /** Called once by the main window. */
+    public void register(NavigationHost host) {
+        this.host = host;
     }
 
     public void goTo(Section section) {
-        main.show(section);
+        host.show(section);
     }
 
-    /** Opens the inventory section showing the history of one product. */
-    public void showHistory(Product product) {
-        main.show(Section.INVENTORY);
-        main.<InventoryController>controller(Section.INVENTORY).filterByProduct(product);
-    }
-
-    /** Opens the point of sale with a product already in the cart. */
-    public void sell(Product product) {
-        main.show(Section.POINT_OF_SALE);
-        main.<PointOfSaleController>controller(Section.POINT_OF_SALE).addProduct(product);
+    /** Opens the section and gives it the request (see {@link SectionController#receive(Object)}). */
+    public void open(Section section, Object request) {
+        if (host.show(section) instanceof SectionController controller) controller.receive(request);
     }
 
     public Window window() {
-        return main == null ? null : main.window();
+        return host == null ? null : host.window();
     }
 }

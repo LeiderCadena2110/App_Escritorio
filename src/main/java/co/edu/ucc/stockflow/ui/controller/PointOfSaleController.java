@@ -306,6 +306,12 @@ public class PointOfSaleController implements SectionController {
         searchField.clear();
     }
 
+    /** Products opens this section with a product to sell: it goes into the cart. */
+    @Override
+    public void receive(Object request) {
+        if (request instanceof Product product) addProduct(product);
+    }
+
     /** Adds one unit of the product (or one more if it is already in the sale). */
     public void addProduct(Product product) {
         try {

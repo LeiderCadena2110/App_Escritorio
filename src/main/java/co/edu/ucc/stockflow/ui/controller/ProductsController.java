@@ -8,6 +8,7 @@ import co.edu.ucc.stockflow.service.CsvExportService;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.Navigator;
+import co.edu.ucc.stockflow.ui.Section;
 import co.edu.ucc.stockflow.ui.SectionController;
 import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.ViewLoader;
@@ -192,7 +193,7 @@ public class ProductsController implements SectionController {
 
     @FXML
     private void history() {
-        if (selected() != null) navigator.showHistory(selected());
+        if (selected() != null) navigator.open(Section.INVENTORY, selected());
     }
 
     @FXML
@@ -203,7 +204,7 @@ public class ProductsController implements SectionController {
             dialogs.info(navigator.window(), "Producto inactivo", "Active el producto para poder venderlo.");
             return;
         }
-        navigator.sell(p);
+        navigator.open(Section.POINT_OF_SALE, p);
     }
 
     @FXML

@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Scope("prototype")
-public class MainController {
+public class MainController implements NavigationHost {
 
     @FXML
     private MenuBar menuBar;
@@ -114,21 +114,19 @@ public class MainController {
         stage.show();
     }
 
-    public void show(Section section) {
+    @Override
+    public Object show(Section section) {
         current = section;
         ViewLoader.LoadedView<Object> view = loaded.computeIfAbsent(section, s -> views.load(s.fxml()));
         content.getChildren().setAll(view.root());
         buttons.get(section).setSelected(true);
         if (view.controller() instanceof SectionController c) c.onShow();
         settings.set(SettingsService.LAST_SECTION, section.name());
+        return view.controller();
     }
 
-    @SuppressWarnings("unchecked")
-    <T> T controller(Section section) {
-        return (T) loaded.computeIfAbsent(section, s -> views.load(s.fxml())).controller();
-    }
-
-    Window window() {
+    @Override
+    public Window window() {
         return stage;
     }
 

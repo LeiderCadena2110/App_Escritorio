@@ -81,7 +81,7 @@ public class DashboardController implements SectionController {
                 Tables.text("Proveedor", Product::getSupplierName, 200)));
         Tables.fill(lowStockTable, 1);
         Tables.placeholder(lowStockTable, "Todo en orden: ningún producto está por debajo de su stock mínimo.");
-        Tables.onOpen(lowStockTable, navigator::showHistory);
+        Tables.onOpen(lowStockTable, p -> navigator.open(Section.INVENTORY, p));
 
         salesAxis.setTickLabelFormatter(new StringConverter<>() {
             @Override

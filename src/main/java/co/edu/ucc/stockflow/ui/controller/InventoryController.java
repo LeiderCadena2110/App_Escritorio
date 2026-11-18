@@ -116,7 +116,13 @@ public class InventoryController implements SectionController {
         reload();
     }
 
-    /** Shows the whole history of one product (called from Products and the dashboard). */
+    /** Products and the dashboard open this section with a product to show its history. */
+    @Override
+    public void receive(Object request) {
+        if (request instanceof Product product) filterByProduct(product);
+    }
+
+    /** Shows the whole history of one product. */
     public void filterByProduct(Product product) {
         loading = true;
         reloadProducts();
