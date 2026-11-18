@@ -3,21 +3,22 @@ package co.edu.ucc.stockflow.service;
 import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.exception.NotFoundException;
+import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.InvoiceStatus;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.model.tax.VatResponsiblePolicy;
 import co.edu.ucc.stockflow.repository.InvoiceRepository;
 import co.edu.ucc.stockflow.repository.ProductRepository;
+import co.edu.ucc.stockflow.service.payment.PaymentPolicies;
 import co.edu.ucc.stockflow.util.DateRange;
 import co.edu.ucc.stockflow.util.Formats;
-import co.edu.ucc.stockflow.util.Money;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,108 +41,69 @@ public class InvoiceService {
     private final CustomerService customerService;
     private final SettingsService settings;
     private final SequenceService sequences;
+    private final PaymentPolicies payments;
     private final Clock clock;
 
     public InvoiceService(InvoiceRepository invoices, ProductRepository products, StockService stockService,
-                          CustomerService customerService, SettingsService settings, SequenceService sequences, Clock clock) {
+                          CustomerService customerService, SettingsService settings, SequenceService sequences,
+                          PaymentPolicies payments, Clock clock) {
         this.invoices = invoices;
         this.products = products;
         this.stockService = stockService;
         this.customerService = customerService;
         this.settings = settings;
         this.sequences = sequences;
+        this.payments = payments;
         this.clock = clock;
     }
 
     /**
-     * Calculates the line totals, subtotal, VAT and total of the invoice.
-     * subtotal − discount = taxable base; VAT = base × rate / 100; total = base + VAT.
+     * Totals with one VAT rate for every line.
+     *
+     * @deprecated kept only while the point of sale moves to {@link Invoice#calculate}; use that instead.
      */
+    @Deprecated(forRemoval = true)
     public static void calculateTotals(Invoice invoice, BigDecimal taxRate) {
-        BigDecimal subtotal = BigDecimal.ZERO;
-        for (InvoiceItem item : invoice.getItems()) {
-            item.recalculate();
-            subtotal = subtotal.add(item.getLineTotal());
-        }
-        subtotal = Money.round(subtotal);
-        BigDecimal discount = Money.round(invoice.getDiscount());
-        if (discount.signum() < 0) discount = BigDecimal.ZERO;
-        if (discount.compareTo(subtotal) > 0) discount = subtotal;
-        BigDecimal base = subtotal.subtract(discount);
-        BigDecimal tax = Money.percentOf(base, taxRate);
-        invoice.setSubtotal(subtotal);
-        invoice.setDiscount(discount);
-        invoice.setTaxRate(taxRate);
-        invoice.setTax(tax);
-        invoice.setTotal(base.add(tax));
-    }
-
-    /** Totals with the VAT rate of the settings (used by the point of sale while editing). */
-    public void calculateTotals(Invoice invoice) {
-        calculateTotals(invoice, settings.defaultTaxRate());
+        for (InvoiceItem item : invoice.getItems()) item.setProductTaxRate(taxRate);
+        invoice.calculate(new VatResponsiblePolicy());
     }
 
     /**
      * Saves the invoice, takes the units out of stock and assigns the next number.
-     * Nothing is saved if any product does not have enough stock.
+     * Everything is checked before writing, and it all runs in one transaction: if anything fails,
+     * nothing is saved.
      */
     @Transactional
     public Invoice issue(Invoice draft) {
-        if (draft.getItems().isEmpty()) throw new BusinessException(ErrorCode.INVOICE_EMPTY);
-        if (draft.getDiscount() != null && draft.getDiscount().signum() < 0) {
-            throw new BusinessException(ErrorCode.INVOICE_DISCOUNT_NEGATIVE);
-        }
+        if (draft.isEmpty()) throw new BusinessException(ErrorCode.INVOICE_EMPTY);
+        draft.validateDiscount();
 
-        // 1. Check every product and the total quantity per product before writing anything
-        Map<Long, Integer> quantities = new LinkedHashMap<>();
-        for (InvoiceItem item : draft.getItems()) {
-            if (item.getQuantity() <= 0) throw new BusinessException(ErrorCode.INVOICE_QUANTITY_NOT_POSITIVE);
-            quantities.merge(item.getProductId(), item.getQuantity(), Integer::sum);
-        }
-        for (Map.Entry<Long, Integer> e : quantities.entrySet()) {
-            Product p = products.findById(e.getKey()).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND, e.getKey()));
+        // 1. Latest data of each product: it must be active and have the units (the one stock rule)
+        for (Map.Entry<Long, Integer> e : draft.unitsByProduct().entrySet()) {
+            Product p = products.findById(e.getKey())
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND, e.getKey()));
             if (!p.isActive()) throw new BusinessException(ErrorCode.PRODUCT_INACTIVE, p.getSku());
             p.checkCanTakeOut(e.getValue());
-            for (InvoiceItem item : draft.getItems()) {
-                if (item.getProductId().equals(p.getId())) {
-                    item.setProductSku(p.getSku());
-                    item.setProductName(p.getName());
-                    item.setUnitCost(p.getCostPrice());
-                }
-            }
+            draft.getItems().stream().filter(i -> i.getProductId().equals(p.getId())).forEach(i -> i.refreshFrom(p));
         }
 
-        // 2. Totals, customer and payment
-        if (draft.getDiscount() != null) {
-            BigDecimal gross = draft.getItems().stream()
-                    .map(i -> i.getUnitPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            if (draft.getDiscount().compareTo(gross) > 0) {
-                throw new BusinessException(ErrorCode.INVOICE_DISCOUNT_ABOVE_SUBTOTAL);
-            }
-        }
-        calculateTotals(draft, settings.defaultTaxRate());
-        if (draft.getCustomerId() == null) draft.setCustomerId(customerService.finalConsumer().getId());
+        // 2. Totals with the VAT regime of the business
+        draft.calculate(settings.taxPolicy());
+
+        // 3. Customer and payment (each payment method has its own policy)
+        Customer customer = draft.getCustomerId() == null ? customerService.finalConsumer()
+                : customerService.findById(draft.getCustomerId());
+        draft.setCustomerId(customer.getId());
         if (draft.getPaymentMethod() == null) draft.setPaymentMethod(PaymentMethod.CASH);
-        if (draft.getPaymentMethod() == PaymentMethod.CASH) {
-            BigDecimal paid = draft.getAmountPaid() == null ? BigDecimal.ZERO : Money.round(draft.getAmountPaid());
-            if (paid.signum() == 0) paid = draft.getTotal();
-            if (paid.compareTo(draft.getTotal()) < 0) {
-                throw new BusinessException(ErrorCode.INVOICE_CASH_INSUFFICIENT,
-                        Money.format(paid), Money.format(draft.getTotal()));
-            }
-            draft.setAmountPaid(paid);
-        } else if (draft.getPaymentMethod() == PaymentMethod.CREDIT) {
-            draft.setAmountPaid(BigDecimal.ZERO);
-        } else {
-            draft.setAmountPaid(draft.getTotal());
-        }
+        draft.setAmountPaid(payments.forMethod(draft.getPaymentMethod())
+                .settle(draft.getTotal(), draft.getAmountPaid(), customer));
+
         draft.setNotes(Formats.clean(draft.getNotes()));
         draft.setStatus(InvoiceStatus.PAID);
         draft.setIssuedAt(LocalDateTime.now(clock));
         draft.setNumber(sequences.reserveInvoiceNumber(invoices::existsNumber));
 
-        // 3. Save and take the units out of stock
+        // 4. Save and take the units out of stock
         Invoice saved = invoices.insert(draft);
         for (InvoiceItem item : saved.getItems()) {
             stockService.register(item.getProductId(), MovementType.SALE, item.getQuantity(), item.getUnitCost(),
@@ -155,8 +117,11 @@ public class InvoiceService {
     /** Cancels the invoice and puts the units back in stock. */
     @Transactional
     public Invoice cancel(long invoiceId, String reason) {
-        Invoice invoice = invoices.findById(invoiceId).orElseThrow(() -> new NotFoundException(ErrorCode.INVOICE_NOT_FOUND, invoiceId));
-        if (invoice.isCancelled()) throw new BusinessException(ErrorCode.INVOICE_ALREADY_CANCELLED, invoice.getNumber());
+        Invoice invoice = invoices.findById(invoiceId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.INVOICE_NOT_FOUND, invoiceId));
+        if (invoice.isCancelled()) {
+            throw new BusinessException(ErrorCode.INVOICE_ALREADY_CANCELLED, invoice.getNumber());
+        }
         String why = Formats.clean(reason);
         if (why == null) throw new BusinessException(ErrorCode.INVOICE_CANCEL_REASON_REQUIRED);
         for (InvoiceItem item : invoice.getItems()) {

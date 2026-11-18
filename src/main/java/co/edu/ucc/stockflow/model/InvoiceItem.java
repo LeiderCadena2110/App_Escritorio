@@ -25,6 +25,14 @@ public class InvoiceItem {
     public InvoiceItem() {
     }
 
+    /** Copies the current SKU, name, cost and VAT of the product (the price stays as offered to the customer). */
+    public void refreshFrom(Product product) {
+        productSku = product.getSku();
+        productName = product.getName();
+        unitCost = product.getCostPrice();
+        productTaxRate = product.getTaxRate();
+    }
+
     /** Copy of the line (used to hand a draft to the service without sharing objects with the screen). */
     public InvoiceItem copy() {
         InvoiceItem c = new InvoiceItem();

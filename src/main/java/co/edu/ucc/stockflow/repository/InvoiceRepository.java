@@ -53,6 +53,8 @@ public class InvoiceRepository {
         item.setUnitPrice(rs.getBigDecimal("unit_price"));
         item.setQuantity(rs.getInt("quantity"));
         item.setLineTotal(rs.getBigDecimal("line_total"));
+        item.setTaxRate(rs.getBigDecimal("tax_rate"));
+        item.setProductTaxRate(rs.getBigDecimal("tax_rate"));
         return item;
     };
 
@@ -70,18 +72,18 @@ public class InvoiceRepository {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 inv.getNumber(), inv.getCustomerId(), JdbcHelper.timestamp(inv.getIssuedAt()), inv.getSubtotal(),
-                inv.getDiscount(), inv.getTaxRate(), inv.getTax(), inv.getTotal(), inv.getPaymentMethod().name(),
+                inv.getDiscount(), inv.singleTaxRate().orElse(null), inv.getTax(), inv.getTotal(), inv.getPaymentMethod().name(),
                 inv.getAmountPaid(), inv.getStatus().name(), inv.getNotes());
         inv.setId(id);
         for (InvoiceItem item : inv.getItems()) {
             item.setInvoiceId(id);
             long itemId = JdbcHelper.insert(jdbc, """
                     INSERT INTO invoice_items (invoice_id, product_id, product_sku, product_name, quantity,
-                                               unit_price, unit_cost, line_total)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                                               unit_price, unit_cost, line_total, tax_rate)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     id, item.getProductId(), item.getProductSku(), item.getProductName(), item.getQuantity(),
-                    item.getUnitPrice(), item.getUnitCost(), item.getLineTotal());
+                    item.getUnitPrice(), item.getUnitCost(), item.getLineTotal(), item.getTaxRate());
             item.setId(itemId);
         }
         return inv;

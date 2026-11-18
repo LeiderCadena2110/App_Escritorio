@@ -2,6 +2,7 @@ package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.exception.ErrorCode;
+import co.edu.ucc.stockflow.exception.NotFoundException;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.repository.CustomerRepository;
 import co.edu.ucc.stockflow.util.Formats;
@@ -26,6 +27,10 @@ public class CustomerService {
 
     public List<Customer> search(String text) {
         return repository.search(text);
+    }
+
+    public Customer findById(long id) {
+        return repository.findById(id).orElseThrow(() -> new NotFoundException(ErrorCode.CUSTOMER_NOT_FOUND, id));
     }
 
     /** Generic customer used when the buyer does not give their data. */
