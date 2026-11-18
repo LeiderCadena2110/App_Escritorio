@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.exception.InsufficientStockException;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
@@ -170,5 +171,45 @@ class InvoiceFlowIntegrationTest {
         Product untouched = newProduct("IT-012", "10000", 3);
         assertTrue(products.delete(untouched));
         assertTrue(products.findById(untouched.getId()).isEmpty());
+    }
+
+    @Test
+    void mixedVatInvoicesAreSavedWithTheRateOfEachLine() {
+        settings.setVatResponsible(true);
+        Product shoes = newProduct("IT-013", "100000", 2);
+        Product book = newProduct("IT-014", "20000", 2);
+        book.setTaxRate(new BigDecimal("5"));
+        products.update(book);
+
+        Invoice draft = new Invoice();
+        draft.addLine(products.findById(shoes.getId()).orElseThrow(), 1);
+        draft.addLine(products.findById(book.getId()).orElseThrow(), 1);
+        draft.setPaymentMethod(PaymentMethod.CARD);
+        Invoice saved = invoices.issue(draft);
+
+        Invoice reloaded = invoices.findById(saved.getId()).orElseThrow();
+        assertEquals(new BigDecimal("20000.00"), reloaded.getTax()); // 19.000 + 1.000
+        assertEquals(2, reloaded.getTaxBreakdown().size());
+        assertEquals(new BigDecimal("140000.00"), reloaded.getTotal());
+    }
+
+    @Test
+    void nonResponsibleBusinessesIssueInvoicesWithoutVat() {
+        settings.setVatResponsible(false);
+        Invoice draft = new Invoice();
+        draft.addLine(newProduct("IT-015", "50000", 1), 1);
+        draft.setPaymentMethod(PaymentMethod.TRANSFER);
+        Invoice saved = invoices.issue(draft);
+        assertEquals(0, saved.getTax().signum());
+        assertEquals(new BigDecimal("50000.00"), saved.getTotal());
+    }
+
+    @Test
+    void creditSalesNeedAnIdentifiedCustomer() {
+        Invoice draft = new Invoice();
+        draft.addLine(newProduct("IT-016", "50000", 1), 1);
+        draft.setPaymentMethod(PaymentMethod.CREDIT);
+        assertEquals(ErrorCode.PAYMENT_CREDIT_REQUIRES_CUSTOMER,
+                assertThrows(BusinessException.class, () -> invoices.issue(draft)).getCode());
     }
 }
