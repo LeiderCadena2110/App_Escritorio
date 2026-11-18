@@ -2,7 +2,6 @@ package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.exception.ErrorCode;
-import co.edu.ucc.stockflow.exception.InsufficientStockException;
 import co.edu.ucc.stockflow.exception.NotFoundException;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
@@ -102,9 +101,7 @@ public class InvoiceService {
         for (Map.Entry<Long, Integer> e : quantities.entrySet()) {
             Product p = products.findById(e.getKey()).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND, e.getKey()));
             if (!p.isActive()) throw new BusinessException(ErrorCode.PRODUCT_INACTIVE, p.getSku());
-            if (p.getStock() < e.getValue()) {
-                throw new InsufficientStockException(p.getSku(), p.getName(), p.getStock(), e.getValue());
-            }
+            p.checkCanTakeOut(e.getValue());
             for (InvoiceItem item : draft.getItems()) {
                 if (item.getProductId().equals(p.getId())) {
                     item.setProductSku(p.getSku());

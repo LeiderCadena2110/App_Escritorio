@@ -1,5 +1,6 @@
 package co.edu.ucc.stockflow.model;
 
+import co.edu.ucc.stockflow.exception.InsufficientStockException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -27,6 +28,16 @@ public class Product {
     private boolean active = true;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    /**
+     * The one stock rule of the app: units can only leave the inventory if there are enough.
+     * The point of sale, invoices and manual movements all call this method.
+     *
+     * @throws InsufficientStockException if {@code units} is more than the stock
+     */
+    public void checkCanTakeOut(int units) {
+        if (units > stock) throw new InsufficientStockException(this, units);
+    }
 
     /** Stock at or below the minimum: shown as a warning. */
     public boolean isLowStock() {

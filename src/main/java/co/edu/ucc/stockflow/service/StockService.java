@@ -2,7 +2,6 @@ package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.exception.ErrorCode;
-import co.edu.ucc.stockflow.exception.InsufficientStockException;
 import co.edu.ucc.stockflow.exception.NotFoundException;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.Product;
@@ -51,10 +50,8 @@ public class StockService {
                                   String reference, String notes) {
         Product product = products.findById(productId).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND, productId));
         int change = signedQuantity(type, quantity);
+        if (change < 0) product.checkCanTakeOut(-change);
         int newStock = product.getStock() + change;
-        if (newStock < 0) {
-            throw new InsufficientStockException(product.getSku(), product.getName(), product.getStock(), -change);
-        }
         if (type == MovementType.PURCHASE && unitCost != null && unitCost.signum() > 0) {
             products.updateCostPrice(productId, averageCost(product, quantity, unitCost));
         }

@@ -1,16 +1,19 @@
 package co.edu.ucc.stockflow.exception;
 
-/** Trying to take out more units than there are in stock. */
+import co.edu.ucc.stockflow.model.Product;
+
+/** Trying to take out more units than there are in stock (see {@link Product#checkCanTakeOut(int)}). */
 public class InsufficientStockException extends BusinessException {
 
     private final String sku;
     private final int available;
     private final int requested;
 
-    public InsufficientStockException(String sku, String name, int available, int requested) {
-        super(ErrorCode.STOCK_INSUFFICIENT, sku, name, available, requested);
-        this.sku = sku;
-        this.available = available;
+    public InsufficientStockException(Product product, int requested) {
+        super(product.getStock() <= 0 ? ErrorCode.STOCK_SOLD_OUT : ErrorCode.STOCK_INSUFFICIENT,
+                product.getSku(), product.getName(), product.getStock(), requested, product.getUnit());
+        this.sku = product.getSku();
+        this.available = product.getStock();
         this.requested = requested;
     }
 
