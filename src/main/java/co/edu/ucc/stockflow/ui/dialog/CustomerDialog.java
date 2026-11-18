@@ -3,6 +3,7 @@ package co.edu.ucc.stockflow.ui.dialog;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.service.CustomerService;
 import co.edu.ucc.stockflow.ui.Dialogs;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.component.FormGrid;
 import java.util.Optional;
 import javafx.scene.control.ComboBox;
@@ -16,17 +17,19 @@ public class CustomerDialog {
 
     private final CustomerService customers;
     private final Dialogs dialogs;
+    private final TaskRunner tasks;
 
-    public CustomerDialog(CustomerService customers, Dialogs dialogs) {
+    public CustomerDialog(CustomerService customers, Dialogs dialogs, TaskRunner tasks) {
         this.customers = customers;
         this.dialogs = dialogs;
+        this.tasks = tasks;
     }
 
     /** @param customer null to create a new one */
     public Optional<Customer> show(Window owner, Customer customer) {
         boolean isNew = customer == null;
         Customer c = isNew ? new Customer() : customer;
-        FormDialog<Customer> fd = new FormDialog<>(dialogs, owner, isNew ? "Nuevo cliente" : "Editar cliente",
+        FormDialog<Customer> fd = new FormDialog<>(dialogs, tasks, owner, isNew ? "Nuevo cliente" : "Editar cliente",
                 isNew ? "Crear cliente" : "Guardar cambios");
         FormGrid form = fd.form();
         ComboBox<String> type = form.add("Tipo de documento", new ComboBox<>());
@@ -44,7 +47,7 @@ public class CustomerDialog {
             c.setPhone(phone.getText());
             c.setEmail(email.getText());
             c.setAddress(address.getText());
-            return customers.save(c);
+            return () -> customers.save(c);
         }, isNew ? document : name);
     }
 }

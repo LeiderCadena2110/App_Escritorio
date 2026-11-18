@@ -8,6 +8,7 @@ import co.edu.ucc.stockflow.model.StockMovement;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.StockService;
 import co.edu.ucc.stockflow.ui.Dialogs;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.component.FormGrid;
 import co.edu.ucc.stockflow.util.Money;
 import java.math.BigDecimal;
@@ -28,11 +29,13 @@ public class StockMovementDialog {
     private final ProductService products;
     private final StockService stock;
     private final Dialogs dialogs;
+    private final TaskRunner tasks;
 
-    public StockMovementDialog(ProductService products, StockService stock, Dialogs dialogs) {
+    public StockMovementDialog(ProductService products, StockService stock, Dialogs dialogs, TaskRunner tasks) {
         this.products = products;
         this.stock = stock;
         this.dialogs = dialogs;
+        this.tasks = tasks;
     }
 
     /**
@@ -40,7 +43,7 @@ public class StockMovementDialog {
      * @param initial  movement type selected at the start (PURCHASE if null)
      */
     public Optional<StockMovement> show(Window owner, Product product, MovementType initial) {
-        FormDialog<StockMovement> fd = new FormDialog<>(dialogs, owner, "Movimiento de inventario", "Registrar");
+        FormDialog<StockMovement> fd = new FormDialog<>(dialogs, tasks, owner, "Movimiento de inventario", "Registrar");
         FormGrid form = fd.form();
 
         TextField search = form.add("Buscar producto", FormGrid.text(null, "Escriba el código o el nombre"));
@@ -109,8 +112,11 @@ public class StockMovementDialog {
             Product p = productBox.getValue();
             if (p == null) throw new BusinessException(ErrorCode.PRODUCT_NOT_SELECTED);
             BigDecimal cost = unitCost.getText().isBlank() ? null : FormGrid.moneyValue(unitCost);
-            return stock.register(p.getId(), type.getValue(), FormGrid.intValue(quantity), cost,
-                    reference.getText(), notes.getText());
+            MovementType chosenType = type.getValue();
+            int units = FormGrid.intValue(quantity);
+            String ref = reference.getText();
+            String note = notes.getText();
+            return () -> stock.register(p.getId(), chosenType, units, cost, ref, note);
         }, product == null ? search : quantity);
     }
 }

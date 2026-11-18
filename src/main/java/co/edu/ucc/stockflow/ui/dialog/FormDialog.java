@@ -2,8 +2,10 @@ package co.edu.ucc.stockflow.ui.dialog;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
 import co.edu.ucc.stockflow.ui.Dialogs;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.component.FormGrid;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -27,11 +29,12 @@ public class FormDialog<T> {
     private final Label error = new Label();
     private final ButtonType save;
     private final Dialogs dialogs;
-    private Supplier<T> onSave;
-    private T result;
+    private final TaskRunner tasks;
+    private Supplier<Callable<T>> onSave;
 
-    public FormDialog(Dialogs dialogs, Window owner, String title, String saveText) {
+    public FormDialog(Dialogs dialogs, TaskRunner tasks, Window owner, String title, String saveText) {
         this.dialogs = dialogs;
+        this.tasks = tasks;
         dialogs.prepare(dialog, owner, title);
         save = new ButtonType(saveText, ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().setAll(save, new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE));
@@ -46,17 +49,28 @@ public class FormDialog<T> {
         Button saveButton = (Button) dialog.getDialogPane().lookupButton(save);
         saveButton.getStyleClass().add("primary-button");
         saveButton.addEventFilter(ActionEvent.ACTION, e -> {
+            e.consume(); // the dialog closes only when the save worked
+            Callable<T> work;
             try {
-                result = onSave.get();
+                work = onSave.get(); // reads the fields on the JavaFX thread
             } catch (BusinessException | NumberFormatException ex) {
                 showError(ex instanceof NumberFormatException ? "Revise los números escritos." : ex.getMessage());
-                e.consume();
-            } catch (RuntimeException ex) {
-                dialogs.error(dialog.getDialogPane().getScene().getWindow(), "No se pudo guardar", ex);
-                e.consume();
+                return;
             }
+            setSaving(true);
+            tasks.submit(work, saved -> {
+                dialog.setResult(saved);
+                dialog.close();
+            }, ex -> {
+                setSaving(false);
+                if (ex instanceof BusinessException) {
+                    showError(ex.getMessage());
+                } else {
+                    dialogs.error(dialog.getDialogPane().getScene().getWindow(), "No se pudo guardar", ex);
+                }
+            });
         });
-        dialog.setResultConverter(b -> b == save ? result : null);
+        dialog.setResultConverter(b -> null); // Cancel / Esc; a saved value is set with setResult
     }
 
     public FormGrid form() {
@@ -74,8 +88,17 @@ public class FormDialog<T> {
         dialog.getDialogPane().getScene().getWindow().sizeToScene();
     }
 
-    /** Shows the dialog; the action runs when the user presses the save button. */
-    public Optional<T> show(Supplier<T> saveAction, Node focus) {
+    /** Disables the buttons while the save runs in the background. */
+    private void setSaving(boolean saving) {
+        dialog.getDialogPane().getButtonTypes().forEach(t -> dialog.getDialogPane().lookupButton(t).setDisable(saving));
+        dialog.getDialogPane().setCursor(saving ? javafx.scene.Cursor.WAIT : javafx.scene.Cursor.DEFAULT);
+    }
+
+    /**
+     * Shows the dialog. When the user presses save, {@code saveAction} runs on the JavaFX thread to
+     * read and check the fields, and returns the work that saves them, which runs in the background.
+     */
+    public Optional<T> show(Supplier<Callable<T>> saveAction, Node focus) {
         this.onSave = saveAction;
         if (focus != null) Platform.runLater(focus::requestFocus);
         return dialog.showAndWait();

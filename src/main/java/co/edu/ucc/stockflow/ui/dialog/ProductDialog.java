@@ -7,6 +7,7 @@ import co.edu.ucc.stockflow.service.CategoryService;
 import co.edu.ucc.stockflow.service.ProductService;
 import co.edu.ucc.stockflow.service.SupplierService;
 import co.edu.ucc.stockflow.ui.Dialogs;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.component.Combos;
 import co.edu.ucc.stockflow.ui.component.FormGrid;
 import co.edu.ucc.stockflow.util.Money;
@@ -31,20 +32,22 @@ public class ProductDialog {
     private final CategoryService categories;
     private final SupplierService suppliers;
     private final Dialogs dialogs;
+    private final TaskRunner tasks;
 
     public ProductDialog(ProductService products, CategoryService categories, SupplierService suppliers,
-                         Dialogs dialogs) {
+                         Dialogs dialogs, TaskRunner tasks) {
         this.products = products;
         this.categories = categories;
         this.suppliers = suppliers;
         this.dialogs = dialogs;
+        this.tasks = tasks;
     }
 
     /** @param product null to create a new one */
     public Optional<Product> show(Window owner, Product product) {
         boolean isNew = product == null;
         Product p = isNew ? new Product() : product;
-        FormDialog<Product> fd = new FormDialog<>(dialogs, owner,
+        FormDialog<Product> fd = new FormDialog<>(dialogs, tasks, owner,
                 isNew ? "Nuevo producto" : "Editar " + p.getSku(), isNew ? "Crear producto" : "Guardar cambios");
         FormGrid form = fd.form();
 
@@ -110,10 +113,10 @@ public class ProductDialog {
             p.setDescription(description.getText());
             if (isNew) {
                 p.setStock(FormGrid.intValue(initialStock));
-                return products.create(p);
+                return () -> products.create(p);
             }
             p.setActive(active.isSelected());
-            return products.update(p);
+            return () -> products.update(p);
         }, sku);
     }
 

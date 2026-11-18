@@ -3,6 +3,7 @@ package co.edu.ucc.stockflow.ui.dialog;
 import co.edu.ucc.stockflow.model.Supplier;
 import co.edu.ucc.stockflow.service.SupplierService;
 import co.edu.ucc.stockflow.ui.Dialogs;
+import co.edu.ucc.stockflow.ui.TaskRunner;
 import co.edu.ucc.stockflow.ui.component.FormGrid;
 import java.util.Optional;
 import javafx.scene.control.CheckBox;
@@ -16,17 +17,19 @@ public class SupplierDialog {
 
     private final SupplierService suppliers;
     private final Dialogs dialogs;
+    private final TaskRunner tasks;
 
-    public SupplierDialog(SupplierService suppliers, Dialogs dialogs) {
+    public SupplierDialog(SupplierService suppliers, Dialogs dialogs, TaskRunner tasks) {
         this.suppliers = suppliers;
         this.dialogs = dialogs;
+        this.tasks = tasks;
     }
 
     /** @param supplier null to create a new one */
     public Optional<Supplier> show(Window owner, Supplier supplier) {
         boolean isNew = supplier == null;
         Supplier s = isNew ? new Supplier() : supplier;
-        FormDialog<Supplier> fd = new FormDialog<>(dialogs, owner, isNew ? "Nuevo proveedor" : "Editar proveedor",
+        FormDialog<Supplier> fd = new FormDialog<>(dialogs, tasks, owner, isNew ? "Nuevo proveedor" : "Editar proveedor",
                 isNew ? "Crear proveedor" : "Guardar cambios");
         FormGrid form = fd.form();
         TextField name = form.add("Nombre o razón social *", FormGrid.text(s.getName(), ""));
@@ -46,7 +49,7 @@ public class SupplierDialog {
             s.setEmail(email.getText());
             s.setAddress(address.getText());
             s.setActive(active.isSelected());
-            return suppliers.save(s);
+            return () -> suppliers.save(s);
         }, name);
     }
 }
