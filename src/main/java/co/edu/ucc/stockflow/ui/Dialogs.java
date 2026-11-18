@@ -11,6 +11,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.Region;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,12 +88,14 @@ public class Dialogs {
         d.setTitle(title);
         d.setHeaderText(title);
         theme.apply(d.getDialogPane());
+        // Long messages wrap onto several lines instead of being cut with "..."
+        d.getDialogPane().setMinWidth(460);
+        d.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
     }
 
     private void show(Alert.AlertType type, Window owner, String title, String message, Throwable detail) {
         Alert a = new Alert(type, message, ButtonType.OK);
         prepare(a, owner, title);
-        a.getDialogPane().setMinWidth(440);
         if (detail != null) {
             TextArea text = new TextArea(stackTrace(detail));
             text.setEditable(false);
