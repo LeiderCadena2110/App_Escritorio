@@ -4,6 +4,7 @@ import co.edu.ucc.stockflow.dto.BusinessInfo;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.PaymentMethod;
+import co.edu.ucc.stockflow.model.tax.TaxLine;
 import co.edu.ucc.stockflow.util.Formats;
 import co.edu.ucc.stockflow.util.Money;
 import java.awt.Color;
@@ -131,8 +132,14 @@ public class InvoicePdfService {
         if (invoice.getDiscount().signum() > 0) {
             y = totalLine(page, labelX, valueX, y, "Descuento", "- " + Money.format(invoice.getDiscount()), false);
         }
-        String rate = invoice.getTaxRate().stripTrailingZeros().toPlainString();
-        y = totalLine(page, labelX, valueX, y, "IVA (" + rate + " %)", Money.format(invoice.getTax()), false);
+        boolean anyVat = false;
+        for (TaxLine vat : invoice.getTaxBreakdown()) {
+            if (vat.rate().signum() == 0) continue;
+            anyVat = true;
+            y = totalLine(page, labelX, valueX, y, "IVA " + vat.rateLabel() + " sobre " + Money.format(vat.base()),
+                    Money.format(vat.tax()), false);
+        }
+        if (!anyVat) y = totalLine(page, labelX, valueX, y, "IVA", Money.format(invoice.getTax()), false);
         y = totalLine(page, labelX, valueX, y - 2, "TOTAL", Money.format(invoice.getTotal()), true);
 
         y -= 10;

@@ -3,6 +3,7 @@ package co.edu.ucc.stockflow.ui.dialog;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.PaymentMethod;
+import co.edu.ucc.stockflow.model.tax.TaxLine;
 import co.edu.ucc.stockflow.ui.Dialogs;
 import co.edu.ucc.stockflow.ui.component.Tables;
 import co.edu.ucc.stockflow.util.Formats;
@@ -75,8 +76,7 @@ public class InvoiceDetailDialog {
         int t = 0;
         t = total(totals, t, "Subtotal", Money.format(invoice.getSubtotal()), false);
         if (invoice.getDiscount().signum() > 0) t = total(totals, t, "Descuento", "- " + Money.format(invoice.getDiscount()), false);
-        t = total(totals, t, "IVA (" + invoice.getTaxRate().stripTrailingZeros().toPlainString() + " %)",
-                Money.format(invoice.getTax()), false);
+        for (String[] vat : vatLines(invoice)) t = total(totals, t, vat[0], vat[1], false);
         t = total(totals, t, "Total", Money.format(invoice.getTotal()), true);
         if (invoice.getPaymentMethod() == PaymentMethod.CASH) {
             t = total(totals, t, "Recibido", Money.format(invoice.getAmountPaid()), false);
@@ -91,6 +91,17 @@ public class InvoiceDetailDialog {
         d.getDialogPane().setContent(content);
         d.setResultConverter(b -> b == pdf ? Action.EXPORT_PDF : b == cancel ? Action.CANCEL_INVOICE : null);
         return d.showAndWait();
+    }
+
+    /** One line per VAT rate with tax ("IVA 19 % sobre $ 90.000"), or a single "IVA $ 0" line when nothing paid VAT. */
+    private static java.util.List<String[]> vatLines(Invoice invoice) {
+        java.util.List<String[]> lines = new java.util.ArrayList<>();
+        for (TaxLine vat : invoice.getTaxBreakdown()) {
+            if (vat.rate().signum() == 0) continue;
+            lines.add(new String[]{"IVA " + vat.rateLabel() + " sobre " + Money.format(vat.base()), Money.format(vat.tax())});
+        }
+        if (lines.isEmpty()) lines.add(new String[]{"IVA", Money.format(invoice.getTax())});
+        return lines;
     }
 
     private static int row(GridPane g, int r, String label, String value) {
