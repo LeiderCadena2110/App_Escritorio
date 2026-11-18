@@ -1,6 +1,6 @@
 package co.edu.ucc.stockflow.ui;
 
-import co.edu.ucc.stockflow.service.SettingsService;
+import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.ui.ThemeManager;
 import co.edu.ucc.stockflow.shared.ui.ViewLoader;
 import javafx.scene.Scene;

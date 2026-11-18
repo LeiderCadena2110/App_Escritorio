@@ -5,6 +5,7 @@ import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.Supplier;
 import co.edu.ucc.stockflow.repository.ProductRepository;
+import co.edu.ucc.stockflow.settings.application.SettingsService;
 import java.math.BigDecimal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

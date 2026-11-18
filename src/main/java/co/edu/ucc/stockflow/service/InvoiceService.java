@@ -10,6 +10,7 @@ import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.repository.InvoiceRepository;
 import co.edu.ucc.stockflow.repository.ProductRepository;
 import co.edu.ucc.stockflow.service.payment.PaymentPolicies;
+import co.edu.ucc.stockflow.settings.application.SequenceService;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import co.edu.ucc.stockflow.shared.domain.NotFoundException;

@@ -1,8 +1,8 @@
-package co.edu.ucc.stockflow.ui.controller;
+package co.edu.ucc.stockflow.settings.ui;
 
-import co.edu.ucc.stockflow.dto.BusinessInfo;
-import co.edu.ucc.stockflow.service.SequenceService;
-import co.edu.ucc.stockflow.service.SettingsService;
+import co.edu.ucc.stockflow.settings.application.SequenceService;
+import co.edu.ucc.stockflow.settings.application.SettingsService;
+import co.edu.ucc.stockflow.settings.domain.BusinessInfo;
 import co.edu.ucc.stockflow.shared.ui.Dialogs;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.SectionController;

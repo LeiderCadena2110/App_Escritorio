@@ -2,7 +2,7 @@ package co.edu.ucc.stockflow.ui;
 
 import co.edu.ucc.stockflow.DesktopApp;
 import co.edu.ucc.stockflow.service.DataSeeder;
-import co.edu.ucc.stockflow.service.SettingsService;
+import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.ui.Dialogs;
 import co.edu.ucc.stockflow.shared.ui.NavigationHost;
 import co.edu.ucc.stockflow.shared.ui.Navigator;

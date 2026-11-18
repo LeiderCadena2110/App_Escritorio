@@ -1,7 +1,7 @@
-package co.edu.ucc.stockflow.service;
+package co.edu.ucc.stockflow.settings.application;
 
-import co.edu.ucc.stockflow.dto.BusinessInfo;
-import co.edu.ucc.stockflow.repository.SettingRepository;
+import co.edu.ucc.stockflow.settings.domain.BusinessInfo;
+import co.edu.ucc.stockflow.settings.infrastructure.SettingRepository;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import java.math.BigDecimal;

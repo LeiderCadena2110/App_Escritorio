@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.service;
+package co.edu.ucc.stockflow.settings.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

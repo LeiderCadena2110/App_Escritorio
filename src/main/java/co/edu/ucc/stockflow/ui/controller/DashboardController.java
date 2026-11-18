@@ -5,7 +5,7 @@ import co.edu.ucc.stockflow.dto.DashboardSummary;
 import co.edu.ucc.stockflow.dto.TopProduct;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.service.ReportService;
-import co.edu.ucc.stockflow.service.SettingsService;
+import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.Section;
 import co.edu.ucc.stockflow.shared.ui.SectionController;

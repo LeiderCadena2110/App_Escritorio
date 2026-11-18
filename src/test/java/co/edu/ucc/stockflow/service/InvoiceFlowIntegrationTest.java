@@ -11,6 +11,8 @@ import co.edu.ucc.stockflow.model.InvoiceStatus;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.Product;
+import co.edu.ucc.stockflow.settings.application.SequenceService;
+import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.domain.ErrorCode;
 import co.edu.ucc.stockflow.shared.util.DateRange;

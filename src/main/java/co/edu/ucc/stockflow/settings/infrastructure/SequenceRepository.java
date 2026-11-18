@@ -1,4 +1,4 @@
-package co.edu.ucc.stockflow.repository;
+package co.edu.ucc.stockflow.settings.infrastructure;
 
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;

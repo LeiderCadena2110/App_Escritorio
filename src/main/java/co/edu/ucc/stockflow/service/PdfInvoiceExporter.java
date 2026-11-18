@@ -1,10 +1,11 @@
 package co.edu.ucc.stockflow.service;
 
-import co.edu.ucc.stockflow.dto.BusinessInfo;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.tax.TaxLine;
+import co.edu.ucc.stockflow.settings.application.SettingsService;
+import co.edu.ucc.stockflow.settings.domain.BusinessInfo;
 import co.edu.ucc.stockflow.shared.util.Formats;
 import co.edu.ucc.stockflow.shared.util.Money;
 import java.awt.Color;
