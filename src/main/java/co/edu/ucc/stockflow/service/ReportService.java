@@ -2,11 +2,11 @@ package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
+import co.edu.ucc.stockflow.customers.infrastructure.CustomerRepository;
 import co.edu.ucc.stockflow.dto.DailySales;
 import co.edu.ucc.stockflow.dto.DashboardSummary;
 import co.edu.ucc.stockflow.dto.SalesSummary;
 import co.edu.ucc.stockflow.dto.TopProduct;
-import co.edu.ucc.stockflow.repository.CustomerRepository;
 import co.edu.ucc.stockflow.repository.ReportRepository;
 import co.edu.ucc.stockflow.shared.util.DateRange;
 import java.math.BigDecimal;

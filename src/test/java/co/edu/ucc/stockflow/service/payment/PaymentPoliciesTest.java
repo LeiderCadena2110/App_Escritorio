@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import co.edu.ucc.stockflow.model.Customer;
+import co.edu.ucc.stockflow.customers.domain.Customer;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import co.edu.ucc.stockflow.model.payment.PaymentPolicy;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;

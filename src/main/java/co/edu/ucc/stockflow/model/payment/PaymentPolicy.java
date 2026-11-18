@@ -1,6 +1,6 @@
 package co.edu.ucc.stockflow.model.payment;
 
-import co.edu.ucc.stockflow.model.Customer;
+import co.edu.ucc.stockflow.customers.domain.Customer;
 import co.edu.ucc.stockflow.model.PaymentMethod;
 import java.math.BigDecimal;
 

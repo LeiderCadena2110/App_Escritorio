@@ -1,7 +1,7 @@
 package co.edu.ucc.stockflow.ui.viewmodel;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
-import co.edu.ucc.stockflow.model.Customer;
+import co.edu.ucc.stockflow.customers.domain.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.PaymentMethod;

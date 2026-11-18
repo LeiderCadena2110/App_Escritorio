@@ -2,7 +2,8 @@ package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.catalog.domain.Product;
 import co.edu.ucc.stockflow.catalog.infrastructure.ProductRepository;
-import co.edu.ucc.stockflow.model.Customer;
+import co.edu.ucc.stockflow.customers.application.CustomerService;
+import co.edu.ucc.stockflow.customers.domain.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
 import co.edu.ucc.stockflow.model.InvoiceStatus;

@@ -10,7 +10,7 @@
 
 <!-- Clientes: list, search, create, edit and delete -->
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="co.edu.ucc.stockflow.ui.controller.CustomersController"
+      fx:controller="co.edu.ucc.stockflow.customers.ui.CustomersController"
       styleClass="section" spacing="14">
     <HBox alignment="CENTER_LEFT" spacing="10">
         <VBox spacing="2">
