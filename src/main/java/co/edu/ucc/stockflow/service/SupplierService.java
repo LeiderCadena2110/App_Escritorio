@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.Supplier;
 import co.edu.ucc.stockflow.repository.SupplierRepository;
 import co.edu.ucc.stockflow.util.Formats;
@@ -33,7 +34,7 @@ public class SupplierService {
         s.setPhone(Formats.clean(s.getPhone()));
         s.setEmail(Formats.clean(s.getEmail()));
         s.setAddress(Formats.clean(s.getAddress()));
-        if (s.getName() == null) throw new BusinessException("Escriba el nombre del proveedor.");
+        if (s.getName() == null) throw new BusinessException(ErrorCode.SUPPLIER_NAME_REQUIRED);
         return repository.save(s);
     }
 

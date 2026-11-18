@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.Category;
 import co.edu.ucc.stockflow.repository.CategoryRepository;
 import co.edu.ucc.stockflow.util.Formats;
@@ -24,11 +25,11 @@ public class CategoryService {
     @Transactional
     public Category save(Category category) {
         String name = Formats.clean(category.getName());
-        if (name == null) throw new BusinessException("Escriba el nombre de la categoría.");
+        if (name == null) throw new BusinessException(ErrorCode.CATEGORY_NAME_REQUIRED);
         repository.findByName(name)
                 .filter(other -> !other.getId().equals(category.getId()))
                 .ifPresent(other -> {
-                    throw new BusinessException("Ya existe una categoría llamada \"" + name + "\".");
+                    throw new BusinessException(ErrorCode.CATEGORY_DUPLICATED, name);
                 });
         category.setName(name);
         category.setDescription(Formats.clean(category.getDescription()));

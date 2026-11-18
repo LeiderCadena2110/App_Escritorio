@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.repository.SequenceRepository;
 import co.edu.ucc.stockflow.repository.SequenceRepository.Series;
 import java.util.function.Predicate;
@@ -38,8 +39,8 @@ public class SequenceService {
     @Transactional
     public void configureInvoices(String prefix, long nextValue) {
         String p = prefix == null ? "" : prefix.trim();
-        if (p.length() > 10) throw new BusinessException("El prefijo de factura puede tener máximo 10 caracteres.");
-        if (nextValue < 1) throw new BusinessException("El siguiente número de factura debe ser mayor que 0.");
+        if (p.length() > 10) throw new BusinessException(ErrorCode.SEQUENCE_PREFIX_TOO_LONG, 10);
+        if (nextValue < 1) throw new BusinessException(ErrorCode.SEQUENCE_NEXT_NOT_POSITIVE);
         repository.save(new Series(INVOICE, p, nextValue));
     }
 

@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.ui.dialog;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.model.StockMovement;
@@ -106,7 +107,7 @@ public class StockMovementDialog {
 
         return fd.show(() -> {
             Product p = productBox.getValue();
-            if (p == null) throw new BusinessException("Elija un producto de la lista.");
+            if (p == null) throw new BusinessException(ErrorCode.PRODUCT_NOT_SELECTED);
             BigDecimal cost = unitCost.getText().isBlank() ? null : FormGrid.moneyValue(unitCost);
             return stock.register(p.getId(), type.getValue(), FormGrid.intValue(quantity), cost,
                     reference.getText(), notes.getText());

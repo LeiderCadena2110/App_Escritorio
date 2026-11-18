@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.repository.CustomerRepository;
 import co.edu.ucc.stockflow.util.Formats;
@@ -47,16 +48,16 @@ public class CustomerService {
         c.setEmail(Formats.clean(c.getEmail()));
         c.setAddress(Formats.clean(c.getAddress()));
         if (c.getDocumentType() == null || !DOCUMENT_TYPES.contains(c.getDocumentType())) c.setDocumentType("CC");
-        if (c.getDocumentNumber() == null) throw new BusinessException("Escriba el número de documento del cliente.");
-        if (c.getName() == null) throw new BusinessException("Escriba el nombre del cliente.");
+        if (c.getDocumentNumber() == null) throw new BusinessException(ErrorCode.CUSTOMER_DOCUMENT_REQUIRED);
+        if (c.getName() == null) throw new BusinessException(ErrorCode.CUSTOMER_NAME_REQUIRED);
         if (c.getEmail() != null && !EMAIL.matcher(c.getEmail()).matches()) {
-            throw new BusinessException("El correo \"" + c.getEmail() + "\" no es válido.");
+            throw new BusinessException(ErrorCode.CUSTOMER_EMAIL_INVALID, c.getEmail());
         }
         repository.findByDocument(c.getDocumentNumber())
                 .filter(other -> !other.getId().equals(c.getId()))
                 .ifPresent(other -> {
-                    throw new BusinessException("Ya existe un cliente con el documento " + c.getDocumentNumber()
-                            + " (" + other.getName() + ").");
+                    throw new BusinessException(ErrorCode.CUSTOMER_DOCUMENT_DUPLICATED,
+                            c.getDocumentNumber(), other.getName());
                 });
         return repository.save(c);
     }
@@ -64,11 +65,10 @@ public class CustomerService {
     /** Customers with invoices cannot be deleted (the invoices point to them). */
     @Transactional
     public void delete(Customer c) {
-        if (c.isFinalConsumer()) throw new BusinessException("El cliente \"Consumidor final\" no se puede eliminar.");
+        if (c.isFinalConsumer()) throw new BusinessException(ErrorCode.CUSTOMER_FINAL_CONSUMER_PROTECTED);
         int invoices = repository.countInvoices(c.getId());
         if (invoices > 0) {
-            throw new BusinessException("No se puede eliminar a " + c.getName() + " porque tiene " + invoices
-                    + " factura(s).");
+            throw new BusinessException(ErrorCode.CUSTOMER_HAS_INVOICES, c.getName(), invoices);
         }
         repository.delete(c.getId());
     }

@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.exception.InsufficientStockException;
 import co.edu.ucc.stockflow.exception.NotFoundException;
 import co.edu.ucc.stockflow.model.MovementType;
@@ -48,7 +49,7 @@ public class StockService {
     @Transactional
     public StockMovement register(long productId, MovementType type, int quantity, BigDecimal unitCost,
                                   String reference, String notes) {
-        Product product = products.findById(productId).orElseThrow(() -> new NotFoundException("el producto", productId));
+        Product product = products.findById(productId).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND, productId));
         int change = signedQuantity(type, quantity);
         int newStock = product.getStock() + change;
         if (newStock < 0) {
@@ -76,10 +77,10 @@ public class StockService {
     /** Applies the sign of the movement type and checks the quantity. */
     static int signedQuantity(MovementType type, int quantity) {
         if (type.sign() == 0) {
-            if (quantity == 0) throw new BusinessException("La cantidad del ajuste no puede ser 0.");
+            if (quantity == 0) throw new BusinessException(ErrorCode.STOCK_ADJUSTMENT_ZERO);
             return quantity;
         }
-        if (quantity <= 0) throw new BusinessException("La cantidad debe ser mayor que 0.");
+        if (quantity <= 0) throw new BusinessException(ErrorCode.STOCK_QUANTITY_NOT_POSITIVE);
         return quantity * type.sign();
     }
 

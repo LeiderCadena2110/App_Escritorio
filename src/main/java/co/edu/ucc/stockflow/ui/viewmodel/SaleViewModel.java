@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.ui.viewmodel;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.Customer;
 import co.edu.ucc.stockflow.model.Invoice;
 import co.edu.ucc.stockflow.model.InvoiceItem;
@@ -170,8 +171,9 @@ public class SaleViewModel {
     private void checkStock(Long productId, String name, int wanted) {
         Product p = catalog.get(productId);
         if (p == null || wanted <= p.getStock()) return;
-        throw new BusinessException(p.getStock() == 0 ? name + " está agotado."
-                : "Solo hay " + p.getStock() + " " + p.getUnit() + " de " + name + ".");
+        throw p.getStock() == 0
+                ? new BusinessException(ErrorCode.STOCK_SOLD_OUT, name)
+                : new BusinessException(ErrorCode.STOCK_ONLY_AVAILABLE, p.getStock(), p.getUnit(), name);
     }
 
     /** Tells the list (and the table) that a line changed. */

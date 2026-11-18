@@ -2,6 +2,7 @@ package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.dto.BusinessInfo;
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.repository.SettingRepository;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class SettingsService {
     @Transactional
     public void saveBusinessInfo(BusinessInfo info) {
         if (info.name() == null || info.name().isBlank()) {
-            throw new BusinessException("Escriba el nombre del negocio.");
+            throw new BusinessException(ErrorCode.SETTINGS_BUSINESS_NAME_REQUIRED);
         }
         set(BUSINESS_NAME, info.name());
         set(BUSINESS_TAX_ID, info.taxId());
@@ -76,7 +77,7 @@ public class SettingsService {
 
     public void setTaxRate(BigDecimal rate) {
         if (rate == null || rate.signum() < 0 || rate.compareTo(BigDecimal.valueOf(100)) > 0) {
-            throw new BusinessException("El IVA debe estar entre 0 y 100 %.");
+            throw new BusinessException(ErrorCode.SETTINGS_TAX_RATE_OUT_OF_RANGE);
         }
         set(TAX_RATE, rate.stripTrailingZeros().toPlainString());
     }

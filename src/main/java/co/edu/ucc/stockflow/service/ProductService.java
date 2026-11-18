@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.model.MovementType;
 import co.edu.ucc.stockflow.model.Product;
 import co.edu.ucc.stockflow.repository.ProductRepository;
@@ -52,7 +53,7 @@ public class ProductService {
     public Product create(Product product) {
         validate(product);
         int initialStock = product.getStock();
-        if (initialStock < 0) throw new BusinessException("El stock inicial no puede ser negativo.");
+        if (initialStock < 0) throw new BusinessException(ErrorCode.PRODUCT_INITIAL_STOCK_NEGATIVE);
         product.setStock(0);
         Product saved = repository.insert(product);
         if (initialStock > 0) {
@@ -98,28 +99,28 @@ public class ProductService {
         p.setBarcode(Formats.clean(p.getBarcode()));
         p.setName(Formats.clean(p.getName()));
         p.setDescription(Formats.clean(p.getDescription()));
-        if (p.getSku() == null) throw new BusinessException("Escriba el código (SKU) del producto.");
-        if (p.getSku().length() > 50) throw new BusinessException("El código (SKU) puede tener máximo 50 caracteres.");
-        if (p.getName() == null) throw new BusinessException("Escriba el nombre del producto.");
+        if (p.getSku() == null) throw new BusinessException(ErrorCode.PRODUCT_SKU_REQUIRED);
+        if (p.getSku().length() > 50) throw new BusinessException(ErrorCode.PRODUCT_SKU_TOO_LONG, 50);
+        if (p.getName() == null) throw new BusinessException(ErrorCode.PRODUCT_NAME_REQUIRED);
         if (p.getBarcode() != null && !p.getBarcode().matches("[0-9A-Za-z\\-]{4,50}")) {
-            throw new BusinessException("El código de barras solo puede tener letras, números y guiones (4 a 50).");
+            throw new BusinessException(ErrorCode.PRODUCT_BARCODE_INVALID);
         }
-        if (p.getCostPrice().signum() < 0) throw new BusinessException("El precio de costo no puede ser negativo.");
-        if (p.getSalePrice().signum() <= 0) throw new BusinessException("El precio de venta debe ser mayor que 0.");
-        if (p.getMinStock() < 0) throw new BusinessException("El stock mínimo no puede ser negativo.");
+        if (p.getCostPrice().signum() < 0) throw new BusinessException(ErrorCode.PRODUCT_COST_NEGATIVE);
+        if (p.getSalePrice().signum() <= 0) throw new BusinessException(ErrorCode.PRODUCT_PRICE_NOT_POSITIVE);
+        if (p.getMinStock() < 0) throw new BusinessException(ErrorCode.PRODUCT_MIN_STOCK_NEGATIVE);
         if (p.getUnit() == null || p.getUnit().isBlank()) p.setUnit("UND");
         repository.findBySku(p.getSku())
                 .filter(other -> !other.getId().equals(p.getId()))
                 .ifPresent(other -> {
-                    throw new BusinessException("Ya existe un producto con el código " + p.getSku()
-                            + " (" + other.getName() + ").");
+                    throw new BusinessException(ErrorCode.PRODUCT_SKU_DUPLICATED, p.getSku(),
+                            other.getName());
                 });
         if (p.getBarcode() != null) {
             repository.findByBarcode(p.getBarcode())
                     .filter(other -> !other.getId().equals(p.getId()))
                     .ifPresent(other -> {
-                        throw new BusinessException("El código de barras " + p.getBarcode()
-                                + " ya lo tiene " + other.getSku() + " · " + other.getName() + ".");
+                        throw new BusinessException(ErrorCode.PRODUCT_BARCODE_DUPLICATED,
+                                p.getBarcode(), other.getSku(), other.getName());
                     });
         }
     }

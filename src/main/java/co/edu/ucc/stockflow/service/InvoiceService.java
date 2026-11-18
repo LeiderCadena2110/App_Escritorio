@@ -1,6 +1,7 @@
 package co.edu.ucc.stockflow.service;
 
 import co.edu.ucc.stockflow.exception.BusinessException;
+import co.edu.ucc.stockflow.exception.ErrorCode;
 import co.edu.ucc.stockflow.exception.InsufficientStockException;
 import co.edu.ucc.stockflow.exception.NotFoundException;
 import co.edu.ucc.stockflow.model.Invoice;
@@ -87,20 +88,20 @@ public class InvoiceService {
      */
     @Transactional
     public Invoice issue(Invoice draft) {
-        if (draft.getItems().isEmpty()) throw new BusinessException("Agregue al menos un producto a la factura.");
+        if (draft.getItems().isEmpty()) throw new BusinessException(ErrorCode.INVOICE_EMPTY);
         if (draft.getDiscount() != null && draft.getDiscount().signum() < 0) {
-            throw new BusinessException("El descuento no puede ser negativo.");
+            throw new BusinessException(ErrorCode.INVOICE_DISCOUNT_NEGATIVE);
         }
 
         // 1. Check every product and the total quantity per product before writing anything
         Map<Long, Integer> quantities = new LinkedHashMap<>();
         for (InvoiceItem item : draft.getItems()) {
-            if (item.getQuantity() <= 0) throw new BusinessException("Las cantidades deben ser mayores que 0.");
+            if (item.getQuantity() <= 0) throw new BusinessException(ErrorCode.INVOICE_QUANTITY_NOT_POSITIVE);
             quantities.merge(item.getProductId(), item.getQuantity(), Integer::sum);
         }
         for (Map.Entry<Long, Integer> e : quantities.entrySet()) {
-            Product p = products.findById(e.getKey()).orElseThrow(() -> new NotFoundException("el producto", e.getKey()));
-            if (!p.isActive()) throw new BusinessException("El producto " + p.getSku() + " está inactivo.");
+            Product p = products.findById(e.getKey()).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND, e.getKey()));
+            if (!p.isActive()) throw new BusinessException(ErrorCode.PRODUCT_INACTIVE, p.getSku());
             if (p.getStock() < e.getValue()) {
                 throw new InsufficientStockException(p.getSku(), p.getName(), p.getStock(), e.getValue());
             }
@@ -119,7 +120,7 @@ public class InvoiceService {
                     .map(i -> i.getUnitPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             if (draft.getDiscount().compareTo(gross) > 0) {
-                throw new BusinessException("El descuento no puede ser mayor que el subtotal.");
+                throw new BusinessException(ErrorCode.INVOICE_DISCOUNT_ABOVE_SUBTOTAL);
             }
         }
         calculateTotals(draft, settings.taxRate());
@@ -129,8 +130,8 @@ public class InvoiceService {
             BigDecimal paid = draft.getAmountPaid() == null ? BigDecimal.ZERO : Money.round(draft.getAmountPaid());
             if (paid.signum() == 0) paid = draft.getTotal();
             if (paid.compareTo(draft.getTotal()) < 0) {
-                throw new BusinessException("El dinero recibido (" + Money.format(paid)
-                        + ") es menor que el total (" + Money.format(draft.getTotal()) + ").");
+                throw new BusinessException(ErrorCode.INVOICE_CASH_INSUFFICIENT,
+                        Money.format(paid), Money.format(draft.getTotal()));
             }
             draft.setAmountPaid(paid);
         } else if (draft.getPaymentMethod() == PaymentMethod.CREDIT) {
@@ -157,10 +158,10 @@ public class InvoiceService {
     /** Cancels the invoice and puts the units back in stock. */
     @Transactional
     public Invoice cancel(long invoiceId, String reason) {
-        Invoice invoice = invoices.findById(invoiceId).orElseThrow(() -> new NotFoundException("la factura", invoiceId));
-        if (invoice.isCancelled()) throw new BusinessException("La factura " + invoice.getNumber() + " ya está anulada.");
+        Invoice invoice = invoices.findById(invoiceId).orElseThrow(() -> new NotFoundException(ErrorCode.INVOICE_NOT_FOUND, invoiceId));
+        if (invoice.isCancelled()) throw new BusinessException(ErrorCode.INVOICE_ALREADY_CANCELLED, invoice.getNumber());
         String why = Formats.clean(reason);
-        if (why == null) throw new BusinessException("Escriba el motivo de la anulación.");
+        if (why == null) throw new BusinessException(ErrorCode.INVOICE_CANCEL_REASON_REQUIRED);
         for (InvoiceItem item : invoice.getItems()) {
             stockService.register(item.getProductId(), MovementType.SALE_CANCELLATION, item.getQuantity(),
                     item.getUnitCost(), invoice.getNumber(), why);
