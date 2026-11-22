@@ -44,25 +44,23 @@ Ejemplo de factura generada: [`samples/sample-invoice.pdf`](samples/sample-invoi
 
 ## Estructura del proyecto
 
+Monolito modular con arquitectura hexagonal (puertos y adaptadores): un módulo por funcionalidad,
+y dentro de cada uno las capas `domain`, `application`, `infrastructure` y `ui`.
+
 ```
-├── docs/                 Documentación (propuesta, arquitectura, manual, capturas)
-├── packaging/            Scripts e íconos para crear los instaladores
-├── samples/              Ejemplos de archivos que genera la app (PDF, CSV)
-└── src/
-    ├── main/java/co/edu/ucc/stockflow/
-    │   ├── model/        Entidades: Product, Invoice, Customer…
-    │   ├── dto/          Registros para reportes
-    │   ├── exception/    Errores de negocio
-    │   ├── repository/   Acceso a datos (SQL)
-    │   ├── service/      Reglas de negocio
-    │   ├── util/         Dinero, fechas y formatos
-    │   └── ui/           Interfaz: controller/, dialog/, component/
-    ├── main/resources/   views/ (FXML), styles/ (CSS), db/migration/ (SQL), icons/
-    └── test/java/        Pruebas
+src/main/java/co/edu/ucc/stockflow/
+├── app/          Ventana principal y menú
+├── shared/       Errores, dinero/fechas, componentes de interfaz
+├── settings/     Datos del negocio, IVA, consecutivos
+├── catalog/      Productos, categorías, proveedores
+├── customers/    Clientes
+├── inventory/    Movimientos de stock
+├── sales/        Facturas, IVA, pagos, punto de venta, PDF
+└── reporting/    Inicio y reportes
 ```
 
-El detalle de las capas, el modelo de datos y las convenciones de nombres está en
-[`docs/architecture.md`](docs/architecture.md).
+Las reglas de capas y dependencias entre módulos se verifican en cada build con `ArchitectureTest`.
+Los detalles están en [`docs/architecture.md`](docs/architecture.md).
 
 ## Cómo ejecutarla
 

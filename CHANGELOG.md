@@ -2,6 +2,22 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] · Paso 4: arquitectura modular
+
+### Cambiado
+- El código se organiza por módulos (`settings`, `catalog`, `customers`, `inventory`, `sales`,
+  `reporting`, `shared`, `app`), cada uno con capas `domain`, `application`, `infrastructure` y `ui`.
+- Los repositorios son **puertos** (interfaces en `domain`) con **adaptadores** JDBC en `infrastructure`.
+- El PDF queda detrás del puerto `InvoiceDocumentExporter`.
+- `Navigator` abre secciones pasándoles un dato, sin conocer sus controladores.
+- `ThemeManager` ya no depende de la configuración; la ventana principal se arma en `MainWindow`.
+- El catálogo publica el evento `ProductCreated` y el inventario registra el stock inicial.
+- La exportación CSV se divide en `CsvWriter` y un exportador por módulo.
+
+### Agregado
+- `ArchitectureTest`: 6 reglas de capas y módulos que hacen fallar el build si se rompen.
+- Prueba de `CategoryService` con un repositorio en memoria (sin Spring ni base de datos).
+
 ## [Sin publicar] · Paso 3: modelo de dominio
 
 ### Agregado
