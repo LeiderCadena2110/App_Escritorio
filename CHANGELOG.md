@@ -2,7 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
-## [Sin publicar] · Paso 6: asistente con inteligencia artificial
+## [2.0.0] · 2026-11-22
+
+Versión con arquitectura modular, IVA por producto, mejoras en el punto de venta y asistente con
+inteligencia artificial. Reúne los pasos 2 a 6.
+
+## [2.0.0] · Paso 6: asistente con inteligencia artificial
 
 ### Agregado
 - Sección **Asistente IA** (módulo `assistant`) con Google Gemini (`gemini-3.5-flash-lite` por defecto).
@@ -19,7 +24,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 ### Cambiado
 - Configuración pasa a Ctrl + 0; Asistente IA usa Ctrl + 9.
 
-## [Sin publicar] · Paso 5: experiencia en Vender
+## [2.0.0] · Paso 5: experiencia en Vender
 
 ### Agregado
 - **Botones de pago rápido** en efectivo: *Exacto* y los billetes siguientes ($ 37.400 → 38.000, 40.000, 50.000).
@@ -34,7 +39,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 ### Corregido
 - En el tema oscuro, la fila seleccionada de una tabla sin foco ahora se lee bien.
 
-## [Sin publicar] · Paso 4: arquitectura modular
+## [2.0.0] · Paso 4: arquitectura modular
 
 ### Cambiado
 - El código se organiza por módulos (`settings`, `catalog`, `customers`, `inventory`, `sales`,
@@ -50,7 +55,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 - `ArchitectureTest`: 6 reglas de capas y módulos que hacen fallar el build si se rompen.
 - Prueba de `CategoryService` con un repositorio en memoria (sin Spring ni base de datos).
 
-## [Sin publicar] · Paso 3: modelo de dominio
+## [2.0.0] · Paso 3: modelo de dominio
 
 ### Agregado
 - **IVA por producto** (19 %, 5 % o exento) y **régimen de IVA** del negocio (responsable o no responsable).
@@ -67,7 +72,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 ### Base de datos
 - `V6`: `products.tax_rate` e `invoice_items.tax_rate`; `invoices.tax_rate` pasa a ser opcional.
 
-## [Sin publicar] · Paso 2: bases para producción
+## [2.0.0] · Paso 2: bases para producción
 
 ### Agregado
 - `Clock` inyectado: los servicios y repositorios ya no llaman `now()` directamente; las pruebas pueden fijar la fecha.

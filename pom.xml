@@ -14,7 +14,7 @@
 
     <groupId>co.edu.ucc</groupId>
     <artifactId>stockflow</artifactId>
-    <version>1.1.0</version>
+    <version>2.0.0</version>
     <name>StockFlow</name>
     <description>Inventory and billing desktop app for small businesses (offline)</description>
 
@@ -106,6 +106,8 @@
                             <mainClass>${main.class}</mainClass>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
+                            <!-- Implementation-Version = project version, shown in Ayuda > Acerca de -->
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>
                 </configuration>

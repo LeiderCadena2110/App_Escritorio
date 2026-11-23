@@ -30,6 +30,12 @@ public class DesktopApp extends Application {
 
     public static final String NAME = "StockFlow";
 
+    /** Version from the .jar manifest (the one in pom.xml); "en desarrollo" when run from the IDE. */
+    public static String version() {
+        String v = DesktopApp.class.getPackage().getImplementationVersion();
+        return v == null ? "en desarrollo" : v;
+    }
+
     private ConfigurableApplicationContext context;
 
     @Override

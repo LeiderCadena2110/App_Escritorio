@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 [ -f target/app/stockflow.jar ] || { echo "target/app is missing. Run first: mvn package"; exit 1; }
 JPACKAGE="${JAVA_HOME:+$JAVA_HOME/bin/}jpackage"
 rm -rf target/installers
-"$JPACKAGE" --type dmg --name "StockFlow" --app-version 1.1.0 --vendor "UCC Pasto" \
+"$JPACKAGE" --type dmg --name "StockFlow" --app-version 2.0.0 --vendor "UCC Pasto" \
   --description "Inventario y facturación para pequeños negocios" \
   --input target/app --main-jar stockflow.jar --main-class co.edu.ucc.stockflow.Launcher \
   --icon packaging/icons/app-icon.icns --mac-package-identifier co.edu.ucc.stockflow \

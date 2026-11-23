@@ -193,7 +193,7 @@ public class MainController implements NavigationHost {
         }
 
         MenuItem about = item("Acerca de StockFlow", null, () -> dialogs.info(stage, "Acerca de StockFlow",
-                "StockFlow 1.1\nInventario y facturación para pequeños negocios.\n\n"
+                "StockFlow " + DesktopApp.version() + "\nInventario y facturación para pequeños negocios.\n\n"
                         + "Los datos se guardan en este equipo, en la carpeta .stockflow de su usuario.\n"
                         + "Universidad Cooperativa de Colombia, sede Pasto."));
         MenuItem sample = item("Cargar datos de ejemplo", null, this::loadSampleData);

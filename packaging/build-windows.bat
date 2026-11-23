@@ -20,7 +20,7 @@ if exist target\installers rmdir /s /q target\installers
 set EXTRA=
 if /i "%TYPE%"=="exe" set EXTRA=--win-menu --win-shortcut --win-dir-chooser --win-per-user-install --win-menu-group "StockFlow"
 
-%JPACKAGE% --type %TYPE% --name "StockFlow" --app-version 1.1.0 --vendor "UCC Pasto" ^
+%JPACKAGE% --type %TYPE% --name "StockFlow" --app-version 2.0.0 --vendor "UCC Pasto" ^
   --description "Inventario y facturacion para pequenos negocios" ^
   --input target\app --main-jar stockflow.jar --main-class co.edu.ucc.stockflow.Launcher ^
   --icon packaging\icons\app-icon.ico --dest target\installers %EXTRA%
