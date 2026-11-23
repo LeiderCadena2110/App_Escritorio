@@ -2,9 +2,13 @@
 
 Aplicación de escritorio para **controlar el inventario y facturar las ventas** de un negocio pequeño
 (tienda de calzado, papelería, miscelánea…). Funciona **sin internet** en Windows, macOS y Linux, y
-guarda los datos en el mismo equipo.
+guarda los datos en el mismo equipo; solo el asistente de inteligencia artificial necesita conexión.
 
 ![Panel principal](docs/screenshots/dashboard.png)
+
+**Descargar:** el instalador de cada sistema está en
+[Releases](https://github.com/LeiderCadena2110/App_Escritorio/releases) (`.exe` para Windows,
+`.dmg` para macOS, `.deb` y AppImage para Linux). No necesita instalar Java.
 
 ## Funcionalidades
 
@@ -14,13 +18,14 @@ guarda los datos en el mismo equipo.
   búsqueda, filtros y exportación a CSV.
 - **Inventario:** entradas por compra (con costo promedio ponderado), ajustes, pérdidas y devoluciones,
   con el historial (kardex) de cada producto.
-- **Punto de venta:** carrito con búsqueda por código, control de stock, descuento, IVA, forma de pago
-  y cambio. Atajos F2 (buscar) y F12 (cobrar).
+- **Punto de venta:** carrito con búsqueda por código o lector de barras (sin importar tildes), cliente
+  con sugerencias, botones de pago rápido en efectivo, control de stock, descuento, IVA y cambio.
+  Atajos F2 (buscar), F3 (cliente) y F12 (cobrar).
 - **Facturas:** consecutivo con prefijo (`FV-000001`), detalle, exportación a **PDF** y anulación que
   devuelve las unidades al inventario.
 - **Clientes y proveedores.**
 - **Reportes:** ventas por periodo, ganancia, ticket promedio, IVA cobrado, ventas por día y más vendidos.
-- **Configuración:** datos del negocio, % de IVA, numeración de facturas y tema claro u oscuro.
+- **Configuración:** datos del negocio, régimen e IVA por producto, numeración de facturas y tema claro u oscuro.
 - **Asistente IA (Gemini):** lee la foto o el PDF de una factura de proveedor y prepara la compra
   para revisar; calcula qué productos comprar y cuántos, y redacta la nota de pedido por proveedor.
 
@@ -29,6 +34,8 @@ guarda los datos en el mismo equipo.
 | ![Punto de venta](docs/screenshots/point-of-sale.png) | ![Productos](docs/screenshots/products.png) |
 | **Inventario** | **Reportes** |
 | ![Inventario](docs/screenshots/inventory.png) | ![Reportes](docs/screenshots/reports.png) |
+| **Asistente IA** | **Factura de proveedor leída con IA** |
+| ![Asistente IA](docs/screenshots/assistant.png) | ![Revisión de la factura](docs/screenshots/invoice-review.png) |
 
 Ejemplo de factura generada: [`samples/sample-invoice.pdf`](samples/sample-invoice.pdf).
 
@@ -80,14 +87,18 @@ Requisitos: **JDK 21** (por ejemplo, Eclipse Temurin). Maven descarga JavaFX y l
 **Terminal**
 
 ```bash
-mvn spring-boot:run
+mvn spring-boot:run          # la primera vez, o tras cambiar de rama: mvn clean spring-boot:run
 ```
 
 > Ejecute siempre **Launcher**, no `DesktopApp`: si se ejecuta directamente la clase que extiende
 > `Application`, Java muestra "JavaFX runtime components are missing".
 
-La primera vez se crea un catálogo de ejemplo de una tienda de calzado para probar la app. Los datos
-quedan en `~/.stockflow/` (carpeta `.stockflow` del usuario).
+La app empieza vacía. Para probarla con un catálogo de tienda de calzado (13 productos, clientes y
+proveedores) use **Ayuda › Cargar datos de ejemplo**. Los datos quedan en `~/.stockflow/` (carpeta
+`.stockflow` del usuario).
+
+Para el **Asistente IA** cree una clave gratuita en [Google AI Studio](https://aistudio.google.com/apikey)
+y péguela en *Asistente IA › Configurar* (o defina la variable de entorno `GEMINI_API_KEY`).
 
 ## Pruebas
 
@@ -95,8 +106,15 @@ quedan en `~/.stockflow/` (carpeta `.stockflow` del usuario).
 mvn test
 ```
 
-Incluyen pruebas unitarias (dinero, fechas, totales de factura, reglas de stock, CSV) y una prueba de
-integración del flujo completo vender → anular sobre una base H2 en memoria.
+Más de 110 pruebas, todas sin internet:
+
+- **unitarias** de dominio: dinero, fechas, agregado `Invoice`, IVA, formas de pago, stock, plan de compras;
+- **de integración** sobre H2 en memoria: vender → anular, y leer factura con IA → registrar compra
+  (con un modelo de IA falso);
+- **del adaptador de Gemini** contra un servidor HTTP local que lo imita;
+- **de arquitectura** (`ArchitectureTest`): capas y dependencias entre módulos.
+
+GitHub Actions las ejecuta en cada `push`.
 
 ## Instaladores
 
