@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public final class ProductMatcher {
 
     /** Share of the product name's words that must appear in the description. */
-    static final double MIN_NAME_SCORE = 0.6;
+    static final double MIN_NAME_SCORE = 0.7;
 
     private ProductMatcher() {
     }

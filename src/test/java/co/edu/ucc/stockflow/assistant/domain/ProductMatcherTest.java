@@ -52,6 +52,12 @@ class ProductMatcherTest {
     }
 
     @Test
+    void twoOfThreeWordsAreNotEnough() {
+        Product sandal = product("SAN-002", null, "Sandalia cuero dama");
+        assertNull(ProductMatcher.find(line("", "Sandalia playera dama"), List.of(sandal)).product());
+    }
+
+    @Test
     void wordsIgnoreAccentsCaseAndConnectors() {
         assertEquals(java.util.Set.of("guayos", "futbol", "pro"), ProductMatcher.words("Guayos de Fútbol PRO x"));
         assertEquals(java.util.Set.of("medias", "deportivas", "3"), ProductMatcher.words("Medias deportivas x 3"));
