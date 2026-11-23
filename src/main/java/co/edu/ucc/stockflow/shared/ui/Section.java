@@ -1,6 +1,6 @@
 package co.edu.ucc.stockflow.shared.ui;
 
-/** Sections of the sidebar (Ctrl/Cmd + 1…9). Each one has a view in /views/&lt;fxml&gt;.fxml. */
+/** Sections of the sidebar (Ctrl/Cmd + 1…9 and 0). Each one has a view in /views/&lt;fxml&gt;.fxml. */
 public enum Section {
     DASHBOARD("dashboard", "Inicio", Icon.DASHBOARD),
     POINT_OF_SALE("point-of-sale", "Vender", Icon.CART),
@@ -10,6 +10,7 @@ public enum Section {
     CUSTOMERS("customers", "Clientes", Icon.PEOPLE),
     SUPPLIERS("suppliers", "Proveedores", Icon.TRUCK),
     REPORTS("reports", "Reportes", Icon.CHART),
+    ASSISTANT("assistant", "Asistente IA", Icon.SPARKLES),
     SETTINGS("settings", "Configuración", Icon.SETTINGS);
 
     private final String fxml;

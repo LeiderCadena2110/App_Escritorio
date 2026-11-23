@@ -166,7 +166,7 @@ public class MainController implements NavigationHost {
         }
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
-        Label footer = new Label("Ctrl + 1…9 para cambiar de sección");
+        Label footer = new Label("Ctrl + 1…9 y 0 para cambiar de sección");
         footer.getStyleClass().add("sidebar-footer");
         footer.setWrapText(true);
         sidebar.getChildren().addAll(spacer, footer);
@@ -186,9 +186,10 @@ public class MainController implements NavigationHost {
 
         Menu go = new Menu("Ir a");
         KeyCode[] digits = {KeyCode.DIGIT1, KeyCode.DIGIT2, KeyCode.DIGIT3, KeyCode.DIGIT4, KeyCode.DIGIT5,
-                KeyCode.DIGIT6, KeyCode.DIGIT7, KeyCode.DIGIT8, KeyCode.DIGIT9};
+                KeyCode.DIGIT6, KeyCode.DIGIT7, KeyCode.DIGIT8, KeyCode.DIGIT9, KeyCode.DIGIT0};
         for (Section s : Section.values()) {
-            go.getItems().add(item(s.label(), shortcut(digits[s.ordinal()]), () -> show(s)));
+            KeyCombination key = s.ordinal() < digits.length ? shortcut(digits[s.ordinal()]) : null;
+            go.getItems().add(item(s.label(), key, () -> show(s)));
         }
 
         MenuItem about = item("Acerca de StockFlow", null, () -> dialogs.info(stage, "Acerca de StockFlow",

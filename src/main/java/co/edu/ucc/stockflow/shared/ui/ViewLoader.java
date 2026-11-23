@@ -42,6 +42,11 @@ public class ViewLoader {
         if (hostServices != null) hostServices.showDocument(file.toUri().toString());
     }
 
+    /** Opens a web page in the default browser. */
+    public void openUrl(String url) {
+        if (hostServices != null) hostServices.showDocument(url);
+    }
+
     public void setHostServices(HostServices hostServices) {
         this.hostServices = hostServices;
     }

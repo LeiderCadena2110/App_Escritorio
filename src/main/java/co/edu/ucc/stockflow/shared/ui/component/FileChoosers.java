@@ -31,6 +31,20 @@ public class FileChoosers {
                 new FileChooser.ExtensionFilter("PDF", "*.pdf"));
     }
 
+    /** Photo or PDF of a document to read (for example a supplier's invoice). */
+    public Path openImageOrPdf(Window owner, String title) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(title);
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Foto o PDF", "*.jpg", "*.jpeg", "*.png", "*.webp", "*.pdf"),
+                new FileChooser.ExtensionFilter("Todos los archivos", "*.*"));
+        if (lastFolder.isDirectory()) chooser.setInitialDirectory(lastFolder);
+        File file = chooser.showOpenDialog(owner);
+        if (file == null) return null;
+        lastFolder = file.getParentFile();
+        return file.toPath();
+    }
+
     private Path save(Window owner, String title, String fileName, FileChooser.ExtensionFilter filter) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle(title);
