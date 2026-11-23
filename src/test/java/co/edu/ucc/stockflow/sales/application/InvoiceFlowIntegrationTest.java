@@ -74,10 +74,13 @@ class InvoiceFlowIntegrationTest {
         assertEquals(3, products.findById(shoe.getId()).orElseThrow().getStock());
         assertTrue(saved.getNumber().startsWith(sequences.invoiceSeries().prefix()));
         assertEquals(1, reports.salesSummary(DateRange.today()).invoices());
+        assertEquals(2, reports.unitsSoldByProduct(DateRange.today()).get(shoe.getId()));
 
         invoices.cancel(saved.getId(), "Error en la venta");
 
         assertEquals(5, products.findById(shoe.getId()).orElseThrow().getStock());
+        assertFalse(reports.unitsSoldByProduct(DateRange.today()).containsKey(shoe.getId()),
+                "a cancelled invoice does not count as sold");
         assertEquals(InvoiceStatus.CANCELLED, invoices.findById(saved.getId()).orElseThrow().getStatus());
         assertEquals(0, reports.salesSummary(DateRange.today()).invoices());
         // initial + sale + cancellation

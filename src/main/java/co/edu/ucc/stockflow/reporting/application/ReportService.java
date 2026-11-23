@@ -55,6 +55,11 @@ public class ReportService {
         return reports.topProducts(range.start(), range.end(), limit);
     }
 
+    /** Units sold of each product in the range, by product id. */
+    public Map<Long, Integer> unitsSoldByProduct(DateRange range) {
+        return reports.unitsSoldByProduct(range.start(), range.end());
+    }
+
     /** One entry per day of the range, including the days without sales (with 0). */
     public List<DailySales> dailySales(DateRange range) {
         Map<LocalDate, DailySales> byDay = new HashMap<>();

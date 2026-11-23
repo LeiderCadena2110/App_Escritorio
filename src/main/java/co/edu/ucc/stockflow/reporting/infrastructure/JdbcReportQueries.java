@@ -6,7 +6,9 @@ import co.edu.ucc.stockflow.reporting.application.SalesSummary;
 import co.edu.ucc.stockflow.reporting.application.TopProduct;
 import co.edu.ucc.stockflow.shared.persistence.JdbcHelper;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -59,6 +61,22 @@ public class JdbcReportQueries implements ReportQueries {
                 (rs, n) -> new TopProduct(rs.getString("product_sku"), rs.getString("product_name"),
                         rs.getInt("quantity"), rs.getBigDecimal("revenue"), rs.getBigDecimal("profit")),
                 JdbcHelper.timestamp(from), JdbcHelper.timestamp(to), limit);
+    }
+
+    @Override
+    public Map<Long, Integer> unitsSoldByProduct(LocalDateTime from, LocalDateTime to) {
+        Map<Long, Integer> units = new HashMap<>();
+        jdbc.query("""
+                SELECT it.product_id, SUM(it.quantity) AS quantity
+                FROM invoice_items it JOIN invoices iv ON iv.id = it.invoice_id
+                WHERE iv.status = 'PAID' AND iv.issued_at >= ? AND iv.issued_at < ?
+                GROUP BY it.product_id
+                """,
+                rs -> {
+                    units.put(rs.getLong("product_id"), rs.getInt("quantity"));
+                },
+                JdbcHelper.timestamp(from), JdbcHelper.timestamp(to));
+        return units;
     }
 
     @Override
