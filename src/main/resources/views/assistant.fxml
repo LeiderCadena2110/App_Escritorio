@@ -26,7 +26,7 @@
     <HBox styleClass="card" spacing="16" alignment="CENTER_LEFT">
         <VBox spacing="4" HBox.hgrow="ALWAYS">
             <Label styleClass="card-title" text="Leer factura de proveedor"/>
-            <Label styleClass="muted" wrapText="true"
+            <Label styleClass="muted" wrapText="true" minHeight="-Infinity"
                    text="Tome una foto o use el PDF de la factura de compra. La IA lee los productos, cantidades y costos, y usted revisa todo antes de sumar el stock."/>
         </VBox>
         <Button fx:id="readInvoiceButton" text="Elegir foto o PDF…" styleClass="primary-button"
