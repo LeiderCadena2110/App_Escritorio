@@ -18,6 +18,7 @@ import co.edu.ucc.stockflow.shared.ui.Dialogs;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
+import co.edu.ucc.stockflow.shared.ui.Toasts;
 import co.edu.ucc.stockflow.shared.ui.ViewLoader;
 import co.edu.ucc.stockflow.shared.ui.component.AutoCompleteField;
 import co.edu.ucc.stockflow.shared.ui.component.FileChoosers;
@@ -38,10 +39,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
@@ -102,6 +100,7 @@ public class PointOfSaleController implements SectionController {
     private final ViewLoader views;
     private final FileChoosers files;
     private final TaskRunner tasks;
+    private final Toasts toasts;
 
     private final SaleViewModel sale = new SaleViewModel();
     private final ObservableList<Product> catalog = FXCollections.observableArrayList();
@@ -117,7 +116,7 @@ public class PointOfSaleController implements SectionController {
     public PointOfSaleController(ProductService products, CustomerService customers, InvoiceService invoices,
                                  InvoiceDocumentExporter pdf, SequenceService sequences, TaxPolicyProvider taxPolicies,
                                  CustomerDialog customerDialog, Dialogs dialogs, Navigator navigator,
-                                 ViewLoader views, FileChoosers files, TaskRunner tasks) {
+                                 ViewLoader views, FileChoosers files, TaskRunner tasks, Toasts toasts) {
         this.products = products;
         this.customers = customers;
         this.invoices = invoices;
@@ -130,6 +129,7 @@ public class PointOfSaleController implements SectionController {
         this.views = views;
         this.files = files;
         this.tasks = tasks;
+        this.toasts = toasts;
     }
 
     @FXML
@@ -435,25 +435,29 @@ public class PointOfSaleController implements SectionController {
         });
     }
 
+    /**
+     * A toast instead of a dialog: the next customer can be served at once. The change is in the
+     * title because it is what the cashier needs to read; the PDF is one click away.
+     */
     private void afterSale(Invoice saved) {
-        StringBuilder msg = new StringBuilder("Total: ").append(Money.format(saved.getTotal()));
-        if (saved.getPaymentMethod() == PaymentMethod.CASH) {
-            msg.append("\nRecibido: ").append(Money.format(saved.getAmountPaid()))
-                    .append("\nCambio: ").append(Money.format(saved.getChange()));
+        String title;
+        String detail;
+        if (saved.getPaymentMethod() == PaymentMethod.CASH && saved.getChange().signum() > 0) {
+            title = "Cambio: " + Money.format(saved.getChange());
+            detail = "Factura " + saved.getNumber() + " · Total " + Money.format(saved.getTotal())
+                    + " · Recibido " + Money.format(saved.getAmountPaid());
         } else {
-            msg.append("\nForma de pago: ").append(saved.getPaymentMethod().label());
+            title = "Factura " + saved.getNumber() + " registrada";
+            detail = "Total " + Money.format(saved.getTotal()) + " · " + saved.getPaymentMethod().label();
         }
-        ButtonType savePdf = new ButtonType("Guardar PDF", ButtonBar.ButtonData.OTHER);
-        ButtonType ok = new ButtonType("Nueva venta", ButtonBar.ButtonData.OK_DONE);
-        Alert a = new Alert(Alert.AlertType.INFORMATION, msg.toString(), savePdf, ok);
-        dialogs.prepare(a, navigator.window(), "Factura " + saved.getNumber() + " registrada");
-        if (a.showAndWait().filter(b -> b == savePdf).isPresent()) {
-            Path file = files.savePdf(navigator.window(), saved.getNumber());
-            if (file != null) {
-                tasks.run("No se pudo guardar el PDF",
-                        () -> pdf.export(invoices.findById(saved.getId()).orElse(saved), file),
-                        () -> views.openFile(file));
-            }
-        }
+        toasts.show(Toasts.Kind.SUCCESS, title, detail, "Guardar PDF", () -> savePdf(saved));
+    }
+
+    private void savePdf(Invoice saved) {
+        Path file = files.savePdf(navigator.window(), saved.getNumber());
+        if (file == null) return;
+        tasks.run("No se pudo guardar el PDF",
+                () -> pdf.export(invoices.findById(saved.getId()).orElse(saved), file),
+                () -> views.openFile(file));
     }
 }

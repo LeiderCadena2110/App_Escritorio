@@ -87,7 +87,8 @@ public class Toasts {
         HBox toast = new HBox(12);
         toast.getStyleClass().addAll("toast", kind.styleClass);
         toast.setAlignment(Pos.CENTER_LEFT);
-        toast.setMaxWidth(420);
+        toast.setPrefWidth(400);
+        toast.setMaxWidth(440);
 
         Region bar = new Region();
         bar.getStyleClass().add("toast-bar");
@@ -107,6 +108,7 @@ public class Toasts {
         if (action != null) {
             Button button = new Button(actionText);
             button.getStyleClass().add("toast-action");
+            button.setMinWidth(Region.USE_PREF_SIZE); // never cut to "..."
             button.setOnAction(e -> {
                 close(toast);
                 action.run();
