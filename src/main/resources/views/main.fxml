@@ -20,7 +20,8 @@
         <VBox fx:id="sidebar" styleClass="sidebar" spacing="3" prefWidth="210"/>
     </left>
     <center>
-        <StackPane>
+        <!-- Toasts (Toasts.attach) float on top of this area -->
+        <StackPane fx:id="center">
             <StackPane fx:id="content" styleClass="content"/>
             <!-- Shown while data is loading in the background -->
             <HBox fx:id="loadingBadge" styleClass="loading-badge" spacing="8" alignment="CENTER"

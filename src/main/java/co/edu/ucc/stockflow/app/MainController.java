@@ -8,6 +8,7 @@ import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.Section;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
+import co.edu.ucc.stockflow.shared.ui.Toasts;
 import co.edu.ucc.stockflow.shared.ui.ViewLoader;
 import java.util.EnumMap;
 import java.util.Map;
@@ -51,6 +52,8 @@ public class MainController implements NavigationHost {
     @FXML
     private VBox sidebar;
     @FXML
+    private StackPane center;
+    @FXML
     private StackPane content;
     @FXML
     private HBox loadingBadge;
@@ -61,6 +64,7 @@ public class MainController implements NavigationHost {
     private final Dialogs dialogs;
     private final TaskRunner tasks;
     private final DataSeeder seeder;
+    private final Toasts toasts;
 
     private final Map<Section, ViewLoader.LoadedView<Object>> loaded = new EnumMap<>(Section.class);
     private final Map<Section, ToggleButton> buttons = new EnumMap<>(Section.class);
@@ -69,13 +73,14 @@ public class MainController implements NavigationHost {
     private Section current = Section.DASHBOARD;
 
     public MainController(ViewLoader views, SettingsService settings, Navigator navigator, Dialogs dialogs,
-                          TaskRunner tasks, DataSeeder seeder) {
+                          TaskRunner tasks, DataSeeder seeder, Toasts toasts) {
         this.views = views;
         this.settings = settings;
         this.navigator = navigator;
         this.dialogs = dialogs;
         this.tasks = tasks;
         this.seeder = seeder;
+        this.toasts = toasts;
     }
 
     @FXML
@@ -86,6 +91,7 @@ public class MainController implements NavigationHost {
         // On macOS the menu goes to the system bar; on Windows and Linux it stays in the window
         menuBar.setUseSystemMenuBar(true);
         setUpLoadingBadge();
+        toasts.attach(center);
     }
 
     /** "Cargando…" appears only if the work takes more than 300 ms, so quick queries do not blink. */
@@ -202,7 +208,11 @@ public class MainController implements NavigationHost {
             tasks.run("No se pudieron cargar los datos de ejemplo", () -> {
                 seeder.loadSampleData();
                 return true;
-            }, done -> show(current));
+            }, done -> {
+                show(current);
+                toasts.show(Toasts.Kind.SUCCESS, "Datos de ejemplo cargados",
+                        "13 productos, 5 categorías, 3 proveedores y 3 clientes.");
+            });
         });
     }
 
