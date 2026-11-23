@@ -266,3 +266,19 @@
     -fx-text-fill: -color-muted;
     -fx-font-size: 12px;
 }
+
+/* Search-and-choose field (AutoCompleteField) */
+.autocomplete-popup .menu-item {
+    -fx-padding: 6 10 6 10;
+}
+.autocomplete-title {
+    -fx-font-weight: bold;
+}
+.autocomplete-detail {
+    -fx-text-fill: -color-muted;
+    -fx-font-size: 11px;
+}
+.autocomplete-popup .menu-item:focused .autocomplete-title,
+.autocomplete-popup .menu-item:focused .autocomplete-detail {
+    -fx-text-fill: white;
+}
