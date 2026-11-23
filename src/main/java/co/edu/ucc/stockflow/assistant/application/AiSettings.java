@@ -2,6 +2,8 @@ package co.edu.ucc.stockflow.assistant.application;
 
 import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.util.Formats;
+import java.util.function.UnaryOperator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,19 +21,26 @@ public class AiSettings {
     public static final String DEFAULT_MODEL = "gemini-3.5-flash-lite";
 
     private final SettingsService settings;
+    private final UnaryOperator<String> environment;
 
+    @Autowired
     public AiSettings(SettingsService settings) {
+        this(settings, System::getenv);
+    }
+
+    /** For tests: environment variables that do not depend on the computer. */
+    public AiSettings(SettingsService settings, UnaryOperator<String> environment) {
         this.settings = settings;
+        this.environment = environment;
     }
 
     public String apiKey() {
-        String fromEnvironment = System.getenv(ENVIRONMENT_VARIABLE);
-        if (fromEnvironment != null && !fromEnvironment.isBlank()) return fromEnvironment.trim();
+        if (keyFromEnvironment()) return environment.apply(ENVIRONMENT_VARIABLE).trim();
         return settings.get(API_KEY, "").trim();
     }
 
     public boolean keyFromEnvironment() {
-        String fromEnvironment = System.getenv(ENVIRONMENT_VARIABLE);
+        String fromEnvironment = environment.apply(ENVIRONMENT_VARIABLE);
         return fromEnvironment != null && !fromEnvironment.isBlank();
     }
 

@@ -55,6 +55,12 @@
             <artifactId>flyway-core</artifactId>
         </dependency>
 
+        <!-- JSON for the Gemini API (version managed by Spring Boot; Flyway already brings it) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
         <!-- Invoice PDF -->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
