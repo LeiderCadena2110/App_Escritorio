@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -61,8 +62,10 @@
             <TextField fx:id="discountField" promptText="0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
             <Label fx:id="receivedLabel" text="Recibido ($)" styleClass="form-label" GridPane.rowIndex="2"/>
             <TextField fx:id="receivedField" promptText="Valor exacto" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label text="Notas" styleClass="form-label" GridPane.rowIndex="3"/>
-            <TextField fx:id="notesField" promptText="Opcional" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <!-- Quick cash buttons: exact amount and the next bills -->
+            <FlowPane fx:id="cashButtons" hgap="6" vgap="6" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <Label text="Notas" styleClass="form-label" GridPane.rowIndex="4"/>
+            <TextField fx:id="notesField" promptText="Opcional" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
         </GridPane>
 
         <GridPane styleClass="totals-box" hgap="10" vgap="6">

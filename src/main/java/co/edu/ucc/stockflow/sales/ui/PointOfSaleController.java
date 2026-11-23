@@ -43,6 +43,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.control.Label;
@@ -76,6 +78,7 @@ public class PointOfSaleController implements SectionController {
     @FXML private TextField discountField;
     @FXML private Label receivedLabel;
     @FXML private TextField receivedField;
+    @FXML private FlowPane cashButtons;
     @FXML private TextField notesField;
     @FXML private Label subtotalLabel;
     @FXML private Label discountLabel;
@@ -225,6 +228,25 @@ public class PointOfSaleController implements SectionController {
         changeNameLabel.visibleProperty().bind(sale.cashProperty());
         changeLabel.visibleProperty().bind(sale.cashProperty());
         chargeButton.disableProperty().bind(sale.emptyProperty().or(charging));
+
+        cashButtons.visibleProperty().bind(sale.cashProperty().and(sale.emptyProperty().not()));
+        cashButtons.managedProperty().bind(cashButtons.visibleProperty());
+        sale.totalProperty().addListener((o, a, total) -> showCashButtons(total));
+    }
+
+    /** "Exacto" and the next bills: one click fills "Recibido" and shows the change. */
+    private void showCashButtons(BigDecimal total) {
+        List<BigDecimal> amounts = CashSuggestions.forTotal(total);
+        cashButtons.getChildren().clear();
+        for (int i = 0; i < amounts.size(); i++) {
+            BigDecimal amount = amounts.get(i);
+            Button b = new Button(i == 0 ? "Exacto" : Money.format(amount));
+            b.getStyleClass().add("cash-button");
+            b.setFocusTraversable(false);
+            if (i == 0) b.setTooltip(new Tooltip(Money.format(amount)));
+            b.setOnAction(e -> receivedField.setText(Money.number(amount)));
+            cashButtons.getChildren().add(b);
+        }
     }
 
     private static StringBinding money(ObservableValue<BigDecimal> value) {

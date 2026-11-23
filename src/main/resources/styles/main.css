@@ -282,3 +282,15 @@
 .autocomplete-popup .menu-item:focused .autocomplete-detail {
     -fx-text-fill: white;
 }
+
+/* Quick cash buttons in the point of sale */
+.cash-button {
+    -fx-font-size: 12px;
+    -fx-padding: 3 9 3 9;
+    -fx-background-color: -color-success-bg;
+    -fx-text-fill: -color-success;
+    -fx-font-weight: bold;
+}
+.cash-button:hover {
+    -fx-background-color: derive(-color-success-bg, -6%);
+}
