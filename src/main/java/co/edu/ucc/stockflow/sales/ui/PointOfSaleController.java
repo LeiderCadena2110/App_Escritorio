@@ -22,6 +22,7 @@ import co.edu.ucc.stockflow.shared.ui.ViewLoader;
 import co.edu.ucc.stockflow.shared.ui.component.FileChoosers;
 import co.edu.ucc.stockflow.shared.ui.component.Tables;
 import co.edu.ucc.stockflow.shared.util.Money;
+import co.edu.ucc.stockflow.shared.util.TextSearch;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
@@ -272,11 +273,9 @@ public class PointOfSaleController implements SectionController {
     }
 
     private void filterProducts(String text) {
-        String t = text == null ? "" : text.trim().toLowerCase();
-        results.setPredicate(p -> t.isEmpty() || p.getSku().toLowerCase().contains(t)
-                || p.getName().toLowerCase().contains(t)
-                || (p.getBarcode() != null && p.getBarcode().equals(t))
-                || (p.getCategoryName() != null && p.getCategoryName().toLowerCase().contains(t)));
+        String t = text == null ? "" : text.trim();
+        results.setPredicate(p -> t.equals(p.getBarcode())
+                || TextSearch.matches(t, p.getSku(), p.getName(), p.getCategoryName()));
     }
 
     private void filterCustomers(String text) {
