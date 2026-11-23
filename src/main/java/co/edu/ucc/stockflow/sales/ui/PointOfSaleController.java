@@ -19,6 +19,7 @@ import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
 import co.edu.ucc.stockflow.shared.ui.ViewLoader;
+import co.edu.ucc.stockflow.shared.ui.component.AutoCompleteField;
 import co.edu.ucc.stockflow.shared.ui.component.FileChoosers;
 import co.edu.ucc.stockflow.shared.ui.component.Tables;
 import co.edu.ucc.stockflow.shared.util.Money;
@@ -42,6 +43,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -67,8 +70,8 @@ public class PointOfSaleController implements SectionController {
     @FXML private Button minusButton;
     @FXML private Button quantityButton;
     @FXML private Button removeButton;
-    @FXML private TextField customerSearch;
-    @FXML private ComboBox<Customer> customerBox;
+    @FXML private HBox customerRow;
+    @FXML private Label customerDetail;
     @FXML private ComboBox<PaymentMethod> paymentBox;
     @FXML private TextField discountField;
     @FXML private Label receivedLabel;
@@ -101,7 +104,9 @@ public class PointOfSaleController implements SectionController {
     private final ObservableList<Product> catalog = FXCollections.observableArrayList();
     private final FilteredList<Product> results = new FilteredList<>(catalog);
     private final ObservableList<Customer> allCustomers = FXCollections.observableArrayList();
-    private final FilteredList<Customer> customerOptions = new FilteredList<>(allCustomers);
+    private final AutoCompleteField<Customer> customerField = new AutoCompleteField<>(allCustomers,
+            Customer::getName, PointOfSaleController::customerDocument,
+            (c, text) -> TextSearch.matches(text, c.getName(), c.getDocumentNumber(), c.getPhone()));
     private final BooleanProperty charging = new SimpleBooleanProperty(false);
     private boolean shortcutsInstalled;
     private Customer finalConsumer;
@@ -139,8 +144,7 @@ public class PointOfSaleController implements SectionController {
                 resultsTable.getSelectionModel().selectFirst();
             }
         });
-        customerBox.setItems(customerOptions);
-        customerSearch.textProperty().addListener((o, a, text) -> filterCustomers(text));
+        buildCustomerField();
 
         // F2: search, F12: charge. The filter is added once; it only acts while this view is on screen.
         searchField.sceneProperty().addListener((o, old, scene) -> {
@@ -191,7 +195,7 @@ public class PointOfSaleController implements SectionController {
     private void bindInputs() {
         paymentBox.getItems().setAll(PaymentMethod.values());
         paymentBox.valueProperty().bindBidirectional(sale.paymentMethodProperty());
-        customerBox.valueProperty().bindBidirectional(sale.customerProperty());
+        customerField.valueProperty().bindBidirectional(sale.customerProperty());
         notesField.textProperty().bindBidirectional(sale.notesProperty());
         moneyField(discountField, sale.discountProperty()::set);
         moneyField(receivedField, sale.receivedProperty()::set);
@@ -232,6 +236,9 @@ public class PointOfSaleController implements SectionController {
         if (e.getCode() == KeyCode.F2) {
             searchField.requestFocus();
             e.consume();
+        } else if (e.getCode() == KeyCode.F3) {
+            customerField.requestFocus();
+            e.consume();
         } else if (e.getCode() == KeyCode.F12) {
             charge();
             e.consume();
@@ -264,11 +271,10 @@ public class PointOfSaleController implements SectionController {
         filterProducts(searchField.getText());
         nextNumberLabel.setText("Próxima factura: " + loaded.nextNumber());
 
-        Customer current = select != null ? select : customerBox.getValue();
+        Customer current = select != null ? select : customerField.getValue();
         Customer target = current != null ? current : loaded.finalConsumer();
         allCustomers.setAll(loaded.customers());
-        filterCustomers(customerSearch.getText());
-        allCustomers.stream().filter(c -> c.getId().equals(target.getId())).findFirst().ifPresent(customerBox::setValue);
+        customerField.select(allCustomers, target);
         finalConsumer = loaded.finalConsumer();
     }
 
@@ -278,13 +284,23 @@ public class PointOfSaleController implements SectionController {
                 || TextSearch.matches(t, p.getSku(), p.getName(), p.getCategoryName()));
     }
 
-    private void filterCustomers(String text) {
-        String t = text == null ? "" : text.trim().toLowerCase();
-        Customer selected = customerBox.getValue();
-        customerOptions.setPredicate(c -> t.isEmpty() || c.getName().toLowerCase().contains(t)
-                || c.getDocumentNumber().toLowerCase().contains(t));
-        if (selected != null && customerOptions.contains(selected)) customerBox.setValue(selected);
-        else if (!customerOptions.isEmpty() && !t.isEmpty()) customerBox.setValue(customerOptions.get(0));
+    /** One box to find the customer by name, document or phone (F3 jumps to it). */
+    private void buildCustomerField() {
+        customerField.setPromptText("Buscar cliente por nombre o documento (F3)");
+        customerField.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(customerField, Priority.ALWAYS);
+        customerRow.getChildren().add(0, customerField);
+        customerDetail.textProperty().bind(Bindings.createStringBinding(() -> {
+            Customer c = customerField.getValue();
+            if (c == null) return "";
+            if (c.isFinalConsumer()) return "Venta sin identificar al cliente. Para venta a crédito elija un cliente.";
+            String phone = c.getPhone() == null || c.getPhone().isBlank() ? "" : " · Tel. " + c.getPhone();
+            return customerDocument(c) + phone;
+        }, customerField.valueProperty()));
+    }
+
+    private static String customerDocument(Customer c) {
+        return c.getDocumentType() == null ? c.getDocumentNumber() : c.getDocumentType() + " " + c.getDocumentNumber();
     }
 
     /** Enter in the search box (or a barcode scanner): exact SKU or barcode first, otherwise the first result. */
@@ -372,16 +388,12 @@ public class PointOfSaleController implements SectionController {
     private void reset() {
         discountField.clear();
         receivedField.clear();
-        customerSearch.clear();
         sale.clear(finalConsumer);
     }
 
     @FXML
     private void newCustomer() {
-        customerDialog.show(navigator.window(), null).ifPresent(c -> {
-            customerSearch.clear();
-            reloadData(c);
-        });
+        customerDialog.show(navigator.window(), null).ifPresent(this::reloadData);
     }
 
     @FXML
