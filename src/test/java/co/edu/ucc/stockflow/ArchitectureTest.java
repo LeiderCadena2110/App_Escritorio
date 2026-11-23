@@ -32,7 +32,7 @@ class ArchitectureTest {
 
     /**
      * Which modules each module may use outside its UI layer. The graph only points "down", so there
-     * are no cycles: settings ← catalog ← inventory ← sales ← reporting, and customers on its own.
+     * are no cycles: settings ← catalog ← inventory ← sales ← reporting ← assistant, and customers on its own.
      */
     private static final Map<String, Set<String>> ALLOWED_MODULES = Map.of(
             "shared", Set.of(),
@@ -41,7 +41,8 @@ class ArchitectureTest {
             "customers", Set.of("shared"),
             "inventory", Set.of("shared", "catalog"),
             "sales", Set.of("shared", "settings", "catalog", "customers", "inventory"),
-            "reporting", Set.of("shared", "settings", "catalog", "customers", "inventory", "sales"));
+            "reporting", Set.of("shared", "settings", "catalog", "customers", "inventory", "sales"),
+            "assistant", Set.of("shared", "settings", "catalog", "inventory", "reporting"));
 
     private record SourceClass(String file, String module, String layer, String code, List<Location> uses) {
     }
