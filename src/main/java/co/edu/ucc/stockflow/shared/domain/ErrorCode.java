@@ -55,7 +55,21 @@ public enum ErrorCode {
     SEQUENCE_PREFIX_TOO_LONG,
     SEQUENCE_NEXT_NOT_POSITIVE,
     SETTINGS_BUSINESS_NAME_REQUIRED,
-    SETTINGS_TAX_RATE_OUT_OF_RANGE;
+    SETTINGS_TAX_RATE_OUT_OF_RANGE,
+    // Artificial intelligence assistant
+    AI_NOT_CONFIGURED,
+    AI_KEY_INVALID,
+    AI_MODEL_NOT_FOUND,
+    AI_QUOTA_EXCEEDED,
+    AI_UNAVAILABLE,
+    AI_NETWORK,
+    AI_TIMEOUT,
+    AI_BAD_RESPONSE,
+    AI_FILE_TYPE_NOT_SUPPORTED,
+    AI_FILE_TOO_LARGE,
+    AI_FILE_UNREADABLE,
+    AI_INVOICE_WITHOUT_LINES,
+    AI_PURCHASE_EMPTY;
 
     /** Key of the message in i18n/messages.properties. */
     public String messageKey() {
