@@ -71,7 +71,7 @@ jobs:
           body: |
             Instaladores de StockFlow (no necesitan Java):
             - **Windows:** `StockFlow-*.exe`
-            - **macOS:** `.dmg` (Apple Silicon o Intel). La primera vez: Configuración del sistema › Privacidad y seguridad › "Abrir de todos modos".
+            - **macOS:** `.dmg` (`arm64` para Apple Silicon M1–M4, `x86_64` para Intel). La primera vez: Configuración del sistema › Privacidad y seguridad › "Abrir de todos modos".
             - **Linux:** `.deb` (Ubuntu, Debian, Mint) o `.AppImage`.
 
             Cambios: ver CHANGELOG.md.

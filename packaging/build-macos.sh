@@ -11,5 +11,7 @@ rm -rf target/installers
   --input target/app --main-jar stockflow.jar --main-class co.edu.ucc.stockflow.Launcher \
   --icon packaging/icons/app-icon.icns --mac-package-identifier co.edu.ucc.stockflow \
   --dest target/installers
+# Two Macs build it (Apple Silicon and Intel): the architecture in the name keeps both in the Release
+for dmg in target/installers/*.dmg; do mv "$dmg" "${dmg%.dmg}-$(uname -m).dmg"; done
 # Unsigned: the first time, System Settings > Privacy & Security > "Open Anyway"
 echo "Done: target/installers"
