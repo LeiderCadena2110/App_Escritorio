@@ -12,6 +12,7 @@ import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.Section;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
+import co.edu.ucc.stockflow.shared.ui.Toasts;
 import co.edu.ucc.stockflow.shared.ui.ViewLoader;
 import co.edu.ucc.stockflow.shared.ui.component.Combos;
 import co.edu.ucc.stockflow.shared.ui.component.FileChoosers;
@@ -61,11 +62,12 @@ public class ProductsController implements SectionController {
     private final PauseTransition searchDelay = new PauseTransition(Duration.millis(250));
     private final FileChoosers files;
     private final TaskRunner tasks;
+    private final Toasts toasts;
 
     public ProductsController(ProductService products, CategoryService categories, ProductCsvExport csv,
                               ProductDialog productDialog, StockMovementDialog movementDialog,
                               CategoryManagerDialog categoryDialog, Dialogs dialogs, Navigator navigator,
-                              ViewLoader views, FileChoosers files, TaskRunner tasks) {
+                              ViewLoader views, FileChoosers files, TaskRunner tasks, Toasts toasts) {
         this.products = products;
         this.categories = categories;
         this.csv = csv;
@@ -77,6 +79,7 @@ public class ProductsController implements SectionController {
         this.views = views;
         this.files = files;
         this.tasks = tasks;
+        this.toasts = toasts;
     }
 
     @FXML
@@ -199,7 +202,7 @@ public class ProductsController implements SectionController {
         Product p = selected();
         if (p == null) return;
         if (!p.isActive()) {
-            dialogs.info(navigator.window(), "Producto inactivo", "Active el producto para poder venderlo.");
+            toasts.show(Toasts.Kind.WARNING, "Producto inactivo", "Active el producto para poder venderlo.");
             return;
         }
         navigator.open(Section.POINT_OF_SALE, p);
@@ -218,10 +221,11 @@ public class ProductsController implements SectionController {
         }
         dialogs.run(navigator.window(), "No se pudo eliminar", () -> {
             boolean deleted = products.delete(p);
-            if (!deleted) {
-                dialogs.info(navigator.window(), "Producto desactivado",
-                        p.getName() + " tiene ventas o movimientos registrados, así que se desactivó en lugar de borrarse.\n"
-                                + "Puede verlo marcando \"Mostrar inactivos\".");
+            if (deleted) {
+                toasts.show(Toasts.Kind.SUCCESS, "Producto eliminado", p.getSku() + " · " + p.getName());
+            } else {
+                toasts.show(Toasts.Kind.INFO, "Producto desactivado", p.getName() + " tiene ventas o movimientos, "
+                        + "así que se desactivó para conservar el historial. Véalo con \"Mostrar inactivos\".");
             }
             reload();
         });

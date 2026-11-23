@@ -10,6 +10,7 @@ import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.Section;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
+import co.edu.ucc.stockflow.shared.ui.Toasts;
 import co.edu.ucc.stockflow.shared.ui.ViewLoader;
 import co.edu.ucc.stockflow.shared.ui.component.Combos;
 import co.edu.ucc.stockflow.shared.ui.component.DatePickers;
@@ -57,10 +58,11 @@ public class InvoicesController implements SectionController {
     private final PauseTransition searchDelay = new PauseTransition(Duration.millis(250));
     private final FileChoosers files;
     private final TaskRunner tasks;
+    private final Toasts toasts;
 
     public InvoicesController(InvoiceService invoices, InvoiceDocumentExporter pdf, InvoiceCsvExport csv,
                               InvoiceDetailDialog detailDialog, Dialogs dialogs, Navigator navigator,
-                              ViewLoader views, FileChoosers files, TaskRunner tasks) {
+                              ViewLoader views, FileChoosers files, TaskRunner tasks, Toasts toasts) {
         this.invoices = invoices;
         this.pdf = pdf;
         this.csv = csv;
@@ -70,6 +72,7 @@ public class InvoicesController implements SectionController {
         this.views = views;
         this.files = files;
         this.tasks = tasks;
+        this.toasts = toasts;
     }
 
     @FXML
@@ -184,12 +187,16 @@ public class InvoicesController implements SectionController {
 
     private void cancel(Invoice invoice) {
         if (invoice.isCancelled()) {
-            dialogs.info(navigator.window(), "Factura anulada", "La factura " + invoice.getNumber() + " ya está anulada.");
+            toasts.show(Toasts.Kind.WARNING, "Factura ya anulada", "La factura " + invoice.getNumber() + " ya estaba anulada.");
             return;
         }
         dialogs.askText(navigator.window(), "Anular factura " + invoice.getNumber(),
                 "Motivo de la anulación (los productos vuelven al inventario):", "").ifPresent(reason ->
-                tasks.run("No se pudo anular", () -> invoices.cancel(invoice.getId(), reason), this::reload));
+                tasks.run("No se pudo anular", () -> invoices.cancel(invoice.getId(), reason), () -> {
+                    reload();
+                    toasts.show(Toasts.Kind.SUCCESS, "Factura " + invoice.getNumber() + " anulada",
+                            "Los productos volvieron al inventario.");
+                }));
     }
 
     @FXML

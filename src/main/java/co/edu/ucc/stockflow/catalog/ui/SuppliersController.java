@@ -5,6 +5,7 @@ import co.edu.ucc.stockflow.catalog.domain.Supplier;
 import co.edu.ucc.stockflow.shared.ui.Dialogs;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
+import co.edu.ucc.stockflow.shared.ui.Toasts;
 import co.edu.ucc.stockflow.shared.ui.component.Tables;
 import java.util.List;
 import javafx.animation.PauseTransition;
@@ -31,13 +32,16 @@ public class SuppliersController implements SectionController {
     private final SupplierDialog dialog;
     private final Dialogs dialogs;
     private final Navigator navigator;
+    private final Toasts toasts;
     private final PauseTransition searchDelay = new PauseTransition(Duration.millis(250));
 
-    public SuppliersController(SupplierService suppliers, SupplierDialog dialog, Dialogs dialogs, Navigator navigator) {
+    public SuppliersController(SupplierService suppliers, SupplierDialog dialog, Dialogs dialogs, Navigator navigator,
+                               Toasts toasts) {
         this.suppliers = suppliers;
         this.dialog = dialog;
         this.dialogs = dialogs;
         this.navigator = navigator;
+        this.toasts = toasts;
     }
 
     @FXML
@@ -97,8 +101,10 @@ public class SuppliersController implements SectionController {
             return;
         }
         dialogs.run(navigator.window(), "No se pudo eliminar", () -> {
-            if (!suppliers.delete(s)) {
-                dialogs.info(navigator.window(), "Proveedor desactivado",
+            if (suppliers.delete(s)) {
+                toasts.show(Toasts.Kind.SUCCESS, "Proveedor eliminado", s.getName());
+            } else {
+                toasts.show(Toasts.Kind.INFO, "Proveedor desactivado",
                         s.getName() + " tiene productos asociados, así que se desactivó en lugar de borrarse.");
             }
             reload();
