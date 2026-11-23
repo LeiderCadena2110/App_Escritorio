@@ -21,6 +21,8 @@ guarda los datos en el mismo equipo.
 - **Clientes y proveedores.**
 - **Reportes:** ventas por periodo, ganancia, ticket promedio, IVA cobrado, ventas por día y más vendidos.
 - **Configuración:** datos del negocio, % de IVA, numeración de facturas y tema claro u oscuro.
+- **Asistente IA (Gemini):** lee la foto o el PDF de una factura de proveedor y prepara la compra
+  para revisar; calcula qué productos comprar y cuántos, y redacta la nota de pedido por proveedor.
 
 | Vender | Productos |
 |---|---|
@@ -39,6 +41,7 @@ Ejemplo de factura generada: [`samples/sample-invoice.pdf`](samples/sample-invoi
 | Servicios | Spring Boot 3 (sin servidor web) |
 | Datos | Spring JDBC + H2 (archivo local) + Flyway |
 | PDF | Apache PDFBox |
+| IA | Google Gemini (API REST, salida JSON estructurada) |
 | Pruebas | JUnit 5 + Spring Boot Test |
 | Instaladores | jpackage (`.exe`, `.dmg`, `.deb`, AppImage) |
 
@@ -56,7 +59,8 @@ src/main/java/co/edu/ucc/stockflow/
 ├── customers/    Clientes
 ├── inventory/    Movimientos de stock
 ├── sales/        Facturas, IVA, pagos, punto de venta, PDF
-└── reporting/    Inicio y reportes
+├── reporting/    Inicio y reportes
+└── assistant/    Asistente IA: plan de compras y facturas de proveedor (Gemini)
 ```
 
 Las reglas de capas y dependencias entre módulos se verifican en cada build con `ArchitectureTest`.

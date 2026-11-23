@@ -39,6 +39,7 @@ servidor web (`spring.main.web-application-type=none`).
 | `inventory` | Movimientos de stock (kardex) | shared, catalog |
 | `sales` | Facturas, IVA, formas de pago, punto de venta, PDF | shared, settings, catalog, customers, inventory |
 | `reporting` | Panel de inicio y reportes (solo lectura) | todos los anteriores |
+| `assistant` | Asistente IA: plan de compras y lectura de facturas de proveedor con Gemini | shared, settings, catalog, inventory, reporting |
 | `app` | Ventana principal, menú, datos de ejemplo | todos |
 
 Las dependencias solo van "hacia abajo", así que no hay ciclos. La **interfaz** sí puede abrir
@@ -190,6 +191,61 @@ tasks.run("No se pudieron cargar las facturas",
         () -> invoices.search(range, text, status),   // segundo plano: base de datos
         this::render);                                 // hilo de JavaFX: actualizar la tabla
 ```
+
+## Inteligencia artificial (módulo `assistant`)
+
+Dos casos de uso, con una regla común: **la IA propone y la persona decide**. Nada que diga el
+modelo se guarda sin que el usuario lo revise, y los números de negocio los calcula el código.
+
+```
+            ui                          application                       infrastructure
+┌───────────────────────┐   ┌──────────────────────────────┐   ┌──────────────────────────────┐
+│ AssistantController   │──▶│ SupplierInvoiceService       │   │                              │
+│ SupplierInvoiceDialog │   │ RestockPlanner ─▶ RestockPolicy (domain, sin IA)                 │
+│ AiConfigDialog        │   │ RestockAdvisor               │   │                              │
+└───────────────────────┘   │        │ usa el puerto       │   │                              │
+                            │        ▼                     │   │                              │
+                            │   «interface» AiModel ◀──────┼───│ GeminiClient (REST + JSON)   │
+                            └──────────────────────────────┘   └──────────────┬───────────────┘
+                                                                              ▼
+                                                   generativelanguage.googleapis.com (Gemini)
+```
+
+### 1. Leer la factura de un proveedor → borrador de compra
+
+1. El usuario elige una foto o PDF. `Attachment.read` revisa el tipo (JPG, PNG, WEBP, PDF) y el tamaño (máx. 15 MB).
+2. `SupplierInvoiceService.read` envía el archivo con un **JSON Schema** (salida estructurada): el
+   modelo solo puede responder con proveedor, número, fecha y líneas (código, descripción, cantidad,
+   costo unitario sin IVA). `temperature = 0` para que la lectura sea estable.
+3. `ProductMatcher` (dominio, sin IA) busca cada línea en el catálogo: primero por **código** (SKU o
+   código de barras) y luego por **nombre** (70 % de las palabras, sin tildes). Las líneas sin
+   producto quedan sin marcar.
+4. `SupplierInvoiceDialog` muestra todo para corregir producto, cantidad y costo.
+5. `SupplierInvoiceService.register` guarda una entrada `PURCHASE` por línea en una sola transacción
+   (todas o ninguna), con el número de la factura como referencia; el costo promedio se actualiza
+   como en cualquier compra.
+
+### 2. ¿Qué debo comprar? → plan y nota de compra
+
+- `RestockPolicy` (dominio, puro y probado) decide con aritmética: ritmo diario = vendidas / días;
+  días que alcanza = stock / ritmo; se compra si está en el mínimo o alcanza menos de entrega
+  (7 días) + 1 semana; la cantidad cubre entrega + 30 días y nunca menos del doble del mínimo.
+- `RestockPlanner` lo aplica a los productos activos con las ventas del periodo
+  (`ReportService.unitsSoldByProduct`). **Funciona sin clave de IA.**
+- `RestockAdvisor` envía el plan ya calculado y pide una nota agrupada por proveedor, con la orden
+  de **no cambiar cantidades**. Solo viajan nombres de productos, proveedores y cantidades; nunca
+  datos de clientes.
+
+### Puerto y adaptador
+
+- `AiModel` (puerto en `application`): `generateJson(prompt, archivos, esquema)` y `generateText(prompt)`.
+- `GeminiClient` (adaptador): `POST /v1beta/models/{modelo}:generateContent` con `java.net.http`
+  y Jackson, sin SDK. La clave va en el encabezado `x-goog-api-key` (nunca en la URL). Los errores
+  HTTP se traducen a mensajes claros (`AI_KEY_INVALID`, `AI_QUOTA_EXCEEDED`, `AI_MODEL_NOT_FOUND`…).
+- `AiSettings`: clave y modelo (por defecto `gemini-3.5-flash-lite`). La variable de entorno
+  `GEMINI_API_KEY` tiene prioridad y nunca se guarda.
+- Pruebas sin internet: `GeminiClientTest` levanta un servidor HTTP local que imita a Gemini, y
+  `SupplierInvoiceServiceTest` / `RestockAdvisorTest` usan un `AiModel` falso.
 
 ## Flujo de una venta
 

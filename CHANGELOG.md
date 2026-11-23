@@ -2,6 +2,23 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] · Paso 6: asistente con inteligencia artificial
+
+### Agregado
+- Sección **Asistente IA** (módulo `assistant`) con Google Gemini (`gemini-3.5-flash-lite` por defecto).
+- **Leer factura de proveedor:** foto o PDF → borrador de compra con salida JSON estructurada,
+  emparejado con el catálogo por código o nombre, revisión línea por línea y registro en una transacción.
+- **¿Qué debo comprar?:** plan de reabastecimiento calculado sin IA (`RestockPolicy`) y nota de
+  compra redactada por la IA con las cantidades del plan.
+- Puerto `AiModel` y adaptador `GeminiClient` (REST con `java.net.http` + Jackson, sin SDK).
+- Configuración de clave y modelo con prueba de conexión; `GEMINI_API_KEY` tiene prioridad.
+- Mensajes claros para clave inválida, límite gratuito, sin conexión, modelo inexistente, etc.
+- Consulta de unidades vendidas por producto en un periodo.
+- Pruebas: servidor HTTP local que imita a Gemini, IA falsa para el caso de uso completo, reglas del plan.
+
+### Cambiado
+- Configuración pasa a Ctrl + 0; Asistente IA usa Ctrl + 9.
+
 ## [Sin publicar] · Paso 5: experiencia en Vender
 
 ### Agregado

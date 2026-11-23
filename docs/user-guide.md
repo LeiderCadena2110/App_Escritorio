@@ -78,11 +78,29 @@ donde se exporta a PDF o se **anula** (pide un motivo y devuelve las unidades al
 - ticket promedio y unidades vendidas;
 - ventas por día y productos más vendidos (exportables a CSV).
 
+## 7. Asistente IA
+
+**Asistente IA** (Ctrl + 9) ayuda con las compras. La primera vez pulse **Configurar**, cree una
+clave gratuita en [Google AI Studio](https://aistudio.google.com/apikey) con su cuenta de Google,
+péguela y pulse **Guardar y probar**.
+
+- **Leer factura de proveedor:** pulse **Elegir foto o PDF…** y escoja la factura. En unos segundos
+  aparece cada línea con el producto que encontró StockFlow (*Por código*, *Por nombre* o *Elegir
+  producto*), la cantidad y el costo sin IVA. Corrija lo necesario, desmarque lo que no quiera
+  sumar y pulse **Registrar compra**: el stock y el costo promedio se actualizan con la referencia de la factura.
+- **¿Qué debo comprar?** La tabla se calcula sola (no necesita clave) con el stock, el mínimo y lo
+  vendido en los últimos 15, 30, 60 o 90 días: prioridad, cuántos días alcanza y cuántas unidades
+  comprar. Con **Nota de compra con IA** obtiene un pedido redactado por proveedor para copiar y
+  enviar por WhatsApp o correo. Doble clic en un producto abre su historial en *Inventario*.
+
+La IA puede equivocarse al leer: revise siempre antes de registrar. Solo se envían a Google las
+facturas que usted elija y los nombres y cantidades del plan; nunca datos de sus clientes.
+
 ## Atajos de teclado
 
 | Atajo | Acción |
 |---|---|
-| Ctrl + 1 … 9 | Cambiar de sección |
+| Ctrl + 1 … 9 y 0 | Cambiar de sección (0 = Configuración) |
 | Ctrl + N | Nueva venta |
 | F2 | Ir al buscador en *Vender* |
 | F3 | Ir al cliente en *Vender* |
