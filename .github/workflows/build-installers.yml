@@ -19,7 +19,7 @@ jobs:
         include:
           - os: windows-2022        # ships WiX 3.14, needed for the .exe with JDK 21
             script: packaging\build-windows.bat exe
-          - os: macos-14            # Apple Silicon
+          - os: macos-15            # Apple Silicon (macos-14 was retired in November 2026)
             script: packaging/build-macos.sh
           - os: macos-15-intel      # Intel
             script: packaging/build-macos.sh
@@ -27,8 +27,8 @@ jobs:
             script: packaging/build-linux.sh
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -48,7 +48,7 @@ jobs:
       - name: Package (macOS and Linux)
         if: runner.os != 'Windows'
         run: ${{ matrix.script }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: installer-${{ matrix.os }}
           path: target/installers/*
@@ -60,7 +60,7 @@ jobs:
     needs: build
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           path: installers
           merge-multiple: true
