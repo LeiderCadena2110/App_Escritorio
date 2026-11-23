@@ -1,8 +1,9 @@
 # Manual de uso de StockFlow
 
-La primera vez que se abre, StockFlow trae un **catálogo de ejemplo** de una tienda de calzado
-(13 productos, 5 categorías, 3 proveedores y 3 clientes) para que pueda probar la app de una vez.
-Puede editar o eliminar esos datos cuando quiera.
+StockFlow empieza vacío, listo para un negocio real. Para probarlo primero, use **Ayuda › Cargar
+datos de ejemplo**: crea el catálogo de una tienda de calzado (13 productos, 5 categorías,
+3 proveedores y 3 clientes), que puede editar o eliminar cuando quiera. Solo se puede cargar en un
+negocio sin productos.
 
 ## 1. Configurar el negocio
 
