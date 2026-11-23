@@ -334,3 +334,30 @@
 .toast-close:hover {
     -fx-text-fill: -color-text;
 }
+
+/* Icons (shared.ui.Icon): the color comes from here, so they follow the theme */
+.icon {
+    -fx-background-color: -color-text;
+}
+.button:disabled .icon {
+    -fx-opacity: 0.6;
+}
+.danger-button .icon {
+    -fx-background-color: -color-danger;
+}
+.primary-button .icon,
+.toast-action .icon {
+    -fx-background-color: -color-accent-text;
+}
+.nav-button .icon {
+    -fx-background-color: -color-sidebar-text;
+}
+.nav-button:selected .icon {
+    -fx-background-color: white;
+}
+.toast-success .toast-icon { -fx-background-color: -color-success; }
+.toast-info .toast-icon { -fx-background-color: -color-accent; }
+.toast-warning .toast-icon { -fx-background-color: -color-warning; }
+.field-icon {
+    -fx-background-color: -color-muted;
+}
