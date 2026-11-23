@@ -28,12 +28,14 @@ public class Toasts {
 
     /** Kind of notice: it only changes the color. */
     public enum Kind {
-        SUCCESS("toast-success"), INFO("toast-info"), WARNING("toast-warning");
+        SUCCESS("toast-success", Icon.CHECK_CIRCLE), INFO("toast-info", Icon.INFO), WARNING("toast-warning", Icon.WARNING);
 
         private final String styleClass;
+        private final Icon icon;
 
-        Kind(String styleClass) {
+        Kind(String styleClass, Icon icon) {
             this.styleClass = styleClass;
+            this.icon = icon;
         }
     }
 
@@ -92,6 +94,8 @@ public class Toasts {
 
         Region bar = new Region();
         bar.getStyleClass().add("toast-bar");
+        Region icon = kind.icon.node(20);
+        icon.getStyleClass().add("toast-icon");
 
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("toast-title");
@@ -103,7 +107,7 @@ public class Toasts {
             text.getChildren().add(messageLabel);
         }
         HBox.setHgrow(text, Priority.ALWAYS);
-        toast.getChildren().addAll(bar, text);
+        toast.getChildren().addAll(bar, icon, text);
 
         if (action != null) {
             Button button = new Button(actionText);

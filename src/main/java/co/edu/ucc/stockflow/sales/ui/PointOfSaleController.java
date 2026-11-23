@@ -15,6 +15,7 @@ import co.edu.ucc.stockflow.sales.domain.tax.TaxPolicy;
 import co.edu.ucc.stockflow.settings.application.SequenceService;
 import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.ui.Dialogs;
+import co.edu.ucc.stockflow.shared.ui.Icon;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
@@ -87,6 +88,8 @@ public class PointOfSaleController implements SectionController {
     @FXML private Label changeLabel;
     @FXML private Label warningLabel;
     @FXML private Button chargeButton;
+    @FXML private Button clearButton;
+    @FXML private Button newCustomerButton;
 
     private final ProductService products;
     private final CustomerService customers;
@@ -134,6 +137,7 @@ public class PointOfSaleController implements SectionController {
 
     @FXML
     private void initialize() {
+        addIcons();
         buildResultsTable();
         buildCartTable();
         bindInputs();
@@ -156,6 +160,15 @@ public class PointOfSaleController implements SectionController {
                 shortcutsInstalled = true;
             }
         });
+    }
+
+    private void addIcons() {
+        quantityButton.setGraphic(Icon.EDIT.node(14));
+        removeButton.setGraphic(Icon.DELETE.node(14));
+        clearButton.setGraphic(Icon.CLOSE.node(14));
+        newCustomerButton.setGraphic(Icon.PERSON_ADD.node(16));
+        chargeButton.setGraphic(Icon.CHECK_CIRCLE.node(20));
+        chargeButton.setGraphicTextGap(10);
     }
 
     private void buildResultsTable() {

@@ -149,8 +149,9 @@ public class MainController implements NavigationHost {
         subtitle.getStyleClass().add("brand-subtitle");
         sidebar.getChildren().addAll(brand, subtitle);
         for (Section s : Section.values()) {
-            ToggleButton b = new ToggleButton(s.label());
+            ToggleButton b = new ToggleButton(s.label(), s.icon().node(18));
             b.getStyleClass().add("nav-button");
+            b.setGraphicTextGap(12);
             b.setToggleGroup(group);
             b.setMaxWidth(Double.MAX_VALUE);
             b.setFocusTraversable(false);
