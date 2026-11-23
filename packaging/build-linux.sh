@@ -37,7 +37,8 @@ exec "$HERE/bin/StockFlow" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
 if command -v appimagetool >/dev/null; then
-  ARCH=x86_64 appimagetool "$APPDIR" "target/installers/StockFlow-2.0.0-x86_64.AppImage"
+  # APPIMAGE_EXTRACT_AND_RUN: works without FUSE (CI machines, containers)
+  APPIMAGE_EXTRACT_AND_RUN=1 ARCH=x86_64 appimagetool "$APPDIR" "target/installers/StockFlow-2.0.0-x86_64.AppImage"
 else
   echo "Warning: appimagetool not found; only the .deb was created"
 fi
