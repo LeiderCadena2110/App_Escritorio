@@ -55,7 +55,16 @@ public class AiSettings {
 
     /** Saves the key (empty removes it) and the model (empty goes back to the default). */
     public void save(String apiKey, String model) {
+        saveKey(apiKey);
+        saveModel(model);
+    }
+
+    /** The key written in the app; the one from the environment variable is never saved. */
+    public void saveKey(String apiKey) {
         settings.set(API_KEY, apiKey == null ? "" : apiKey.trim());
+    }
+
+    public void saveModel(String model) {
         String clean = Formats.clean(model);
         settings.set(MODEL, clean == null ? DEFAULT_MODEL : clean);
     }
