@@ -17,6 +17,7 @@ import co.edu.ucc.stockflow.shared.domain.BusinessException;
 import co.edu.ucc.stockflow.shared.ui.Dialogs;
 import co.edu.ucc.stockflow.shared.ui.Icon;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
+import co.edu.ucc.stockflow.shared.ui.PendingWork;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
 import co.edu.ucc.stockflow.shared.ui.Toasts;
@@ -29,6 +30,7 @@ import co.edu.ucc.stockflow.shared.util.TextSearch;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -60,7 +62,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Scope("prototype")
-public class PointOfSaleController implements SectionController {
+public class PointOfSaleController implements SectionController, PendingWork {
 
     @FXML private Label nextNumberLabel;
     @FXML private TextField searchField;
@@ -353,6 +355,14 @@ public class PointOfSaleController implements SectionController {
         }
         addProduct(chosen);
         searchField.clear();
+    }
+
+    /** A sale with products that was not charged would be lost if the app closed now. */
+    @Override
+    public Optional<String> pendingWork() {
+        if (sale.isEmpty()) return Optional.empty();
+        return Optional.of("Hay una venta sin cobrar: " + sale.getItems().size() + " productos por "
+                + Money.format(sale.getTotal()) + ".");
     }
 
     /** Products opens this section with a product to sell: it goes into the cart. */

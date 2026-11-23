@@ -5,6 +5,7 @@ import co.edu.ucc.stockflow.settings.application.SettingsService;
 import co.edu.ucc.stockflow.shared.ui.Dialogs;
 import co.edu.ucc.stockflow.shared.ui.NavigationHost;
 import co.edu.ucc.stockflow.shared.ui.Navigator;
+import co.edu.ucc.stockflow.shared.ui.PendingWork;
 import co.edu.ucc.stockflow.shared.ui.Section;
 import co.edu.ucc.stockflow.shared.ui.SectionController;
 import co.edu.ucc.stockflow.shared.ui.TaskRunner;
@@ -12,6 +13,7 @@ import co.edu.ucc.stockflow.shared.ui.Toasts;
 import co.edu.ucc.stockflow.shared.ui.ViewLoader;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -114,7 +116,10 @@ public class MainController implements NavigationHost {
         stage.setMinHeight(640);
         restoreWindow();
         stage.setScene(scene);
-        stage.setOnCloseRequest(e -> saveWindow());
+        stage.setOnCloseRequest(e -> {
+            if (canClose()) saveWindow();
+            else e.consume(); // the user chose to stay
+        });
 
         Section first = Section.DASHBOARD;
         try {
@@ -171,6 +176,7 @@ public class MainController implements NavigationHost {
         MenuItem newSale = item("Nueva venta", shortcut(KeyCode.N), () -> show(Section.POINT_OF_SALE));
         MenuItem settingsItem = item("Configuración", shortcut(KeyCode.COMMA), () -> show(Section.SETTINGS));
         MenuItem exit = item("Salir", shortcut(KeyCode.Q), () -> {
+            if (!canClose()) return;
             saveWindow();
             stage.close();
             Platform.exit();
@@ -215,6 +221,25 @@ public class MainController implements NavigationHost {
                         "13 productos, 5 categorías, 3 proveedores y 3 clientes.");
             });
         });
+    }
+
+    /**
+     * Asks the screens if they hold unsaved work (a sale not charged). If one does, the user
+     * decides; choosing to stay takes them to that screen.
+     */
+    private boolean canClose() {
+        for (Map.Entry<Section, ViewLoader.LoadedView<Object>> entry : loaded.entrySet()) {
+            if (!(entry.getValue().controller() instanceof PendingWork screen)) continue;
+            Optional<String> reason = screen.pendingWork();
+            if (reason.isEmpty()) continue;
+            if (dialogs.confirm(stage, "¿Salir sin terminar?", reason.get()
+                    + "\n\nSi sale ahora, se perderá. Pulse Cancelar para volver y terminarla.", "Salir sin cobrar")) {
+                return true;
+            }
+            show(entry.getKey());
+            return false;
+        }
+        return true;
     }
 
     private static KeyCombination shortcut(KeyCode code) {
