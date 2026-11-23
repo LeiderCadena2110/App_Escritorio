@@ -21,6 +21,8 @@
     -fx-background: -color-background;
     -fx-control-inner-background: #20252b;
     -fx-control-inner-background-alt: #252b32;
+    /* Selected row of a table that does not have the focus (by default it is light gray) */
+    -fx-selection-bar-non-focused: #33465c;
     -fx-text-base-color: -color-text;
     -fx-text-background-color: -color-text;
     -fx-text-inner-color: -color-text;
