@@ -89,8 +89,7 @@ public class Toasts {
         HBox toast = new HBox(12);
         toast.getStyleClass().addAll("toast", kind.styleClass);
         toast.setAlignment(Pos.CENTER_LEFT);
-        toast.setPrefWidth(400);
-        toast.setMaxWidth(440);
+        toast.setMaxWidth(520);
 
         Region bar = new Region();
         bar.getStyleClass().add("toast-bar");
@@ -101,12 +100,14 @@ public class Toasts {
         titleLabel.getStyleClass().add("toast-title");
         VBox text = new VBox(2, titleLabel);
         if (message != null && !message.isBlank()) {
-            Label messageLabel = new Label(message);
+            // "$ 248.472" never splits between two lines
+            Label messageLabel = new Label(message.replace("$ ", "$\u00A0"));
             messageLabel.getStyleClass().add("toast-message");
             messageLabel.setWrapText(true);
             text.getChildren().add(messageLabel);
         }
         HBox.setHgrow(text, Priority.ALWAYS);
+        text.setMinWidth(250);
         toast.getChildren().addAll(bar, icon, text);
 
         if (action != null) {

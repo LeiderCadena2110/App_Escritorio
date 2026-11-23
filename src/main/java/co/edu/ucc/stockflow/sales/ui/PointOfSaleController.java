@@ -457,8 +457,8 @@ public class PointOfSaleController implements SectionController {
         String detail;
         if (saved.getPaymentMethod() == PaymentMethod.CASH && saved.getChange().signum() > 0) {
             title = "Cambio: " + Money.format(saved.getChange());
-            detail = "Factura " + saved.getNumber() + " · Total " + Money.format(saved.getTotal())
-                    + " · Recibido " + Money.format(saved.getAmountPaid());
+            detail = "Total " + Money.format(saved.getTotal()) + " · Recibido " + Money.format(saved.getAmountPaid())
+                    + "\nFactura " + saved.getNumber();
         } else {
             title = "Factura " + saved.getNumber() + " registrada";
             detail = "Total " + Money.format(saved.getTotal()) + " · " + saved.getPaymentMethod().label();
