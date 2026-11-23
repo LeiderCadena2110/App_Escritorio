@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar] · Paso 5: experiencia en Vender
+
+### Agregado
+- **Botones de pago rápido** en efectivo: *Exacto* y los billetes siguientes ($ 37.400 → 38.000, 40.000, 50.000).
+- **Un solo campo de cliente** con sugerencias mientras se escribe (nombre, documento o teléfono; F3).
+- Búsqueda **sin tildes y en cualquier orden** en productos y clientes (`TextSearch`).
+- **Avisos tipo toast** que no bloquean la pantalla: la factura registrada muestra el cambio y
+  ofrece *Guardar PDF*; también se usan al eliminar, desactivar o anular.
+- **Íconos** en el menú lateral, los botones de Vender y los avisos, dibujados con SVG
+  (sin dependencias nuevas; siguen el tema claro u oscuro).
+- **Confirmación al cerrar** la app si hay una venta sin cobrar (`PendingWork`).
+
+### Corregido
+- En el tema oscuro, la fila seleccionada de una tabla sin foco ahora se lee bien.
+
 ## [Sin publicar] · Paso 4: arquitectura modular
 
 ### Cambiado

@@ -49,15 +49,20 @@ se abre el historial de un solo producto.
 
 **Vender** (Ctrl + 2, o Ctrl + N):
 
-1. Escriba el código o el nombre y pulse **Enter** (o doble clic en la lista). Con un **lector de
+1. Escriba el código o el nombre y pulse **Enter** (o doble clic en la lista). No importan las
+   tildes ni el orden de las palabras: "zapatilla nike" encuentra "Nike Zapatilla". Con un **lector de
    código de barras** USB basta con escanear: el lector escribe el código y pulsa Enter solo. Si el
    producto ya está en la venta, suma una unidad.
 2. Ajuste cantidades con **+1 / −1**, *Cambiar cantidad…* o las teclas `+`, `−` y `Supr`.
-3. Elija el cliente (por defecto, *Consumidor final*) o cree uno con **+ Nuevo**.
-4. Elija la forma de pago. En efectivo, escriba el dinero recibido para ver el cambio.
-5. Pulse **Cobrar y facturar** (F12). Puede guardar la factura en PDF de inmediato.
+3. Cliente (F3): escriba parte del nombre, del documento o del teléfono y elíjalo de la lista con
+   **Enter** o un clic. Por defecto es *Consumidor final*; **Nuevo** crea un cliente sin salir de la venta.
+4. Elija la forma de pago. En efectivo, pulse uno de los **botones de pago rápido** (*Exacto* o el
+   billete con que le pagan, por ejemplo *$ 50.000*) o escriba el valor recibido: el cambio aparece al instante.
+5. Pulse **Cobrar y facturar** (F12). Abajo a la derecha aparece un aviso con el **cambio** y el
+   botón **Guardar PDF**; el aviso se cierra solo y puede atender al siguiente cliente de una vez.
 
-La app no deja vender más unidades de las que hay en stock.
+La app no deja vender más unidades de las que hay en stock. Si intenta cerrar StockFlow con una
+venta sin cobrar, le pregunta antes para que no se pierda.
 
 ## 5. Consultar y anular facturas
 
@@ -80,6 +85,7 @@ donde se exporta a PDF o se **anula** (pide un motivo y devuelve las unidades al
 | Ctrl + 1 … 9 | Cambiar de sección |
 | Ctrl + N | Nueva venta |
 | F2 | Ir al buscador en *Vender* |
+| F3 | Ir al cliente en *Vender* |
 | F12 | Cobrar y facturar |
 | Ctrl + , | Configuración |
 | Ctrl + Q | Salir |
